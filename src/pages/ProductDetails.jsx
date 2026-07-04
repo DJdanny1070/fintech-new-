@@ -90,7 +90,8 @@ function ProductDetails() {
       toast.success("Order created successfully.");
       navigate("/dashboard");
     } catch (err) {
-      toast.error("Failed to create order: " + (err?.message || err));
+      const message = err?.message || "Failed to create order.";
+      toast.error(/failed to fetch|network/i.test(message) ? "We couldn’t place the order right now. Please try again shortly." : message);
     } finally {
       setPlacing(false);
     }
@@ -188,7 +189,7 @@ function ProductDetails() {
             ) : (
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12}}>
                 {related.map(r => (
-                  <Link key={r.id} to={`/marketplace/${r.id}`} className="card-link" style={{padding:12,border:"1px solid var(--border)",borderRadius:8,textDecoration:"none",color:"inherit"}}>
+                  <Link key={r.id} to={`/marketplace/product/${r.id}`} className="card-link" style={{padding:12,border:"1px solid var(--border)",borderRadius:8,textDecoration:"none",color:"inherit"}}>
                     <div style={{fontWeight:700}}>{r.title}</div>
                     <div style={{fontSize:12,color:"var(--text-muted)"}}>{r.seller?.full_name || 'Unknown'}</div>
                     <div style={{marginTop:6,fontFamily:"monospace",fontWeight:700}}>{r.price ? `₹${Number(r.price).toLocaleString('en-IN')}` : '—'}</div>
