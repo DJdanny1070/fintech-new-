@@ -137,9 +137,16 @@ function Dashboard() {
     const handleMarketplaceChanged = () => {
       loadDashboard();
     };
+    const handleOrdersChanged = () => {
+      loadDashboard();
+    };
 
     window.addEventListener("marketplace:changed", handleMarketplaceChanged);
-    return () => window.removeEventListener("marketplace:changed", handleMarketplaceChanged);
+    window.addEventListener("orders:changed", handleOrdersChanged);
+    return () => {
+      window.removeEventListener("marketplace:changed", handleMarketplaceChanged);
+      window.removeEventListener("orders:changed", handleOrdersChanged);
+    };
   }, [loadDashboard]);
 
   const walletBalance = wallet?.balance ?? 0;

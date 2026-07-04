@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "../hooks/useAuth";
+import { getProducts, getRecentOrders } from "../services/productService";
+import { getTransactionsForUser } from "../services/transactionService";
 import "./Dashboard.css";
 
 function BarChart({ data, color="#075AD8" }) {
@@ -64,7 +67,53 @@ const ASSETS = [
 ];
 
 function Analytics() {
+  const { user } = useAuth();
   const [range, setRange] = useState("1Y");
+  const [products, setProducts] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      if (!user) {
+        setProducts([]);
+        setOrders([]);
+        setTransactions([]);
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      try {
+        const [productData, orderData, txData] = await Promise.all([
+          getProducts({}),
+          getRecentOrders(user.id, 10),
+          getTransactionsForUser(user.id, 10),
+        ]);
+        if (!mounted) return;
+        setProducts(productData || []);
+        setOrders(orderData || []);
+        setTransactions(txData || []);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    load();
+    return () => { mounted = false; };
+  }, [user]);
+
+  const summary = useMemo(() => {
+    const marketplaceValue = (products || []).reduce((sum, p) => sum + (Number(p.price) || 0), 0);
+    const orderCount = (orders || []).length;
+    const txCount = (transactions || []).length;
+    return {
+      marketplaceValue,
+      orderCount,
+      txCount,
+    };
+  }, [products, orders, transactions]);
 
   return (
     <div>
@@ -85,10 +134,10 @@ function Analytics() {
 
       <div className="kpi-grid" style={{marginBottom:"var(--sp-5)"}}>
         {[
-          { label:"Total Revenue",       value:"₹1.2 Cr",  change:"↑ 22.4% YoY",  up:true  },
-          { label:"Marketplace Volume",  value:"₹48.5 L",  change:"↑ 34.1%",       up:true  },
-          { label:"Avg. Monthly Growth", value:"14.8%",    change:"↑ +2.1pp",      up:true  },
-          { label:"Blockchain Savings",  value:"₹1.8 L",   change:"vs. traditional",up:null },
+          { label:"Total Revenue",       value:`₹${Math.round(summary.marketplaceValue).toLocaleString("en-IN")}`,  change:"Live marketplace value",  up:true  },
+          { label:"Marketplace Volume",  value:`${summary.orderCount} orders`,  change:"Recent activity",       up:true  },
+          { label:"Avg. Monthly Growth", value:`${summary.txCount} txns`,    change:"Recent transactions",      up:true  },
+          { label:"Blockchain Savings",  value:loading ? "—" : "Active",   change:"Hash-backed records",up:null },
         ].map(k => (
           <div className="kpi-card" key={k.label}>
             <div className="kpi-card__label">{k.label}</div>

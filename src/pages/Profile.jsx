@@ -69,6 +69,7 @@ function Profile() {
       await updateProfile(user.id, payload);
       await refreshProfile();
       setAvatarPreview(avatarUrl || profile?.avatar_url || "");
+      window.dispatchEvent(new Event("profile:changed"));
       if (form.avatar) {
         toast.success("Avatar uploaded");
       }
@@ -120,6 +121,7 @@ function Profile() {
         documents,
       });
       await refreshProfile();
+      window.dispatchEvent(new Event("profile:changed"));
       setVerifMessage("Your business verification request has been submitted successfully.");
       setVerifForm({
         gst_number: "",

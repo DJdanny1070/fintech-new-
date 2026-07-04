@@ -88,6 +88,7 @@ function ProductDetails() {
     try {
       await createOrder({ buyerId: user.id, sellerId: product.seller_id, productId: product.id });
       toast.success("Order created successfully.");
+      window.dispatchEvent(new Event("orders:changed"));
       navigate("/dashboard");
     } catch (err) {
       const message = err?.message || "Failed to create order.";

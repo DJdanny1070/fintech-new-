@@ -86,7 +86,6 @@ export function AuthProvider({ children }) {
   };
 
   const register = async (email, password, fullName, role) => {
-    // 1. Create auth user
     const data = await signUpWithEmail(email, password, {
       full_name: fullName,
       role,
@@ -94,29 +93,28 @@ export function AuthProvider({ children }) {
 
     const userId = data.user?.id;
     if (!userId) {
-      // Email confirmation required — profile created on first login
       return data;
     }
 
-    // 2. Create profile
-    const prof = await createProfile(userId, {
-      full_name: fullName,
-      email,
-      role,
-    });
+    try {
+      const prof = await createProfile(userId, {
+        full_name: fullName,
+        email,
+        role,
+      });
 
-    // 3. Create wallet (₹1,00,000 initial balance)
-    const wal = await createWallet(userId);
+      const wal = await createWallet(userId);
+      await generateAndStoreHash("profile", userId, {
+        full_name: fullName,
+        email,
+        role,
+      });
 
-    // 4. Generate & store blockchain hash for the new profile
-    await generateAndStoreHash("profile", userId, {
-      full_name: fullName,
-      email,
-      role,
-    });
-
-    setProfile(prof);
-    setWallet(wal);
+      setProfile(prof);
+      setWallet(wal);
+    } catch (err) {
+      console.error("Registration follow-up failed:", err.message);
+    }
 
     return data;
   };

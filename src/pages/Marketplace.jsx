@@ -252,6 +252,7 @@ function Marketplace() {
         productId: product.id,
       });
       toast.success("Order placed successfully");
+      window.dispatchEvent(new Event("orders:changed"));
     } catch (err) {
       toast.error(getFriendlyErrorMessage(err));
     } finally {

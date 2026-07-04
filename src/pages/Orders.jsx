@@ -3,6 +3,29 @@ import { useAuth } from "../hooks/useAuth";
 import { getMyOrders } from "../services/productService";
 import "./Dashboard.css";
 
+function formatOrderDate(value) {
+  if (!value) return "—";
+  return new Date(value).toLocaleString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function getFriendlyErrorMessage(err) {
+  if (!err) return "We couldn’t load your orders right now.";
+  const message = err?.message || "";
+  if (/failed to fetch|network|fetch/i.test(message)) {
+    return "We couldn’t reach the orders service right now. Please try again shortly.";
+  }
+  if (/jwt|token|auth/i.test(message)) {
+    return "Please sign in again to continue.";
+  }
+  return message || "We couldn’t load your orders right now.";
+}
+
 function Orders() {
   const { user, profile } = useAuth();
   const [orders, setOrders] = useState([]);
@@ -24,17 +47,28 @@ function Orders() {
         setOrders(data || []);
       } catch (err) {
         if (!mounted) return;
-        setError(err.message || "Failed to load orders.");
+        setError(getFriendlyErrorMessage(err));
       } finally {
         if (mounted) setLoading(false);
       }
     }
     load();
-    return () => (mounted = false);
+
+    const onOrdersChanged = () => {
+      if (mounted && user) load();
+    };
+
+    window.addEventListener("orders:changed", onOrdersChanged);
+    return () => {
+      mounted = false;
+      window.removeEventListener("orders:changed", onOrdersChanged);
+    };
   }, [user]);
 
   const isBusiness = profile?.role === "business";
-  const visibleOrders = orders.filter(o => isBusiness ? o.seller_id === user.id : o.buyer_id === user.id);
+  const visibleOrders = (orders || []).filter((o) => (
+    isBusiness ? o.seller_id === user?.id : o.buyer_id === user?.id
+  ));
 
   const byStatus = (status) => visibleOrders.filter(o => (o.status || "").toLowerCase() === status);
 
@@ -76,6 +110,24 @@ function Orders() {
     { key: "completed", title: "Completed Orders" },
     { key: "cancelled", title: "Cancelled Orders" },
   ];
+
+  if (!visibleOrders.length) {
+    return (
+      <div>
+        <div className="page-header">
+          <div className="page-header__row">
+            <div>
+              <h1>Orders</h1>
+              <p>No orders yet</p>
+            </div>
+          </div>
+        </div>
+        <div className="content-card" style={{padding:"var(--sp-6)", color:"var(--text-muted)"}}>
+          You do not have any orders yet.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -127,7 +179,7 @@ function Orders() {
                       <td>{o.buyer?.full_name || 'Unknown'}</td>
                       <td>{o.seller?.full_name || 'Unknown'}</td>
                       <td style={{fontFamily:"monospace",fontWeight:700}}>{o.product?.price ? `₹${Number(o.product.price).toLocaleString('en-IN')}` : '—'}</td>
-                      <td>{new Date(o.created_at).toLocaleString()}</td>
+                      <td>{formatOrderDate(o.created_at)}</td>
                       <td>
                         <span className={`status-badge ${o.status === 'completed' ? 'status-badge--success' : o.status === 'cancelled' ? 'status-badge--danger' : 'status-badge--pending'}`}>
                           {o.status}
