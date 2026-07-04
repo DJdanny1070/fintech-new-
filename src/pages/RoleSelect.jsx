@@ -27,12 +27,6 @@ const ROLES = [
     desc: "List your products, services, or digital assets on the CresoX marketplace and get paid instantly via blockchain.",
     features: ["Seller Storefront", "Instant Payouts", "Analytics Dashboard", "Blockchain Receipts"],
   },
-  {
-    icon: "⚙️",
-    title: "Developer",
-    desc: "Integrate CresoX APIs into your applications. Access wallet, payment, blockchain verification, and AI endpoints.",
-    features: ["API Keys", "SDK Access", "Webhook Events", "Sandbox Testing"],
-  },
 ];
 
 function RoleSelect() {
