@@ -31,10 +31,10 @@ function Register() {
     setLoading(true);
     try {
       await register(form.email, form.password, form.name, form.role);
-      toast.success("Registration successful");
+      toast.success("Account created successfully.");
       navigate("/dashboard");
     } catch (err) {
-      const message = err.message || "Registration failed. Please try again.";
+      const message = err.message || "We could not create your account. Please try again.";
       setError(message);
       toast.error("Registration failed");
     } finally {
@@ -48,7 +48,7 @@ function Register() {
     try {
       await loginWithGoogle();
     } catch (err) {
-      const message = err.message || "Google sign-up failed.";
+      const message = err.message || "Google sign-up could not be completed.";
       setError(message);
       toast.error("Registration failed");
       setGoogleLoading(false);

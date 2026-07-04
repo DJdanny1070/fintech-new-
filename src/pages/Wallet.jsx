@@ -125,7 +125,7 @@ function Wallet() {
         await refreshWallet();
         window.dispatchEvent(new Event("orders:changed"));
         window.dispatchEvent(new Event("marketplace:changed"));
-        showToast("Transfer successful");
+        showToast("Transfer completed successfully.");
       }
 
       await loadTransactions();
@@ -218,11 +218,11 @@ function Wallet() {
           <button className="btn btn-ghost btn-sm">Export CSV</button>
         </div>
         {loading ? (
-          <div style={{textAlign:"center",padding:"var(--sp-6)",color:"var(--text-muted)"}}>Loading transactions...</div>
+          <div style={{textAlign:"center",padding:"var(--sp-6)",color:"var(--text-muted)"}}>Loading transaction history...</div>
         ) : txError ? (
           <div style={{textAlign:"center",padding:"var(--sp-6)",color:"var(--red)"}}>{txError}</div>
         ) : transactions.length === 0 ? (
-          <div style={{textAlign:"center",padding:"var(--sp-6)",color:"var(--text-muted)"}}>No transactions yet.</div>
+          <div style={{textAlign:"center",padding:"var(--sp-6)",color:"var(--text-muted)"}}>No transactions yet. Your activity will appear here once you make a move.</div>
         ) : (
           <table className="data-table">
             <thead>

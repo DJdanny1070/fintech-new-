@@ -122,7 +122,7 @@ function Orders() {
             </div>
           </div>
         </div>
-        <div className="content-card" style={{padding:"var(--sp-6)", color:"var(--text-muted)"}}>
+        <div className="content-card" style={{padding:"var(--sp-6)", color:"var(--text-muted)", textAlign:"center"}}>
           You do not have any orders yet.
         </div>
       </div>

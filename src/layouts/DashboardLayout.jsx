@@ -98,11 +98,11 @@ function DashboardLayout() {
   const handleLogout = async () => {
     try {
       await logout();
-      toast.success("Logout successful");
+      toast.success("You have been signed out.");
       navigate("/login");
     } catch (err) {
       console.error("Logout failed:", err.message);
-      toast.error("Logout failed");
+      toast.error("We could not sign you out. Please try again.");
     }
   };
 

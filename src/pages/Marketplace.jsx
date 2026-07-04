@@ -202,12 +202,12 @@ function Marketplace() {
         const updated = await updateProduct(editId, payload);
         const hash = await generateAndStoreHash("product", updated.id, payload);
         await updateProduct(updated.id, { blockchain_hash: hash });
-        toast.success("Product updated");
+        toast.success("Product updated successfully.");
       } else {
         const created = await createProduct(payload);
         const hash = await generateAndStoreHash("product", created.id, payload);
         await updateProduct(created.id, { blockchain_hash: hash });
-        toast.success("Product listed");
+        toast.success("Product listed successfully.");
       }
 
       setShowModal(false);
@@ -228,7 +228,7 @@ function Marketplace() {
       await deleteProduct(id);
       await loadProducts(search, cat, true);
       window.dispatchEvent(new Event("marketplace:changed"));
-      toast.success("Product deleted");
+      toast.success("Product deleted successfully.");
     } catch (err) {
       toast.error(getFriendlyErrorMessage(err));
     }
@@ -251,7 +251,7 @@ function Marketplace() {
         sellerId: product.seller_id,
         productId: product.id,
       });
-      toast.success("Order placed successfully");
+      toast.success("Order placed successfully.");
       window.dispatchEvent(new Event("orders:changed"));
     } catch (err) {
       toast.error(getFriendlyErrorMessage(err));

@@ -73,11 +73,11 @@ function Profile() {
       if (form.avatar) {
         toast.success("Avatar uploaded");
       }
-      showToast("Profile updated");
+      showToast("Profile updated successfully.");
     } catch (err) {
       console.error(err);
       setError(err.message || "Failed to update profile.");
-      toast.error("Update failed");
+      toast.error("We could not update your profile. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -133,8 +133,8 @@ function Profile() {
       toast.success("Verification request submitted");
     } catch (err) {
       console.error(err);
-      setVerifError(err.message || "Failed to submit verification request.");
-      toast.error(err.message || "Failed to submit verification request.");
+      setVerifError(err.message || "We could not submit your verification request. Please try again.");
+      toast.error(err.message || "We could not submit your verification request. Please try again.");
     } finally {
       setVerifSubmitting(false);
     }
