@@ -4,28 +4,28 @@ import cresoxLogo from "../../../assets/cresox-logo.png";
 
 const FOOTER_LINKS = {
   Company: [
-    { label: "About Us", href: "#company" },
-    { label: "Careers", href: null },
-    { label: "Press", href: null },
-    { label: "Contact", href: "#contact" },
+    { label: "About Us", to: "/about" },
+    { label: "Careers", to: null },
+    { label: "Press", to: null },
+    { label: "Contact", to: "/contact" },
   ],
   Solutions: [
-    { label: "Digital Wallet", href: "/register?role=individual" },
+    { label: "Digital Wallet", to: "/register?role=individual" },
     { label: "Marketplace", href: "#marketplace" },
-    { label: "Business Banking", href: "/register?role=business" },
-    { label: "Developer APIs", href: "/register?role=developer" },
+    { label: "Business Banking", to: "/register?role=business" },
+    { label: "Developer APIs", to: "/register?role=developer" },
   ],
   Resources: [
-    { label: "Documentation", href: null },
-    { label: "API Reference", href: null },
-    { label: "Help Centre", href: "#contact" },
-    { label: "Status", href: null },
+    { label: "Documentation", to: "/docs" },
+    { label: "API Reference", to: null },
+    { label: "Help Centre", to: "/help" },
+    { label: "Status", to: "/status" },
   ],
   Legal: [
-    { label: "Privacy Policy", href: null },
-    { label: "Terms of Service", href: null },
-    { label: "Cookie Policy", href: null },
-    { label: "Compliance", href: null },
+    { label: "Privacy Policy", to: "/privacy-policy" },
+    { label: "Terms of Service", to: "/terms" },
+    { label: "Cookie Policy", to: "/cookie-policy" },
+    { label: "Compliance", to: "/compliance" },
   ],
 };
 
@@ -108,7 +108,11 @@ function Footer() {
               <ul className="footer__col-list">
                 {links.map((link) => (
                   <li key={link.label}>
-                    {link.href ? (
+                    {link.to ? (
+                      <Link to={link.to} className="footer__col-link">
+                        {link.label}
+                      </Link>
+                    ) : link.href ? (
                       <a href={link.href} className="footer__col-link">
                         {link.label}
                       </a>
