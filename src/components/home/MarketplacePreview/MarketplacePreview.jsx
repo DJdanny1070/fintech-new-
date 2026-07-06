@@ -1,4 +1,6 @@
+import { useNavigate } from "react-router-dom";
 import { Search, ShieldCheck } from "lucide-react";
+import { useAuth } from "../../../hooks/useAuth";
 import "./MarketplacePreview.css";
 
 const PRODUCTS = [
@@ -29,6 +31,23 @@ const PRODUCTS = [
 ];
 
 function MarketplacePreview() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const handleBuy = () => {
+    if (!user) {
+      navigate("/login", {
+        state: {
+          redirect: "/marketplace",
+        },
+      });
+      return;
+    }
+
+    // Authenticated — continue to the full marketplace
+    navigate("/dashboard/marketplace");
+  };
+
   return (
     <section className="mp-preview" id="marketplace">
       <div className="mp-preview__container">
@@ -72,7 +91,11 @@ function MarketplacePreview() {
                 </div>
                 <span className="mp-preview__seller">{item.seller}</span>
                 <span className="mp-preview__price">{item.price}</span>
-                <button type="button" className="btn btn-primary btn-sm mp-preview__buy">
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm mp-preview__buy"
+                  onClick={handleBuy}
+                >
                   Buy
                 </button>
               </li>
