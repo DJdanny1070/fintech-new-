@@ -12,12 +12,9 @@ const FOOTER_LINKS = {
   Solutions: [
     { label: "Digital Wallet", to: "/register?role=individual" },
     { label: "Marketplace", href: "#marketplace" },
-<<<<<<< HEAD
     { label: "Business Banking", to: "/register?role=business" },
     { label: "Developer APIs", to: "/register?role=developer" },
-=======
     { label: "Business Banking", href: "/register?role=business" },
->>>>>>> f1ca4587a447d02f37a8f8b43692bf1c3143ccd4
   ],
   Resources: [
     { label: "Documentation", to: "/docs" },
