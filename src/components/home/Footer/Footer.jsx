@@ -4,7 +4,7 @@ import cresoxLogo from "../../../assets/cresox-logo.png";
 
 const FOOTER_LINKS = {
   Company: [
-    { label: "About Us", to: "/about" },
+    { label: "About Us", to: "/", state: { scrollTo: "leadership" } },
     { label: "Careers", to: null },
     { label: "Press", to: null },
     { label: "Contact", to: "/contact" },
@@ -14,7 +14,6 @@ const FOOTER_LINKS = {
     { label: "Marketplace", href: "#marketplace" },
     { label: "Business Banking", to: "/register?role=business" },
     { label: "Developer APIs", to: "/register?role=developer" },
-    { label: "Business Banking", href: "/register?role=business" },
   ],
   Resources: [
     { label: "Documentation", to: "/docs" },
@@ -110,7 +109,7 @@ function Footer() {
                 {links.map((link) => (
                   <li key={link.label}>
                     {link.to ? (
-                      <Link to={link.to} className="footer__col-link">
+                      <Link to={link.to} state={link.state || undefined} className="footer__col-link">
                         {link.label}
                       </Link>
                     ) : link.href ? (

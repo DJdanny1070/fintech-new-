@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import {
   getProducts,
@@ -45,6 +45,8 @@ function Marketplace() {
   const { user, profile } = useAuth();
   const isBusiness = profile?.role === "business";
   const toast = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [cat, setCat] = useState("All");
   const [searchInput, setSearchInput] = useState("");
@@ -236,7 +238,9 @@ function Marketplace() {
 
   const handleBuy = async (product) => {
     if (!user) {
-      toast.info("Please log in to continue.");
+      // Redirect to login, preserving the current location so the user
+      // is sent back to the marketplace after a successful sign-in.
+      navigate("/login", { state: { from: location } });
       return;
     }
     if (product.seller_id === user.id) {
