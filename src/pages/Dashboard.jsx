@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { getProducts, getOrdersCounts, getRecentOrders, getGlobalCounts, getMyProducts } from "../services/productService";
@@ -87,53 +87,67 @@ function Dashboard() {
 
   const firstName = profile?.full_name?.split(" ")[0] || "there";
 
-  useEffect(() => {
+  const loadDashboard = useCallback(async () => {
     if (!user) return;
 
-    const load = async () => {
-      setLoadingData(true);
+    setLoadingData(true);
+    setDashboardError("");
+
+    try {
+      const [myProducts, productsData, recentOrds, counts, hashCount, globalCountsData, recentUsersData, txs, hashRecordsData, profileMetrics, transactionCount] = await Promise.all([
+        getMyProducts(user.id),
+        getProducts({}),
+        getRecentOrders(user.id, 8),
+        getOrdersCounts(user.id),
+        getHashCount(),
+        getGlobalCounts(),
+        getRecentProfiles(6),
+        getTransactionsForUser(user.id, 10),
+        getRecentHashes(8),
+        getCounts(),
+        getTotalCount(),
+      ]);
+
+      const sortedProducts = (productsData || []).sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+
+      setMyProductsCount(myProducts?.length || 0);
+      setAllProducts(sortedProducts);
+      setRecentProducts(sortedProducts.slice(0, 4));
+      setRecentOrders(recentOrds || []);
+      setRecentUsers(recentUsersData || []);
+      setTransactions(txs || []);
+      setRecentHashes(hashRecordsData || []);
+      setOrdersSummary(counts || { received: 0, purchased: 0 });
+      setHashRecords(hashCount || 0);
+      setGlobalCounts(globalCountsData || { products: 0, orders: 0 });
+      setProfileCounts(profileMetrics || { users: 0, verified_sellers: 0 });
       setDashboardError("");
+      setHashRecords((hashCount || 0) + (transactionCount || 0));
+    } catch (err) {
+      console.error("Dashboard load error:", err.message);
+      setDashboardError(err.message || "We couldn’t load your dashboard data right now.");
+    } finally {
+      setLoadingData(false);
+    }
+  }, [user]);
 
-      try {
-        const [myProducts, productsData, recentOrds, counts, hashCount, globalCountsData, recentUsersData, txs, hashRecordsData, profileMetrics, transactionCount] = await Promise.all([
-          getMyProducts(user.id),
-          getProducts({}),
-          getRecentOrders(user.id, 8),
-          getOrdersCounts(user.id),
-          getHashCount(),
-          getGlobalCounts(),
-          getRecentProfiles(6),
-          getTransactionsForUser(user.id, 10),
-          getRecentHashes(8),
-          getCounts(),
-          getTotalCount(),
-        ]);
+  useEffect(() => {
+    loadDashboard();
 
-        const sortedProducts = (productsData || []).sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
-
-        setMyProductsCount(myProducts?.length || 0);
-        setAllProducts(sortedProducts);
-        setRecentProducts(sortedProducts.slice(0, 4));
-        setRecentOrders(recentOrds || []);
-        setRecentUsers(recentUsersData || []);
-        setTransactions(txs || []);
-        setRecentHashes(hashRecordsData || []);
-        setOrdersSummary(counts || { received: 0, purchased: 0 });
-        setHashRecords(hashCount || 0);
-        setGlobalCounts(globalCountsData || { products: 0, orders: 0 });
-        setProfileCounts(profileMetrics || { users: 0, verified_sellers: 0 });
-        setDashboardError("");
-        setHashRecords((hashCount || 0) + (transactionCount || 0));
-      } catch (err) {
-        console.error("Dashboard load error:", err.message);
-        setDashboardError(err.message || "We couldn’t load your dashboard data right now.");
-      } finally {
-        setLoadingData(false);
-      }
+    const handleMarketplaceChanged = () => {
+      loadDashboard();
+    };
+    const handleOrdersChanged = () => {
+      loadDashboard();
     };
 
-    load();
-  }, [user]);
+    window.addEventListener("marketplace:changed", handleMarketplaceChanged);
+    window.addEventListener("orders:changed", handleOrdersChanged);
+    return () => {
+      window.removeEventListener("marketplace:changed", handleMarketplaceChanged);
+      window.removeEventListener("orders:changed", handleOrdersChanged);
+    };
+  }, [loadDashboard]);
 
   const walletBalance = wallet?.balance ?? 0;
   const marketplaceValue = useMemo(() => allProducts.reduce((sum, product) => sum + (Number(product.price) || 0), 0), [allProducts]);
@@ -250,7 +264,7 @@ function Dashboard() {
       {dashboardError && (
         <div className="auth-error" style={{marginBottom:12,display:"flex",justifyContent:"space-between",alignItems:"center",gap:12}}>
           <span>{dashboardError}</span>
-          <button className="btn btn-ghost btn-sm" onClick={() => { if (user) { setLoadingData(true); setDashboardError(""); } }}>Retry</button>
+          <button className="btn btn-ghost btn-sm" onClick={() => loadDashboard()}>Retry</button>
         </div>
       )}
 

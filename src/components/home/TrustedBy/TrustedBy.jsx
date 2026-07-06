@@ -15,13 +15,7 @@ const TRUST_GROUPS = [
       { name: "Axis Trade", initials: "AT" },
     ],
   },
-  {
-    category: "Developers",
-    logos: [
-      { name: "StackForge", initials: "SF" },
-      { name: "CodeRoute", initials: "CR" },
-    ],
-  },
+
   {
     category: "Investors",
     logos: [
@@ -51,7 +45,7 @@ function TrustedBy() {
             Trusted by
           </h2>
           <p className="trusted-by__subtitle">
-            Startups, businesses, developers, and investors building on CresoX
+            Startups, businesses, and investors building on CresoX
           </p>
         </div>
 

@@ -13,7 +13,6 @@ const FOOTER_LINKS = {
     { label: "Digital Wallet", href: "/register?role=individual" },
     { label: "Marketplace", href: "#marketplace" },
     { label: "Business Banking", href: "/register?role=business" },
-    { label: "Developer APIs", href: "/register?role=developer" },
   ],
   Resources: [
     { label: "Documentation", href: null },
@@ -76,7 +75,7 @@ function Footer() {
             </Link>
             <p className="footer__desc">
               A complete financial ecosystem for wallets, marketplace trading,
-              blockchain verification, and developer integrations.
+              and blockchain verification.
             </p>
             <div className="footer__social">
               {SOCIAL.map(({ label, icon, href }) => (

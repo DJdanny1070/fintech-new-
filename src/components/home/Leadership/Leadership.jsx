@@ -1,7 +1,7 @@
 import "./Leadership.css";
-import founderImg from "../../../assets/images/team/founder.png";
-import cofounderImg from "../../../assets/images/team/cofounder.png";
-import advisorImg from "../../../assets/images/team/advisor.png";
+import founderImg from "../../../assets/images/team/whahlall copy.png";
+import cofounderImg from "../../../assets/images/team/nadeem pic.png";
+import advisorImg from "../../../assets/images/team/sudeep.png";
 
 const TEAM = [
   {

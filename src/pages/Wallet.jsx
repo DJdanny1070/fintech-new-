@@ -113,6 +113,8 @@ function Wallet() {
         if (amt > (wallet?.balance || 0)) throw new Error("You do not have enough funds for this withdrawal.");
         await withdrawSimulation(user.id, amt);
         await refreshWallet();
+        window.dispatchEvent(new Event("orders:changed"));
+        window.dispatchEvent(new Event("marketplace:changed"));
         showToast("Withdrawal completed successfully.");
       } else if (modal === "Send") {
         const amt = Number(amountInput);
@@ -121,7 +123,9 @@ function Wallet() {
         if (amt > (wallet?.balance || 0)) throw new Error("Insufficient balance");
         await transferBetweenUsers(user.id, recipientInput.trim(), amt, noteInput.trim());
         await refreshWallet();
-        showToast("Transfer successful");
+        window.dispatchEvent(new Event("orders:changed"));
+        window.dispatchEvent(new Event("marketplace:changed"));
+        showToast("Transfer completed successfully.");
       }
 
       await loadTransactions();
@@ -214,11 +218,11 @@ function Wallet() {
           <button className="btn btn-ghost btn-sm">Export CSV</button>
         </div>
         {loading ? (
-          <div style={{textAlign:"center",padding:"var(--sp-6)",color:"var(--text-muted)"}}>Loading transactions...</div>
+          <div style={{textAlign:"center",padding:"var(--sp-6)",color:"var(--text-muted)"}}>Loading transaction history...</div>
         ) : txError ? (
           <div style={{textAlign:"center",padding:"var(--sp-6)",color:"var(--red)"}}>{txError}</div>
         ) : transactions.length === 0 ? (
-          <div style={{textAlign:"center",padding:"var(--sp-6)",color:"var(--text-muted)"}}>No transactions yet.</div>
+          <div style={{textAlign:"center",padding:"var(--sp-6)",color:"var(--text-muted)"}}>No transactions yet. Your activity will appear here once you make a move.</div>
         ) : (
           <table className="data-table">
             <thead>
