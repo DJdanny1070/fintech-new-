@@ -1,4 +1,6 @@
 import { supabase } from "./supabase";
+import { createTransaction } from "./transactionService";
+import { getWallet, updateWalletBalance } from "./walletService";
 
 /**
  * Fetch all products with optional filters.
@@ -92,12 +94,32 @@ export async function uploadProductImage(file, userId) {
  * Create an order when a buyer purchases a product.
  */
 export async function createOrder({ buyerId, sellerId, productId }) {
+  const { data: productData, error: productError } = await supabase
+    .from("products")
+    .select("id, price, seller_id, title")
+    .eq("id", productId)
+    .single();
+
+  if (productError) throw productError;
+
+  const effectiveSellerId = productData?.seller_id || sellerId;
+  const amount = Number(productData?.price || 0);
+
+  const buyerWallet = await getWallet(buyerId);
+  const sellerWallet = await getWallet(effectiveSellerId);
+
+  if (!buyerWallet) throw new Error("Buyer wallet not found.");
+  if (!sellerWallet) throw new Error("Seller wallet not found.");
+  if (amount > 0 && (buyerWallet.balance || 0) < amount) {
+    throw new Error("Insufficient balance to complete this purchase.");
+  }
+
   const { data, error } = await supabase
     .from("orders")
     .insert([
       {
         buyer_id: buyerId,
-        seller_id: sellerId,
+        seller_id: effectiveSellerId,
         product_id: productId,
         status: "pending",
       },
@@ -106,6 +128,32 @@ export async function createOrder({ buyerId, sellerId, productId }) {
     .single();
 
   if (error) throw error;
+
+  if (amount > 0) {
+    await updateWalletBalance(buyerId, (buyerWallet.balance || 0) - amount);
+    await updateWalletBalance(effectiveSellerId, (sellerWallet.balance || 0) + amount);
+
+    await createTransaction({
+      userId: buyerId,
+      type: "purchase",
+      amount: -amount,
+      counterpartyId: effectiveSellerId,
+      counterpartyName: productData?.title || "Seller",
+      note: `Purchased ${productData?.title || "product"}`,
+      status: "verified",
+    });
+
+    await createTransaction({
+      userId: effectiveSellerId,
+      type: "sale",
+      amount,
+      counterpartyId: buyerId,
+      counterpartyName: "Buyer",
+      note: `Sold ${productData?.title || "product"}`,
+      status: "verified",
+    });
+  }
+
   return data;
 }
 
@@ -118,14 +166,13 @@ export async function getMyOrders(userId) {
     .select(
       `
       *,
-      product:products(title, price),
+      product:products(id, title, price, image_url),
       buyer:profiles!orders_buyer_id_fkey(full_name),
       seller:profiles!orders_seller_id_fkey(full_name)
     `
     )
     .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`)
-    .order("created_at", { ascending: false })
-    .limit(5);
+    .order("created_at", { ascending: false });
 
   if (error) throw error;
   return data ?? [];

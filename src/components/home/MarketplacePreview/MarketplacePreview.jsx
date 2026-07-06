@@ -3,28 +3,28 @@ import "./MarketplacePreview.css";
 
 const PRODUCTS = [
   {
-    name: "Premium Analytics Suite",
-    seller: "FinTechPro",
+    name: "Verified Asset Listing",
+    seller: "CresoX Marketplace",
     price: "₹2,500",
     verified: true,
   },
   {
-    name: "Investment Portfolio API",
-    seller: "CodeFinance",
+    name: "Portfolio Analytics Access",
+    seller: "CresoX Marketplace",
     price: "₹4,000",
     verified: true,
   },
   {
     name: "Business Credit Report",
-    seller: "CreditPulse",
+    seller: "CresoX Marketplace",
     price: "₹999",
     verified: true,
   },
   {
-    name: "Tax Compliance Tool",
-    seller: "TaxPilot",
+    name: "Compliance Support Pack",
+    seller: "CresoX Marketplace",
     price: "₹3,200",
-    verified: false,
+    verified: true,
   },
 ];
 
@@ -45,7 +45,7 @@ function MarketplacePreview() {
             <input
               type="search"
               className="mp-preview__search-input"
-              placeholder="Search products, services, or sellers…"
+              placeholder="Search marketplace listings"
               readOnly
               aria-label="Search marketplace"
             />

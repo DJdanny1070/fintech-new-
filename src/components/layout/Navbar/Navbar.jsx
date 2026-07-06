@@ -6,9 +6,7 @@ import {
   X,
   Wallet,
   Building2,
-  Code2,
   Store,
-  Link2,
 } from "lucide-react";
 import "./Navbar.css";
 import cresoxLogo from "../../../assets/cresox-logo.png";
@@ -16,7 +14,6 @@ import cresoxLogo from "../../../assets/cresox-logo.png";
 const NAV_LINKS = [
   { label: "Marketplace", href: "#marketplace" },
   { label: "Blockchain", href: "#blockchain" },
-  { label: "Developers", href: "/register?role=developer" },
   { label: "Company", href: "#company" },
   { label: "Contact", href: "#contact" },
 ];
@@ -39,18 +36,6 @@ const SOLUTIONS_ITEMS = [
     desc: "Buy and sell verified products within the ecosystem.",
     icon: Store,
     path: "/register?role=individual",
-  },
-  {
-    title: "Developer APIs",
-    desc: "REST endpoints, webhooks, and sandbox access.",
-    icon: Code2,
-    path: "/register?role=developer",
-  },
-  {
-    title: "Blockchain Verification",
-    desc: "Hash-only storage with on-chain proof of integrity.",
-    icon: Link2,
-    path: "/register?role=developer",
   },
 ];
 

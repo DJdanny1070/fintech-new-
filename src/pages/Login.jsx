@@ -31,10 +31,10 @@ function Login() {
     setLoading(true);
     try {
       await login(form.email, form.password);
-      toast.success("Login successful");
+      toast.success("Signed in successfully.");
       navigate(from, { replace: true });
     } catch (err) {
-      const message = err.message || "Login failed. Please check your credentials.";
+      const message = err.message || "We could not sign you in. Please check your credentials and try again.";
       setError(message);
       toast.error("Login failed");
     } finally {

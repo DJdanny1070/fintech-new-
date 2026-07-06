@@ -26,6 +26,21 @@ function formatDate(value) {
   return new Date(value).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
+function getFriendlyErrorMessage(err) {
+  if (!err) return "Something went wrong. Please try again.";
+  const message = err?.message || err?.error || "";
+  if (/failed to fetch|network|fetch/i.test(message)) {
+    return "We couldn’t reach the marketplace right now. Please try again shortly.";
+  }
+  if (/duplicate|already exists/i.test(message)) {
+    return "This item already exists. Please change the details and try again.";
+  }
+  if (/jwt|token|auth/i.test(message)) {
+    return "Please sign in again to continue.";
+  }
+  return message || "Something went wrong. Please try again.";
+}
+
 function Marketplace() {
   const { user, profile } = useAuth();
   const isBusiness = profile?.role === "business";
@@ -48,10 +63,11 @@ function Marketplace() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [modalError, setModalError] = useState("");
+  const [buyingId, setBuyingId] = useState(null);
 
-  const loadProducts = useCallback(async (nextSearch = search, nextCategory = cat) => {
+  const loadProducts = useCallback(async (nextSearch = search, nextCategory = cat, force = false) => {
     const requestKey = `${nextCategory || "All"}::${(nextSearch || "").trim().toLowerCase()}`;
-    if (lastRequestKey.current === requestKey) return;
+    if (!force && lastRequestKey.current === requestKey) return;
 
     lastRequestKey.current = requestKey;
     setLoadingList(true);
@@ -167,8 +183,9 @@ function Marketplace() {
         try {
           imageUrl = await uploadProductImage(form.image, user.id);
         } catch (err) {
-          toast.error("Image upload failed");
-          throw err;
+          const message = getFriendlyErrorMessage(err);
+          toast.error(message);
+          throw new Error(message);
         }
       }
 
@@ -182,23 +199,24 @@ function Marketplace() {
       };
 
       if (editId) {
-        // Update
         const updated = await updateProduct(editId, payload);
         const hash = await generateAndStoreHash("product", updated.id, payload);
         await updateProduct(updated.id, { blockchain_hash: hash });
-        toast.success("Product updated");
+        toast.success("Product updated successfully.");
       } else {
-        // Create
         const created = await createProduct(payload);
         const hash = await generateAndStoreHash("product", created.id, payload);
         await updateProduct(created.id, { blockchain_hash: hash });
-        toast.success("Product listed");
+        toast.success("Product listed successfully.");
       }
 
       setShowModal(false);
-      await loadProducts(search, cat);
+      await loadProducts(search, cat, true);
+      window.dispatchEvent(new Event("marketplace:changed"));
     } catch (err) {
-      setModalError(err.message || "Failed to save product.");
+      const message = getFriendlyErrorMessage(err);
+      setModalError(message);
+      toast.error(message);
     } finally {
       setSaving(false);
     }
@@ -208,24 +226,37 @@ function Marketplace() {
     if (!window.confirm("Delete this product?")) return;
     try {
       await deleteProduct(id);
-      setProducts(prev => prev.filter(p => p.id !== id));
-      toast.success("Product deleted");
+      await loadProducts(search, cat, true);
+      window.dispatchEvent(new Event("marketplace:changed"));
+      toast.success("Product deleted successfully.");
     } catch (err) {
-      toast.error("Failed to delete: " + err.message);
+      toast.error(getFriendlyErrorMessage(err));
     }
   };
 
   const handleBuy = async (product) => {
-    if (!user) return;
+    if (!user) {
+      toast.info("Please log in to continue.");
+      return;
+    }
+    if (product.seller_id === user.id) {
+      toast.error("You cannot buy your own listing.");
+      return;
+    }
+
+    setBuyingId(product.id);
     try {
       await createOrder({
         buyerId: user.id,
         sellerId: product.seller_id,
         productId: product.id,
       });
-      toast.success("Order placed");
+      toast.success("Order placed successfully.");
+      window.dispatchEvent(new Event("orders:changed"));
     } catch (err) {
-      toast.error("Failed to place order: " + err.message);
+      toast.error(getFriendlyErrorMessage(err));
+    } finally {
+      setBuyingId(null);
     }
   };
 
@@ -375,7 +406,9 @@ function Marketplace() {
                       <button className="btn btn-ghost btn-sm" style={{color:"var(--red)"}} onClick={() => handleDelete(l.id)}>Delete</button>
                     </>
                   ) : (
-                    <button className="btn btn-primary btn-sm" onClick={() => handleBuy(l)}>Buy</button>
+                    <button className="btn btn-primary btn-sm" onClick={() => handleBuy(l)} disabled={buyingId === l.id}>
+                      {buyingId === l.id ? "Placing..." : "Buy"}
+                    </button>
                   )}
                 </td>
               </tr>

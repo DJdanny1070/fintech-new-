@@ -21,7 +21,7 @@ const FEATURES = [
   {
     icon: Layers,
     title: "Scalable",
-    desc: "Built to handle growing transaction volumes for startups, enterprises, and developer integrations.",
+    desc: "Built to handle growing transaction volumes for startups, enterprises, and advanced financial integrations.",
   },
 ];
 
