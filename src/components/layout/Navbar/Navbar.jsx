@@ -12,7 +12,7 @@ import "./Navbar.css";
 import cresoxLogo from "../../../assets/cresox-logo.png";
 
 const NAV_LINKS = [
-  { label: "Marketplace", href: "#marketplace" },
+  { label: "Services", href: "#services" },
   { label: "Blockchain", href: "#blockchain" },
   { label: "Company", href: "#company" },
   { label: "Contact", href: "#contact" },

@@ -46,7 +46,7 @@ function Leadership() {
         {/* Header */}
         <div className="leadership__header">
           <span className="leadership__eyebrow">Meet Our Team</span>
-          <h2 className="leadership__title">Leadership Team</h2>
+          <h2 className="leadership__title">Team CresoX</h2>
           <p className="leadership__subtitle">
             The visionaries driving CresoX forward — combining decades of
             industry expertise, technological innovation, and entrepreneurial

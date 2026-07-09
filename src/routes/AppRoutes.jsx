@@ -27,6 +27,11 @@ import Compliance from "../pages/Compliance";
 import Documentation from "../pages/Documentation";
 import HelpCentre from "../pages/HelpCentre";
 import StatusPage from "../pages/StatusPage";
+import AssetTokenization from "../pages/AssetTokenization";
+import TokenizationRequest from "../pages/TokenizationRequest";
+import DirectConsultancy from "../pages/DirectConsultancy";
+import AssetTokenizationRequest from "../pages/AssetTokenizationRequest";
+import ConsultancyRequest from "../pages/ConsultancyRequest";
 
 function AppRoutes() {
   return (
@@ -54,6 +59,11 @@ function AppRoutes() {
           <Route path="/docs" element={<Documentation />} />
           <Route path="/help" element={<HelpCentre />} />
           <Route path="/status" element={<StatusPage />} />
+          <Route path="/services/asset-tokenization" element={<AssetTokenization />} />
+          <Route path="/tokenization-request" element={<TokenizationRequest />} />
+          <Route path="/services/direct-consultancy" element={<DirectConsultancy />} />
+          <Route path="/request/asset-tokenization" element={<AssetTokenizationRequest />} />
+          <Route path="/consultation-request" element={<ConsultancyRequest />} />
 
           {/* Protected Dashboard Routes */}
           <Route
