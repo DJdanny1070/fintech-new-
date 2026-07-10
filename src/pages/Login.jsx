@@ -148,8 +148,8 @@ function Login() {
           </form>
 
           <div className="auth-card__footer">
-            Don't have an account?{" "}
-            <Link to="/register" className="auth-link">Create one free →</Link>
+            Access is by invitation only.{" "}
+            <Link to="/contact" className="auth-link">Contact us →</Link>
           </div>
         </div>
       </div>

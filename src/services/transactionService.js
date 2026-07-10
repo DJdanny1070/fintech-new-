@@ -1,7 +1,7 @@
 import { supabase } from "./supabase";
 import { getWallet, updateWalletBalance } from "./walletService";
 import { getProfileByEmail } from "./profileService";
-import { generateAndStoreHash } from "./hashService";
+import { hashWalletTransaction } from "./hashService";
 
 /**
  * Create a transaction record and generate a blockchain hash.
@@ -27,10 +27,16 @@ export async function createTransaction({ userId, type, amount, counterpartyId =
 
   // Generate blockchain hash (non-blocking if storage fails)
   try {
-    const hash = await generateAndStoreHash("transaction", data.id, payload);
+    const hash = await hashWalletTransaction(data.id, {
+      userId,
+      type,
+      amount,
+      counterpartyId,
+      note,
+    });
     await supabase.from("transactions").update({ blockchain_hash: hash }).eq("id", data.id);
   } catch (err) {
-    console.error("Failed to generate/store transaction hash:", err.message);
+    console.error("[blockchain] Failed to generate/store wallet transaction hash:", err.message);
   }
 
   return data;

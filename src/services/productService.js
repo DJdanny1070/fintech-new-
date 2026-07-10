@@ -1,6 +1,7 @@
 import { supabase } from "./supabase";
 import { createTransaction } from "./transactionService";
 import { getWallet, updateWalletBalance } from "./walletService";
+import { hashTokenPurchase, hashOwnershipChange, hashAssetCreation } from "./hashService";
 
 /**
  * Fetch all products with optional filters.
@@ -33,7 +34,7 @@ export async function getProducts({ search = "", category = "" } = {}) {
 }
 
 /**
- * Create a new product. Also stores blockchain_hash.
+ * Create a new product and fire a blockchain hash for the asset listing event.
  */
 export async function createProduct(productData) {
   const { data, error } = await supabase
@@ -43,6 +44,19 @@ export async function createProduct(productData) {
     .single();
 
   if (error) throw error;
+
+  // Blockchain: hash the asset creation event (non-blocking)
+  try {
+    await hashAssetCreation(data.id, {
+      title: data.title,
+      category: data.category,
+      price: data.price,
+      seller_id: data.seller_id,
+    });
+  } catch (err) {
+    console.error("[blockchain] Asset creation hash failed:", err.message);
+  }
+
   return data;
 }
 
@@ -152,6 +166,31 @@ export async function createOrder({ buyerId, sellerId, productId }) {
       note: `Sold ${productData?.title || "product"}`,
       status: "verified",
     });
+  }
+
+  // ── Blockchain hashes ────────────────────────────────────────────
+  // Fire-and-forget: hash failures must never block the order.
+  try {
+    // 1. Token purchase event
+    await hashTokenPurchase(data.id, {
+      buyerId,
+      sellerId: effectiveSellerId,
+      assetId: productId,
+      assetTitle: productData?.title || "Asset",
+      price: amount,
+    });
+
+    // 2. Ownership change event (buyer gains ownership)
+    // Ownership percentage is indicative (1 unit = 1 share of total supply);
+    // replace with real token ledger values when the trading engine launches.
+    await hashOwnershipChange(productId, {
+      userId: buyerId,
+      previousPct: 0,
+      newPct: 1, // placeholder: 1 token unit acquired
+      trigger: "purchase",
+    });
+  } catch (err) {
+    console.error("[blockchain] Order hash generation failed:", err.message);
   }
 
   return data;

@@ -1,9 +1,18 @@
 import { supabase } from "./supabase";
+import { hashVerificationApproval } from "./hashService";
 
 /**
  * Create a new profile row for a newly registered user.
+ *
+ * approval_status controls platform access (Pending | Approved | Rejected).
+ * It is set to 'Pending' for all new users regardless of role.
+ * An admin must explicitly set it to 'Approved' before the user can access
+ * protected areas. This is separate from verification_status, which tracks
+ * business KYC/document verification.
  */
 export async function createProfile(userId, { full_name, email, role }) {
+  // Business accounts start KYC verification as Pending;
+  // individuals have no KYC requirement (null).
   const verification_status = role === "business" ? "Pending" : null;
 
   const { data, error } = await supabase
@@ -15,6 +24,8 @@ export async function createProfile(userId, { full_name, email, role }) {
         email,
         role,
         verification_status,
+        // All new accounts require admin approval before gaining platform access.
+        approval_status: "Pending",
       },
     ])
     .select()
@@ -173,5 +184,21 @@ export async function requestBusinessVerification(userId, { gst_number, pan_numb
   };
 
   const updated = await updateProfile(userId, fields);
+
+  // ── Blockchain hash ────────────────────────────────────────────
+  // Record that the verification status changed to 'Pending' (KYC submitted).
+  // When an admin approves/rejects, a second hash is written via hashVerificationApproval
+  // with the final status. This creates a two-step audit trail.
+  try {
+    await hashVerificationApproval(userId, {
+      adminId: null, // self-submitted — no admin yet
+      previousStatus: null,
+      newStatus: "Pending",
+      reason: "Business verification documents submitted",
+    });
+  } catch (err) {
+    console.error("[blockchain] Verification hash failed:", err.message);
+  }
+
   return updated;
 }

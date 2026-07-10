@@ -9,7 +9,7 @@ import {
 } from "../services/authService";
 import { createProfile, getProfile } from "../services/profileService";
 import { createWallet, getWallet } from "../services/walletService";
-import { generateAndStoreHash } from "../services/hashService";
+import { hashProfileCreation } from "../services/hashService";
 
 const AuthContext = createContext(null);
 
@@ -85,6 +85,19 @@ export function AuthProvider({ children }) {
     return signInWithGoogle(); // triggers OAuth redirect
   };
 
+  /**
+   * register — INTERNAL USE ONLY.
+   *
+   * Public self-registration has been disabled. This function is kept in
+   * place for the upcoming invitation flow, which will call it server-side
+   * or via an admin-controlled process. It is intentionally NOT exported
+   * through the context value to prevent accidental UI usage.
+   *
+   * When the invitation flow is integrated, this should be called after
+   * the invitation token is validated, with the user's pre-approved role
+   * and approval_status set to 'Approved' at creation time.
+   */
+  // eslint-disable-next-line no-unused-vars
   const register = async (email, password, fullName, role) => {
     const data = await signUpWithEmail(email, password, {
       full_name: fullName,
@@ -104,11 +117,9 @@ export function AuthProvider({ children }) {
       });
 
       const wal = await createWallet(userId);
-      await generateAndStoreHash("profile", userId, {
-        full_name: fullName,
-        email,
-        role,
-      });
+
+      // Blockchain: hash the profile creation event
+      await hashProfileCreation(userId, { full_name: fullName, email, role });
 
       setProfile(prof);
       setWallet(wal);
@@ -156,11 +167,13 @@ export function AuthProvider({ children }) {
     loading,
     login,
     loginWithGoogle,
-    register,
+    // register is intentionally NOT in context — see note above.
     logout,
     refreshWallet,
     refreshProfile,
     isAuthenticated: !!user,
+    // Convenience: 'Pending' | 'Approved' | 'Rejected' | null
+    approvalStatus: profile?.approval_status ?? null,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

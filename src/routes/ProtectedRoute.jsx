@@ -2,13 +2,28 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useEffect, useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../components/common/ToastProvider";
+import AccessPending from "../pages/AccessPending";
 
 /**
- * Wraps a route element and redirects unauthenticated users to /login.
- * Preserves the attempted URL so login can redirect back after success.
+ * ProtectedRoute
+ *
+ * Guards that must ALL pass before the child route renders:
+ *
+ *  1. Authentication — user must be signed in, else redirect to /login.
+ *  2. Approval — profile.approval_status must be 'Approved'.
+ *     • Pending  → render <AccessPending> (in-place, no redirect)
+ *     • Rejected → render <AccessPending> (in-place, no redirect)
+ *
+ * The approval gate is deliberate: we render AccessPending inline rather
+ * than redirecting so the URL stays at the intended route, making it easier
+ * to test and iterate on the approval flow without breaking navigation state.
+ *
+ * When the invitation flow is wired up, approved users will automatically
+ * pass gate 2 from the moment their account is created with approval_status
+ * set to 'Approved'.
  */
 function ProtectedRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, profile } = useAuth();
   const location = useLocation();
   const toast = useToast();
   const wasAuthenticated = useRef(false);
@@ -21,7 +36,7 @@ function ProtectedRoute({ children }) {
     wasAuthenticated.current = isAuthenticated;
   }, [isAuthenticated, loading, toast]);
 
-  // While the session is being restored, render nothing (avoid flash)
+  // ── 1. Restoring session — avoid flash ──────────────────────────
   if (loading) {
     return (
       <div
@@ -41,10 +56,26 @@ function ProtectedRoute({ children }) {
     );
   }
 
+  // ── 2. Not authenticated → login ────────────────────────────────
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // ── 3. Authenticated but approval not yet resolved ───────────────
+  // While profile is still loading (null), let the child render rather
+  // than flashing the pending screen. The profile loads immediately after
+  // session restore in AuthContext, so this window is very brief.
+  if (profile !== null) {
+    const approvalStatus = profile?.approval_status;
+
+    // If approval_status is missing entirely (e.g. old row before migration),
+    // treat as approved to avoid locking out existing users.
+    if (approvalStatus && approvalStatus !== "Approved") {
+      return <AccessPending />;
+    }
+  }
+
+  // ── 4. All gates passed ─────────────────────────────────────────
   return children;
 }
 

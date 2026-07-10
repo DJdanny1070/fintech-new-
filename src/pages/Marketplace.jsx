@@ -1,510 +1,925 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import {
-  getProducts,
-  createProduct,
-  deleteProduct,
-  uploadProductImage,
-  createOrder,
-} from "../services/productService";
-import { generateAndStoreHash } from "../services/hashService";
-import { updateProduct } from "../services/productService";
-import "./Dashboard.css";
 import { useToast } from "../components/common/ToastProvider";
+import { getProducts, getMyOrders } from "../services/productService";
 import LoadingSkeleton from "../components/common/LoadingSkeleton";
-import EmptyState from "../components/common/EmptyState";
-import NetworkError from "../components/common/NetworkError";
+import "./Marketplace.css";
+import "./Dashboard.css";
 
-const CATS = ["All", "Real Estate", "Renewable Energy", "Infrastructure", "Receivables", "Arts & Collectibles", "Other"];
-const PAGE_SIZE = 8;
+// ─── Constants ───────────────────────────────────────────────────────────────
 
-const EMPTY_FORM = { title:"", description:"", category:"Real Estate", price:"", image:null };
+const CATS = [
+  "All",
+  "Real Estate",
+  "Renewable Energy",
+  "Infrastructure",
+  "Receivables",
+  "Arts & Collectibles",
+  "Other",
+];
 
-function formatDate(value) {
-  if (!value) return "—";
-  return new Date(value).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+const CAT_ICONS = {
+  "Real Estate":        "🏢",
+  "Renewable Energy":   "☀️",
+  "Infrastructure":     "🏗️",
+  "Receivables":        "📄",
+  "Arts & Collectibles":"🎨",
+  "Other":              "📦",
+};
+
+// Deterministic mock daily trend per product id (seed via id chars)
+function mockTrend(id = "") {
+  const seed = id.charCodeAt(0) + (id.charCodeAt(1) || 0);
+  const pct = ((seed % 19) - 8) / 10; // range -0.8% to +1.0%
+  return pct;
 }
 
-function getFriendlyErrorMessage(err) {
-  if (!err) return "Something went wrong. Please try again.";
-  const message = err?.message || err?.error || "";
-  if (/failed to fetch|network|fetch/i.test(message)) {
-    return "We couldn’t reach the marketplace right now. Please try again shortly.";
-  }
-  if (/duplicate|already exists/i.test(message)) {
-    return "This item already exists. Please change the details and try again.";
-  }
-  if (/jwt|token|auth/i.test(message)) {
-    return "Please sign in again to continue.";
-  }
-  return message || "Something went wrong. Please try again.";
-}
-
-function Marketplace() {
-  const { user, profile } = useAuth();
-  const isBusiness = profile?.role === "business";
-  const toast = useToast();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const [cat, setCat] = useState("All");
-  const [searchInput, setSearchInput] = useState("");
-  const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState("newest");
-  const [page, setPage] = useState(1);
-  const [products, setProducts] = useState([]);
-  const [loadingList, setLoadingList] = useState(true);
-  const [loadError, setLoadError] = useState("");
-  const [failedImages, setFailedImages] = useState({});
-  const lastRequestKey = useRef("");
-
-  // Create/Edit modal
-  const [showModal, setShowModal] = useState(false);
-  const [editId, setEditId] = useState(null);
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [saving, setSaving] = useState(false);
-  const [modalError, setModalError] = useState("");
-  const [buyingId, setBuyingId] = useState(null);
-
-  const loadProducts = useCallback(async (nextSearch = search, nextCategory = cat, force = false) => {
-    const requestKey = `${nextCategory || "All"}::${(nextSearch || "").trim().toLowerCase()}`;
-    if (!force && lastRequestKey.current === requestKey) return;
-
-    lastRequestKey.current = requestKey;
-    setLoadingList(true);
-    setLoadError("");
-    try {
-      const data = await getProducts({ search: nextSearch, category: nextCategory });
-      setProducts(data || []);
-    } catch (err) {
-      setProducts([]);
-      const message = err?.message?.includes("Failed to fetch") || err?.message?.includes("fetch")
-        ? "We couldn’t reach the marketplace right now. Please try again in a moment."
-        : err.message || "Failed to load products.";
-      setLoadError(message);
-      toast.error("Network error");
-    } finally {
-      setLoadingList(false);
-    }
-  }, [cat, search, toast]);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setSearch(searchInput.trim());
-      setPage(1);
-    }, 250);
-
-    return () => window.clearTimeout(timer);
-  }, [searchInput]);
-
-  useEffect(() => {
-    let mounted = true;
-    const loadCurrent = async () => {
-      if (!mounted) return;
-      await loadProducts(search, cat);
-      if (mounted) setPage(1);
-    };
-    loadCurrent();
-    return () => { mounted = false; };
-  }, [cat, search, loadProducts]);
-
-  const filteredProducts = useMemo(() => {
-    const normalized = search.trim().toLowerCase();
-    let result = [...products];
-
-    if (normalized) {
-      result = result.filter((product) => {
-        const sellerName = product.seller?.full_name || "";
-        const haystack = `${product.title || ""} ${product.description || ""} ${sellerName} ${product.category || ""}`.toLowerCase();
-        return haystack.includes(normalized);
-      });
-    }
-
-    switch (sortBy) {
-      case "price-asc":
-        result.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
-        break;
-      case "price-desc":
-        result.sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0));
-        break;
-      case "oldest":
-        result.sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
-        break;
-      case "newest":
-      default:
-        result.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
-        break;
-    }
-
-    return result;
-  }, [products, search, sortBy]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const visibleProducts = useMemo(() => {
-    const start = (safePage - 1) * PAGE_SIZE;
-    return filteredProducts.slice(start, start + PAGE_SIZE);
-  }, [filteredProducts, safePage]);
-
-  useEffect(() => {
-    if (page > totalPages) {
-      setPage(totalPages);
-    }
-  }, [page, totalPages]);
-
-  // ── Product CRUD ─────────────────────────────────────────────
-
-  const openCreate = () => {
-    setEditId(null);
-    setForm(EMPTY_FORM);
-    setModalError("");
-    setShowModal(true);
-  };
-
-  const openEdit = (product) => {
-    setEditId(product.id);
-    setForm({
-      title: product.title,
-      description: product.description || "",
-      category: product.category || "Real Estate",
-      price: product.price ?? "",
-      image: null,
-    });
-    setModalError("");
-    setShowModal(true);
-  };
-
-  const handleSave = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    setModalError("");
-    try {
-      let imageUrl = null;
-      if (form.image) {
-        try {
-          imageUrl = await uploadProductImage(form.image, user.id);
-        } catch (err) {
-          const message = getFriendlyErrorMessage(err);
-          toast.error(message);
-          throw new Error(message);
-        }
-      }
-
-      const payload = {
-        title: form.title,
-        description: form.description,
-        category: form.category,
-        price: parseFloat(form.price) || 0,
-        seller_id: user.id,
-        ...(imageUrl && { image_url: imageUrl }),
-      };
-
-      if (editId) {
-        const updated = await updateProduct(editId, payload);
-        const hash = await generateAndStoreHash("product", updated.id, payload);
-        await updateProduct(updated.id, { blockchain_hash: hash });
-        toast.success("Product updated successfully.");
-      } else {
-        const created = await createProduct(payload);
-        const hash = await generateAndStoreHash("product", created.id, payload);
-        await updateProduct(created.id, { blockchain_hash: hash });
-        toast.success("Product listed successfully.");
-      }
-
-      setShowModal(false);
-      await loadProducts(search, cat, true);
-      window.dispatchEvent(new Event("marketplace:changed"));
-    } catch (err) {
-      const message = getFriendlyErrorMessage(err);
-      setModalError(message);
-      toast.error(message);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this product?")) return;
-    try {
-      await deleteProduct(id);
-      await loadProducts(search, cat, true);
-      window.dispatchEvent(new Event("marketplace:changed"));
-      toast.success("Product deleted successfully.");
-    } catch (err) {
-      toast.error(getFriendlyErrorMessage(err));
-    }
-  };
-
-  const handleBuy = async (product) => {
-    if (!user) {
-      // Redirect to login, preserving the current location so the user
-      // is sent back to the marketplace after a successful sign-in.
-      navigate("/login", { state: { from: location } });
-      return;
-    }
-    if (product.seller_id === user.id) {
-      toast.error("You cannot buy your own listing.");
-      return;
-    }
-
-    setBuyingId(product.id);
-    try {
-      await createOrder({
-        buyerId: user.id,
-        sellerId: product.seller_id,
-        productId: product.id,
-      });
-      toast.success("Order placed successfully.");
-      window.dispatchEvent(new Event("orders:changed"));
-    } catch (err) {
-      toast.error(getFriendlyErrorMessage(err));
-    } finally {
-      setBuyingId(null);
-    }
-  };
-
-  const handleImageError = (productId) => {
-    setFailedImages(prev => ({ ...prev, [productId]: true }));
-  };
-
-  const clearFilters = () => {
-    setSearchInput("");
-    setSearch("");
-    setCat("All");
-    setSortBy("newest");
-    setPage(1);
-  };
-
-  const hasActiveFilters = Boolean(search.trim() || cat !== "All" || sortBy !== "newest");
-  const isEmptyState = !loadingList && filteredProducts.length === 0;
+// Micro sparkline — 12-point mock data seeded from id
+function Sparkline({ id = "", trend = 0 }) {
+  const seed = (id.charCodeAt(0) || 50) + (id.charCodeAt(2) || 30);
+  const pts = Array.from({ length: 12 }, (_, i) => {
+    const base = 50 + Math.sin((seed + i) * 0.8) * 15;
+    return base + i * trend * 3;
+  });
+  const W = 200, H = 44;
+  const min = Math.min(...pts);
+  const max = Math.max(...pts) - min || 1;
+  const coords = pts
+    .map((v, i) => `${(i / (pts.length - 1)) * W},${H - 4 - ((v - min) / max) * (H - 8)}`)
+    .join(" ");
+  const area = `0,${H} ` + coords + ` ${W},${H}`;
+  const upColor = "#16A34A";
+  const downColor = "#E0010B";
+  const color = trend >= 0 ? upColor : downColor;
 
   return (
-    <div>
-      <div className="page-header">
-        <div className="page-header__row">
-          <div>
-            <h1>Marketplace</h1>
-            <p>{products.length} verified tokenized asset listings</p>
-          </div>
-          {isBusiness && (
-            <button className="btn btn-primary" onClick={openCreate}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
-              List a Product
-            </button>
-          )}
-        </div>
-      </div>
+    <svg className="cp-sparkline" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+      <defs>
+        <linearGradient id={`sg-${id}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.15" />
+          <stop offset="100%" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <polygon points={area} fill={`url(#sg-${id})`} />
+      <polyline
+        points={coords}
+        fill="none"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
-      {/* Filters */}
-      <div className="content-card" style={{marginBottom:"var(--sp-5)"}}>
-        <div style={{display:"flex",gap:"var(--sp-4)",alignItems:"center",flexWrap:"wrap"}}>
-          <div style={{display:"flex",alignItems:"center",gap:"var(--sp-2)",background:"var(--bg)",border:"1px solid var(--border)",borderRadius:"var(--r-md)",padding:"8px 12px",flex:1,minWidth:200}}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            <input style={{border:"none",outline:"none",background:"none",width:"100%",fontSize:14}} placeholder="Search title, description, seller or category..."
-              value={searchInput} onChange={e => setSearchInput(e.target.value)} />
-          </div>
-          <select className="input" value={sortBy} onChange={(e) => { setSortBy(e.target.value); setPage(1); }} style={{minWidth:160}}>
-            <option value="newest">Newest</option>
-            <option value="oldest">Oldest</option>
-            <option value="price-asc">Lowest price</option>
-            <option value="price-desc">Highest price</option>
-          </select>
-          <div style={{display:"flex",gap:"var(--sp-2)",flexWrap:"wrap"}}>
-            {CATS.map(c => (
-              <button key={c} onClick={() => { setCat(c); setPage(1); }}
-                className={`btn btn-sm ${cat===c?"btn-primary":"btn-secondary"}`}>
-                {c}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+// Donut chart for portfolio allocation
+function DonutChart({ slices }) {
+  const total = slices.reduce((s, x) => s + x.value, 0) || 1;
+  const radius = 52;
+  const cx = 70, cy = 70;
+  const circumference = 2 * Math.PI * radius;
+  let offset = 0;
+  const COLORS = ["#075AD8", "#16A34A", "#D97706", "#E0010B", "#6B7280", "#4FA3FF"];
 
-      {/* Table */}
-      <div className="content-card">
-        <div className="content-card__header">
-          <div>
-            <div className="content-card__title">Available Listings</div>
-            <div className="content-card__sub">{loadingList ? "Loading..." : `${filteredProducts.length} results`}</div>
-          </div>
-        </div>
-        {loadError ? (
-          <div style={{marginBottom:"var(--sp-4)"}}>
-            <NetworkError message={loadError} />
-          </div>
-        ) : null}
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Product</th><th>Seller</th><th>Category</th>
-              <th>Price</th><th>Verified</th><th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {loadingList ? (
-              <tr>
-                <td colSpan="6">
-                  <div style={{padding:"var(--sp-4) 0"}}><LoadingSkeleton rows={4} /></div>
-                </td>
-              </tr>
-            ) : (
-              visibleProducts.map(l => (
-              <tr key={l.id}>
-                <td style={{fontWeight:600,color:"var(--text-primary)"}}>
-                  <div style={{display:"flex",alignItems:"center",gap:"var(--sp-3)"}}>
-                    <div style={{width:48,height:48,borderRadius:8,overflow:"hidden",background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                      {l.image_url && !failedImages[l.id] ? (
-                        <img
-                          src={l.image_url}
-                          alt={l.title}
-                          loading="lazy"
-                          decoding="async"
-                          style={{width:"100%",height:"100%",objectFit:"cover"}}
-                          onError={() => handleImageError(l.id)}
-                        />
-                      ) : (
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{color:"var(--text-muted)"}}>
-                          <rect x="3" y="3" width="18" height="14" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 21l-6-5-4 4-3-3-5 4"/></svg>
-                      )}
-                    </div>
-                    <div>
-                      <Link to={`/marketplace/product/${l.id}`} style={{textDecoration:"none",color:"inherit"}}>{l.title}</Link>
-                      <div style={{fontSize:12,color:"var(--text-muted)",marginTop:4}}>{formatDate(l.created_at)}</div>
-                      <div style={{display:"flex",gap:6,marginTop:6,flexWrap:"wrap"}}>
-                        {l.seller?.verification_status === "Verified" ? <span className="status-badge status-badge--verified">Verified Seller</span> : null}
-                        {l.blockchain_hash ? <span className="status-badge status-badge--verified">Blockchain Verified</span> : null}
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <div style={{display:"flex",alignItems:"center",gap:"var(--sp-2)"}}>
-                    <div style={{width:22,height:22,borderRadius:"50%",background:"var(--blue)",color:"#fff",fontSize:10,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                      {(l.seller?.full_name || "?")[0].toUpperCase()}
-                    </div>
-                    <div style={{display:'flex',alignItems:'center',gap:8}}>
-                      <div>{l.seller?.full_name || "Unknown"}</div>
-                    </div>
-                  </div>
-                </td>
-                <td><span className="badge badge-gray">{l.category || "—"}</span></td>
-                <td style={{fontFamily:"monospace",fontWeight:700}}>
-                  {l.price ? `₹${Number(l.price).toLocaleString("en-IN")}` : "—"}
-                </td>
-                <td>
-                  {l.blockchain_hash ? (
-                    <span className="status-badge status-badge--verified">✔ Blockchain Verified</span>
-                  ) : (
-                    <span className="status-badge status-badge--pending">⏳ Pending</span>
-                  )}
-                </td>
-                <td style={{display:"flex",gap:"var(--sp-2)",alignItems:"center"}}>
-                  {l.seller_id === user?.id ? (
-                    <>
-                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(l)}>Edit</button>
-                      <button className="btn btn-ghost btn-sm" style={{color:"var(--red)"}} onClick={() => handleDelete(l.id)}>Delete</button>
-                    </>
-                  ) : (
-                    <button className="btn btn-primary btn-sm" onClick={() => handleBuy(l)} disabled={buyingId === l.id}>
-                      {buyingId === l.id ? "Placing..." : "Buy"}
-                    </button>
-                  )}
-                </td>
-              </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-        {isEmptyState && (
-          <EmptyState
-            title={products.length === 0 ? "No products available" : "No search results"}
-            description={products.length === 0 ? "There are no marketplace listings yet. Try again later or list the first product." : "Try a different keyword or clear the active filters to see more listings."}
-            action={
-              <div style={{display:"flex",gap:"var(--sp-2)",justifyContent:"center",flexWrap:"wrap"}}>
-                <button className="btn btn-secondary btn-sm" onClick={clearFilters}>Clear filters</button>
-                {isBusiness && <button className="btn btn-primary btn-sm" onClick={openCreate}>List a Product</button>}
-              </div>
-            }
-          />
-        )}
-        {!loadingList && filteredProducts.length > 0 && (
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:"var(--sp-4)",flexWrap:"wrap",gap:"var(--sp-3)"}}>
-            <div style={{color:"var(--text-muted)",fontSize:13}}>
-              Showing {((safePage - 1) * PAGE_SIZE) + 1}-{Math.min(safePage * PAGE_SIZE, filteredProducts.length)} of {filteredProducts.length}
+  return (
+    <div className="cp-donut-wrap">
+      <svg width="140" height="140" viewBox="0 0 140 140">
+        {slices.map((s, i) => {
+          const pct = s.value / total;
+          const dash = pct * circumference;
+          const gap = circumference - dash;
+          const el = (
+            <circle
+              key={s.label}
+              cx={cx}
+              cy={cy}
+              r={radius}
+              fill="none"
+              stroke={COLORS[i % COLORS.length]}
+              strokeWidth="18"
+              strokeDasharray={`${dash} ${gap}`}
+              strokeDashoffset={-offset}
+              strokeLinecap="butt"
+              style={{ transform: "rotate(-90deg)", transformOrigin: `${cx}px ${cy}px` }}
+            />
+          );
+          offset += dash;
+          return el;
+        })}
+        <circle cx={cx} cy={cy} r={radius - 9} fill="var(--bg-white)" />
+        <text x={cx} y={cy - 5} textAnchor="middle" fontSize="11" fill="var(--text-muted)" fontFamily="Inter">
+          Assets
+        </text>
+        <text x={cx} y={cy + 11} textAnchor="middle" fontSize="16" fontWeight="800" fill="var(--text-primary)" fontFamily="Inter">
+          {slices.length}
+        </text>
+      </svg>
+
+      <div className="cp-donut-legend">
+        {slices.map((s, i) => (
+          <div className="cp-donut-legend-row" key={s.label}>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <div className="cp-donut-dot" style={{ background: COLORS[i % COLORS.length] }} />
+              <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>{s.label}</span>
             </div>
-            <div style={{display:"flex",gap:"var(--sp-2)"}}>
-              <button className="btn btn-ghost btn-sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={safePage === 1}>Previous</button>
-              <button className="btn btn-ghost btn-sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={safePage === totalPages}>Next</button>
-            </div>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>
+              {((s.value / (slices.reduce((a, x) => a + x.value, 0) || 1)) * 100).toFixed(0)}%
+            </span>
           </div>
-        )}
+        ))}
       </div>
-
-      {/* Create/Edit Product Modal */}
-      {showModal && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200}}
-          onClick={() => setShowModal(false)}>
-          <div className="content-card animate-fade-up" style={{width:520,maxWidth:"95vw",margin:0}}
-            onClick={e => e.stopPropagation()}>
-            <div className="content-card__header">
-              <div className="content-card__title">{editId ? "Edit Product" : "List a New Product"}</div>
-              <button className="btn btn-ghost btn-sm" onClick={() => setShowModal(false)}>✕</button>
-            </div>
-
-            {modalError && <div className="auth-error" style={{marginBottom:"var(--sp-4)"}}>{modalError}</div>}
-
-            <form onSubmit={handleSave}>
-              <div style={{display:"flex",flexDirection:"column",gap:"var(--sp-4)"}}>
-                <div className="auth-field">
-                  <label className="input-label">Product Title *</label>
-                  <input className="input" required value={form.title}
-                    onChange={e => setForm({...form, title:e.target.value})} placeholder="e.g. Commercial Property Token" />
-                </div>
-                <div className="auth-field">
-                  <label className="input-label">Description</label>
-                  <textarea className="input" rows={3} value={form.description}
-                    onChange={e => setForm({...form, description:e.target.value})}
-                    placeholder="Brief description of the asset..." style={{resize:"vertical"}} />
-                </div>
-                <div className="auth-form-row">
-                  <div className="auth-field">
-                    <label className="input-label">Category *</label>
-                    <select className="input" value={form.category}
-                      onChange={e => setForm({...form, category:e.target.value})}>
-                      {CATS.filter(c => c !== "All").map(c => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="auth-field">
-                    <label className="input-label">Price (₹) *</label>
-                    <input className="input" type="number" min="0" required value={form.price}
-                      onChange={e => setForm({...form, price:e.target.value})} placeholder="0" />
-                  </div>
-                </div>
-                <div className="auth-field">
-                  <label className="input-label">Product Image</label>
-                  <input className="input" type="file" accept="image/*"
-                    onChange={e => setForm({...form, image: e.target.files[0] || null})} />
-                  <p style={{fontSize:12,color:"var(--text-muted)",marginTop:4}}>
-                    Uploaded to Supabase Storage. Leave blank to keep existing.
-                  </p>
-                </div>
-                <button type="submit" className="btn btn-primary auth-submit" disabled={saving}>
-                  {saving ? <><span className="spinner"/> Saving...</> : editId ? "Save Changes" : "List Product →"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
-export default Marketplace;
+// Format INR
+function fmt(n) {
+  return "₹" + Number(n || 0).toLocaleString("en-IN");
+}
+
+// ─── Trade Modal ─────────────────────────────────────────────────────────────
+
+const MODAL_CONFIGS = {
+  buy: {
+    title: "Buy Token",
+    color: "var(--green)",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+        <polyline points="17 6 23 6 23 12" />
+      </svg>
+    ),
+    btnLabel: "Confirm Purchase",
+    btnClass: "btn-primary",
+  },
+  sell: {
+    title: "Sell Token",
+    color: "var(--red)",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+        <polyline points="23 18 13.5 8.5 8.5 13.5 1 6" />
+        <polyline points="17 18 23 18 23 12" />
+      </svg>
+    ),
+    btnLabel: "Confirm Sale",
+    btnClass: "btn-ghost",
+  },
+  transfer: {
+    title: "Transfer Token",
+    color: "var(--blue)",
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+        <line x1="22" y1="2" x2="11" y2="13" />
+        <polygon points="22 2 15 22 11 13 2 9 22 2" />
+      </svg>
+    ),
+    btnLabel: "Initiate Transfer",
+    btnClass: "btn-primary",
+  },
+};
+
+function TradeModal({ mode, asset, onClose }) {
+  const { wallet } = useAuth();
+  const toast = useToast();
+  const cfg = MODAL_CONFIGS[mode];
+  const [qty, setQty] = useState("1");
+  const [recipient, setRecipient] = useState("");
+  const trend = mockTrend(asset?.id);
+  const price = Number(asset?.price || 0);
+  const total = price * (parseInt(qty) || 0);
+  const balance = wallet?.balance ?? 0;
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // ── STUB: no real payment processing ──────────────────────────
+    // When the trading engine is implemented, replace this block with
+    // the appropriate service call (e.g. createTradeOrder, createTransfer).
+    // For now we surface a clear notice to the user that this is a preview.
+    toast.info(
+      mode === "transfer"
+        ? "Transfer queued — trading engine coming soon."
+        : `${mode === "buy" ? "Buy" : "Sell"} order noted — trading engine coming soon.`
+    );
+    onClose();
+  };
+
+  return (
+    <div className="cp-modal-overlay" onClick={onClose}>
+      <div className="cp-modal" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className="cp-modal__header">
+          <div className="cp-modal__title" style={{ color: cfg.color }}>
+            {cfg.icon}
+            {cfg.title}
+          </div>
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={onClose}
+            style={{ padding: "4px 8px", lineHeight: 1 }}
+          >
+            ✕
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="cp-modal__body">
+            {/* Asset info */}
+            <div className="cp-modal__asset-row">
+              <div className="cp-token-icon" style={{ fontSize: 18 }}>
+                {CAT_ICONS[asset?.category] || "📦"}
+              </div>
+              <div className="cp-modal__asset-info">
+                <div className="cp-modal__asset-name">{asset?.title || "—"}</div>
+                <div className="cp-modal__asset-price">
+                  Token price: {fmt(price)} · {asset?.category}
+                </div>
+              </div>
+              {trend >= 0 ? (
+                <div className="cp-trend cp-trend--up">+{(trend * 100).toFixed(2)}%</div>
+              ) : (
+                <div className="cp-trend cp-trend--down">{(trend * 100).toFixed(2)}%</div>
+              )}
+            </div>
+
+            {/* Quantity */}
+            <div className="cp-modal__field">
+              <label htmlFor="cp-qty">
+                {mode === "transfer" ? "Token units" : "Quantity (units)"}
+              </label>
+              <input
+                id="cp-qty"
+                className="input"
+                type="number"
+                min="1"
+                max="1000"
+                value={qty}
+                onChange={(e) => setQty(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* Transfer recipient */}
+            {mode === "transfer" && (
+              <div className="cp-modal__field">
+                <label htmlFor="cp-recipient">Recipient wallet address / email</label>
+                <input
+                  id="cp-recipient"
+                  className="input"
+                  type="text"
+                  placeholder="USR-XXXXXXXX or you@example.com"
+                  value={recipient}
+                  onChange={(e) => setRecipient(e.target.value)}
+                  required
+                />
+              </div>
+            )}
+
+            {/* Summary */}
+            <div className="cp-modal__summary">
+              <div className="cp-modal__summary-row">
+                <span style={{ color: "var(--text-muted)" }}>Token price</span>
+                <span>{fmt(price)}</span>
+              </div>
+              <div className="cp-modal__summary-row">
+                <span style={{ color: "var(--text-muted)" }}>Quantity</span>
+                <span>{parseInt(qty) || 0} units</span>
+              </div>
+              {mode !== "transfer" && (
+                <div className="cp-modal__summary-row">
+                  <span style={{ color: "var(--text-muted)" }}>Wallet balance</span>
+                  <span>{fmt(balance)}</span>
+                </div>
+              )}
+              <div className="cp-modal__summary-row">
+                <span>Total</span>
+                <span style={{ color: cfg.color }}>{fmt(total)}</span>
+              </div>
+            </div>
+
+            {/* Coming-soon notice */}
+            <div className="cp-modal__notice">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 1 }}>
+                <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <span>
+                Live token trading is coming soon. This order will be queued for
+                execution once the trading engine is live. No funds will be deducted.
+              </span>
+            </div>
+          </div>
+
+          <div className="cp-modal__footer">
+            <button type="button" className="btn btn-secondary" onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit" className={`btn ${cfg.btnClass}`}>
+              {cfg.btnLabel}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ─── Token card ──────────────────────────────────────────────────────────────
+
+function TokenCard({ product, owned, onAction }) {
+  const trend = mockTrend(product.id);
+  const price = Number(product.price || 0);
+  const isVerified = Boolean(product.blockchain_hash);
+
+  // Deterministic ownership pct (mock, seed from id)
+  const ownershipPct = owned
+    ? Math.min(100, 5 + ((product.id.charCodeAt(1) || 40) % 30))
+    : 0;
+
+  return (
+    <div className="cp-token-card">
+      {/* Head */}
+      <div className="cp-token-card__head">
+        <div className="cp-token-icon">
+          {product.image_url ? (
+            <img src={product.image_url} alt={product.title} />
+          ) : (
+            CAT_ICONS[product.category] || "📦"
+          )}
+        </div>
+        <div className="cp-token-card__meta">
+          <div className="cp-token-card__name" title={product.title}>{product.title}</div>
+          <div className="cp-token-card__category">{product.category || "Other"}</div>
+        </div>
+        <div
+          className={`cp-token-badge ${isVerified ? "cp-token-badge--verified" : "cp-token-badge--pending"}`}
+        >
+          {isVerified ? "✔ On-chain" : "⏳ Pending"}
+        </div>
+      </div>
+
+      {/* Sparkline */}
+      <Sparkline id={product.id} trend={trend} />
+
+      {/* Price + trend */}
+      <div className="cp-price-row">
+        <div>
+          <div className="cp-price__label">Token Price</div>
+          <div className="cp-price">{fmt(price)}</div>
+        </div>
+        {trend >= 0 ? (
+          <div className="cp-trend cp-trend--up">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+              <polyline points="18 15 12 9 6 15" />
+            </svg>
+            +{(trend * 100).toFixed(2)}% today
+          </div>
+        ) : (
+          <div className="cp-trend cp-trend--down">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+            {(trend * 100).toFixed(2)}% today
+          </div>
+        )}
+      </div>
+
+      {/* Ownership */}
+      <div className="cp-ownership">
+        <div className="cp-ownership__row">
+          <span>Your ownership</span>
+          <span className="cp-ownership__val">
+            {owned ? `${ownershipPct.toFixed(1)}%` : "None"}
+          </span>
+        </div>
+        <div className="cp-ownership__bar">
+          <div
+            className="cp-ownership__fill"
+            style={{ width: `${ownershipPct}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="cp-actions">
+        <button
+          className="cp-action-btn cp-action-btn--buy"
+          onClick={() => onAction("buy", product)}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+            <polyline points="17 6 23 6 23 12" />
+          </svg>
+          Buy
+        </button>
+        <button
+          className="cp-action-btn cp-action-btn--sell"
+          onClick={() => onAction("sell", product)}
+          disabled={!owned}
+          title={!owned ? "You don't hold this token" : undefined}
+          style={!owned ? { opacity: 0.4, cursor: "not-allowed" } : {}}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <polyline points="23 18 13.5 8.5 8.5 13.5 1 6" />
+            <polyline points="17 18 23 18 23 12" />
+          </svg>
+          Sell
+        </button>
+        <button
+          className="cp-action-btn"
+          onClick={() => onAction("transfer", product)}
+          disabled={!owned}
+          title={!owned ? "You don't hold this token" : undefined}
+          style={!owned ? { opacity: 0.4, cursor: "not-allowed" } : {}}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <line x1="22" y1="2" x2="11" y2="13" />
+            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+          </svg>
+          Transfer
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Portfolio tab ────────────────────────────────────────────────────────────
+
+function PortfolioTab({ ownedProducts, allProducts }) {
+  const totalValue = ownedProducts.reduce((s, p) => s + Number(p.price || 0), 0);
+  const unrealizedPnl = ownedProducts.reduce((s, p) => {
+    const trend = mockTrend(p.id);
+    return s + Number(p.price || 0) * trend;
+  }, 0);
+
+  // Category allocation for donut
+  const catMap = {};
+  ownedProducts.forEach((p) => {
+    const cat = p.category || "Other";
+    catMap[cat] = (catMap[cat] || 0) + Number(p.price || 0);
+  });
+  const slices = Object.entries(catMap)
+    .map(([label, value]) => ({ label, value }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5);
+
+  if (ownedProducts.length === 0) {
+    return (
+      <div className="content-card">
+        <div className="cp-empty">
+          <div className="cp-empty__icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" strokeWidth="1.8" strokeLinecap="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" />
+              <line x1="8" y1="21" x2="16" y2="21" />
+              <line x1="12" y1="17" x2="12" y2="21" />
+            </svg>
+          </div>
+          <div className="cp-empty__title">No holdings yet</div>
+          <div className="cp-empty__sub">
+            Purchase tokenized assets from the Explore tab to build your portfolio.
+            All trades are blockchain-verified.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="cp-portfolio-grid">
+      {/* Left — holdings table */}
+      <div className="content-card" style={{ padding: 0, overflow: "hidden" }}>
+        <div
+          className="cp-portfolio-row cp-portfolio-row__th"
+          style={{ background: "var(--bg)", borderRadius: "var(--r-lg) var(--r-lg) 0 0" }}
+        >
+          <span>Asset</span>
+          <span>Token Price</span>
+          <span>Daily Trend</span>
+          <span>Ownership</span>
+          <span style={{ textAlign: "right" }}>Value</span>
+        </div>
+        <div className="cp-portfolio-list">
+          {ownedProducts.map((p) => {
+            const trend = mockTrend(p.id);
+            const price = Number(p.price || 0);
+            const ownershipPct = Math.min(100, 5 + ((p.id.charCodeAt(1) || 40) % 30));
+            return (
+              <div className="cp-portfolio-row" key={p.id}>
+                <div className="cp-portfolio-name">
+                  <div className="cp-portfolio-icon">
+                    {CAT_ICONS[p.category] || "📦"}
+                  </div>
+                  <div>
+                    <div className="cp-portfolio-title">{p.title}</div>
+                    <div className="cp-portfolio-cat">{p.category || "Other"}</div>
+                  </div>
+                </div>
+                <div className="cp-portfolio-val">{fmt(price)}</div>
+                <div>
+                  {trend >= 0 ? (
+                    <span className="cp-trend cp-trend--up" style={{ fontSize: 12 }}>
+                      +{(trend * 100).toFixed(2)}%
+                    </span>
+                  ) : (
+                    <span className="cp-trend cp-trend--down" style={{ fontSize: 12 }}>
+                      {(trend * 100).toFixed(2)}%
+                    </span>
+                  )}
+                </div>
+                <div className="cp-portfolio-muted">{ownershipPct.toFixed(1)}%</div>
+                <div className="cp-portfolio-val" style={{ textAlign: "right" }}>
+                  {fmt(price)}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Right — summary + donut */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "var(--sp-4)" }}>
+        <div className="cp-summary-card">
+          <div className="cp-summary-card__title">Portfolio Summary</div>
+          <div className="cp-summary-row">
+            <span className="cp-summary-label">Total holdings</span>
+            <span className="cp-summary-value">{ownedProducts.length}</span>
+          </div>
+          <div className="cp-summary-row">
+            <span className="cp-summary-label">Invested value</span>
+            <span className="cp-summary-value">{fmt(totalValue)}</span>
+          </div>
+          <div className="cp-summary-row">
+            <span className="cp-summary-label">Unrealised P&L</span>
+            <span className={`cp-summary-value ${unrealizedPnl >= 0 ? "green" : "red"}`}>
+              {unrealizedPnl >= 0 ? "+" : ""}{fmt(Math.abs(unrealizedPnl))}
+            </span>
+          </div>
+          <div
+            style={{
+              borderTop: "1px solid var(--border)",
+              paddingTop: "var(--sp-4)",
+            }}
+          >
+            <div className="cp-summary-row">
+              <span className="cp-summary-label" style={{ fontWeight: 700 }}>
+                Portfolio value
+              </span>
+              <span className="cp-summary-value" style={{ fontSize: 18 }}>
+                {fmt(totalValue + unrealizedPnl)}
+              </span>
+            </div>
+          </div>
+          <div
+            style={{
+              padding: "10px 14px",
+              background: "var(--blue-light)",
+              borderRadius: "var(--r-md)",
+              fontSize: 12,
+              color: "var(--blue)",
+              fontWeight: 500,
+              lineHeight: 1.5,
+            }}
+          >
+            P&L values are indicative only. Live pricing will be enabled when the
+            trading engine launches.
+          </div>
+        </div>
+
+        {/* Donut allocation */}
+        {slices.length > 0 && (
+          <div className="cp-summary-card">
+            <div className="cp-summary-card__title">Allocation</div>
+            <DonutChart slices={slices} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
+export default function Marketplace() {
+  const { user, wallet } = useAuth();
+  const toast = useToast();
+
+  // ── Tab state
+  const [tab, setTab] = useState("explore"); // 'explore' | 'portfolio'
+
+  // ── Filters (Explore)
+  const [cat, setCat]             = useState("All");
+  const [searchInput, setSearch]  = useState("");
+  const [sortBy, setSortBy]       = useState("newest");
+
+  // ── Data
+  const [products, setProducts]   = useState([]);
+  const [ownedIds, setOwnedIds]   = useState(new Set()); // product IDs the user has bought
+  const [loading, setLoading]     = useState(true);
+  const [loadError, setLoadError] = useState("");
+
+  // ── Trade modal
+  const [modal, setModal] = useState(null); // { mode: 'buy'|'sell'|'transfer', asset }
+
+  // Debounce search
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const debTimer = useRef(null);
+  useEffect(() => {
+    clearTimeout(debTimer.current);
+    debTimer.current = setTimeout(() => setDebouncedSearch(searchInput.trim()), 250);
+    return () => clearTimeout(debTimer.current);
+  }, [searchInput]);
+
+  // Load products + owned ids
+  const load = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    setLoadError("");
+    try {
+      const [prods, orders] = await Promise.all([
+        getProducts({}),
+        getMyOrders(user.id),
+      ]);
+      setProducts(prods || []);
+      const bought = new Set(
+        (orders || [])
+          .filter((o) => o.buyer_id === user.id && o.product_id)
+          .map((o) => o.product_id)
+      );
+      setOwnedIds(bought);
+    } catch (err) {
+      setLoadError("Failed to load market data. Please try again.");
+      toast.error("Network error");
+    } finally {
+      setLoading(false);
+    }
+  }, [user, toast]);
+
+  useEffect(() => { load(); }, [load]);
+
+  // ── Filtered/sorted products for Explore tab
+  const visible = useMemo(() => {
+    let result = [...products];
+    if (cat !== "All") result = result.filter((p) => p.category === cat);
+    if (debouncedSearch) {
+      const q = debouncedSearch.toLowerCase();
+      result = result.filter((p) =>
+        `${p.title} ${p.description || ""} ${p.category || ""}`.toLowerCase().includes(q)
+      );
+    }
+    switch (sortBy) {
+      case "price-asc":  result.sort((a, b) => (a.price || 0) - (b.price || 0)); break;
+      case "price-desc": result.sort((a, b) => (b.price || 0) - (a.price || 0)); break;
+      case "oldest":     result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at)); break;
+      default:           result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); break;
+    }
+    return result;
+  }, [products, cat, debouncedSearch, sortBy]);
+
+  // Owned product objects
+  const ownedProducts = useMemo(
+    () => products.filter((p) => ownedIds.has(p.id)),
+    [products, ownedIds]
+  );
+
+  // Stats
+  const totalMarketValue = products.reduce((s, p) => s + Number(p.price || 0), 0);
+  const portfolioValue   = ownedProducts.reduce((s, p) => s + Number(p.price || 0), 0);
+  const avgTrend         = products.length
+    ? products.reduce((s, p) => s + mockTrend(p.id), 0) / products.length
+    : 0;
+
+  const handleAction = (mode, asset) => setModal({ mode, asset });
+  const handleCloseModal = () => setModal(null);
+
+  return (
+    <div>
+      {/* ── Page header ─────────────────────────────────── */}
+      <div className="page-header">
+        <div className="page-header__row">
+          <div>
+            <h1>Client Portal</h1>
+            <p>
+              {products.length} tokenized assets available ·{" "}
+              {ownedProducts.length} in your portfolio
+            </p>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-3)" }}>
+            <div
+              style={{
+                fontSize: 13,
+                color: "var(--text-muted)",
+                background: "var(--bg-white)",
+                border: "1px solid var(--border)",
+                borderRadius: "var(--r-md)",
+                padding: "7px 14px",
+                fontWeight: 500,
+              }}
+            >
+              Wallet: <strong style={{ color: "var(--text-primary)" }}>
+                {fmt(wallet?.balance ?? 0)}
+              </strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Stats strip ─────────────────────────────────── */}
+      <div className="cp-stats">
+        <div className="cp-stat">
+          <div className="cp-stat__label">Total Assets</div>
+          <div className="cp-stat__value">{products.length}</div>
+          <div className="cp-stat__sub neutral">on platform</div>
+        </div>
+        <div className="cp-stat">
+          <div className="cp-stat__label">Market Value</div>
+          <div className="cp-stat__value">{fmt(totalMarketValue)}</div>
+          <div className="cp-stat__sub neutral">cumulative</div>
+        </div>
+        <div className="cp-stat">
+          <div className="cp-stat__label">Portfolio Value</div>
+          <div className="cp-stat__value">{fmt(portfolioValue)}</div>
+          <div className="cp-stat__sub neutral">your holdings</div>
+        </div>
+        <div className="cp-stat">
+          <div className="cp-stat__label">Avg Daily Trend</div>
+          <div className="cp-stat__value">
+            {avgTrend >= 0 ? "+" : ""}
+            {(avgTrend * 100).toFixed(2)}%
+          </div>
+          <div className={`cp-stat__sub ${avgTrend >= 0 ? "up" : "down"}`}>
+            {avgTrend >= 0 ? "↑ Market positive" : "↓ Market negative"}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Tabs ────────────────────────────────────────── */}
+      <div className="cp-tabs">
+        <button
+          className={`cp-tab ${tab === "explore" ? "cp-tab--active" : ""}`}
+          onClick={() => setTab("explore")}
+        >
+          Explore Assets
+          <span
+            style={{
+              marginLeft: 6,
+              fontSize: 11,
+              background: "var(--blue-light)",
+              color: "var(--blue)",
+              borderRadius: "var(--r-full)",
+              padding: "1px 7px",
+              fontWeight: 700,
+            }}
+          >
+            {products.length}
+          </span>
+        </button>
+        <button
+          className={`cp-tab ${tab === "portfolio" ? "cp-tab--active" : ""}`}
+          onClick={() => setTab("portfolio")}
+        >
+          My Portfolio
+          {ownedProducts.length > 0 && (
+            <span
+              style={{
+                marginLeft: 6,
+                fontSize: 11,
+                background: "var(--green-light)",
+                color: "var(--green)",
+                borderRadius: "var(--r-full)",
+                padding: "1px 7px",
+                fontWeight: 700,
+              }}
+            >
+              {ownedProducts.length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* ── Explore tab ─────────────────────────────────── */}
+      {tab === "explore" && (
+        <>
+          {/* Filters */}
+          <div className="cp-filters">
+            <div className="cp-search">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ color: "var(--text-muted)" }}>
+                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                placeholder="Search assets…"
+                value={searchInput}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              {searchInput && (
+                <button
+                  onClick={() => setSearch("")}
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", padding: "2px 4px", fontSize: 13 }}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+            <select
+              className="input"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              style={{ minWidth: 160, width: "auto" }}
+            >
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="price-asc">Price: Low → High</option>
+              <option value="price-desc">Price: High → Low</option>
+            </select>
+          </div>
+
+          {/* Category chips */}
+          <div className="cp-cat-strip" style={{ marginBottom: "var(--sp-5)" }}>
+            {CATS.map((c) => (
+              <button
+                key={c}
+                onClick={() => setCat(c)}
+                className={`btn btn-sm ${cat === c ? "btn-primary" : "btn-secondary"}`}
+              >
+                {c !== "All" && CAT_ICONS[c] ? `${CAT_ICONS[c]} ` : ""}
+                {c}
+              </button>
+            ))}
+          </div>
+
+          {/* Error */}
+          {loadError && (
+            <div
+              style={{
+                background: "var(--red-light)",
+                border: "1px solid rgba(224,1,11,0.18)",
+                borderRadius: "var(--r-md)",
+                padding: "12px 16px",
+                color: "var(--red)",
+                fontSize: 14,
+                marginBottom: "var(--sp-5)",
+              }}
+            >
+              {loadError}
+            </div>
+          )}
+
+          {/* Loading */}
+          {loading ? (
+            <div className="content-card">
+              <LoadingSkeleton rows={3} />
+            </div>
+          ) : visible.length === 0 ? (
+            <div className="content-card">
+              <div className="cp-empty">
+                <div className="cp-empty__icon">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" strokeWidth="1.8" strokeLinecap="round">
+                    <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                </div>
+                <div className="cp-empty__title">No assets found</div>
+                <div className="cp-empty__sub">
+                  {products.length === 0
+                    ? "There are no tokenized assets listed yet. Check back soon."
+                    : "Try adjusting your search or category filter."}
+                </div>
+                {(searchInput || cat !== "All") && (
+                  <button className="btn btn-secondary btn-sm" onClick={() => { setSearch(""); setCat("All"); }}>
+                    Clear filters
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="cp-grid">
+              {visible.map((p) => (
+                <TokenCard
+                  key={p.id}
+                  product={p}
+                  owned={ownedIds.has(p.id)}
+                  onAction={handleAction}
+                />
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ── Portfolio tab ────────────────────────────────── */}
+      {tab === "portfolio" && (
+        loading ? (
+          <div className="content-card"><LoadingSkeleton rows={4} /></div>
+        ) : (
+          <PortfolioTab ownedProducts={ownedProducts} allProducts={products} />
+        )
+      )}
+
+      {/* ── Trade modal ──────────────────────────────────── */}
+      {modal && (
+        <TradeModal
+          mode={modal.mode}
+          asset={modal.asset}
+          onClose={handleCloseModal}
+        />
+      )}
+    </div>
+  );
+}

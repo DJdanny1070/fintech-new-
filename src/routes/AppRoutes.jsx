@@ -6,7 +6,6 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
-import RoleSelect from "../pages/RoleSelect";
 import Dashboard from "../pages/Dashboard";
 import Marketplace from "../pages/Marketplace";
 import Wallet from "../pages/Wallet";
@@ -46,8 +45,8 @@ function AppRoutes() {
 
           {/* Auth Routes */}
           <Route path="/login" element={<Login />} />
+          {/* /register shows a closed-access notice — no self-registration form */}
           <Route path="/register" element={<Register />} />
-          <Route path="/choose-role" element={<RoleSelect />} />
 
           {/* Static / Informational Routes */}
           <Route path="/about" element={<AboutUs />} />
@@ -76,6 +75,7 @@ function AppRoutes() {
           >
             <Route index element={<Dashboard />} />
             <Route path="marketplace" element={<Marketplace />} />
+            <Route path="marketplace/product/:id" element={<ProductDetails />} />
             <Route path="wallet" element={<Wallet />} />
             <Route path="blockchain" element={<BlockchainPage />} />
             <Route path="analytics" element={<Analytics />} />
@@ -83,9 +83,7 @@ function AppRoutes() {
             <Route path="profile" element={<Profile />} />
           </Route>
  
-          {/* Public product details route */}
-          <Route path="/marketplace/product/:id" element={<ProductDetails />} />
-          <Route path="/marketplace/:id" element={<ProductDetails />} />
+          {/* Legacy public product URLs — redirect to protected dashboard route */}
         </Routes>
         </ToastProvider>
       </AuthProvider>
