@@ -37,9 +37,23 @@ export async function getProducts({ search = "", category = "" } = {}) {
  * Create a new product and fire a blockchain hash for the asset listing event.
  */
 export async function createProduct(productData) {
-  const { data, error } = await supabase
+  //Default pricing values for future dynamic pricing
+  const defaultPricing = {
+    current_price: productData.price ?? 0,
+    previous_price: productData.price ?? 0,
+    daily_change: 0,
+    daily_change_percent: 0,
+    price_history: [],
+    last_price_update: new Date().toISOString(),};
+
+  const payload = {
+    ...productData,
+    ...defaultPricing,
+  };
+
+    const { data, error } = await supabase
     .from("products")
-    .insert([productData])
+    .insert([payload])
     .select()
     .single();
 
@@ -366,3 +380,53 @@ export async function getRelatedProducts(category, excludeId) {
   if (error) throw error;
   return data ?? [];
 }
+
+export function calculatePriceChange(currentPrice, previousPrice) {
+  const current = Number(current || 0);
+  const previous = Number(previous || 0);
+
+  const change = current - previous;
+  const percent = previous === 0 ? 0 : (change / previous) * 100;
+  let trend = "stable";
+
+  if (change > 0) trend = "up";
+  else if (change < 0) trend = "down";
+
+  return {
+    daily_change: Number(change.toFixed(2)),
+    daily_change_percent: Number(percent.toFixed(2)),
+    trend,
+  };
+}
+
+export async function updateTokenPrice(productId, newPrice) {
+  const product = await getProduct(productId);
+  if (!product) throw new Error("Product not found.");
+
+  const pricing = calculatePriceChange(newPrice, product.current_price);
+
+  return updateProduct(productId, {
+    current_price: newPrice,
+    previous_price: product.current_price,
+    daily_change: pricing.daily_change,
+    daily_change_percent: pricing.daily_change_percent,
+    trend: pricing.trend,
+    last_price_update: new Date().toISOString(),
+  });
+}
+
+export async function getPriceHistory(productId) {
+  const product = await getProduct(productId);
+
+  return product?.price_history ?? []; }
+
+export async function getMarketplaceSummary(){
+  const products = await getProducts();
+
+  return{
+    totalAssets: products.length,
+    totalMarketValue: products.reduce((sum,product) => sum + Number(product.current_price || 0), 0),
+  
+  };
+}
+

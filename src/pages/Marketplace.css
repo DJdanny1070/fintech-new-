@@ -159,44 +159,312 @@
   color: var(--amber);
 }
 
-/* Sparkline mini chart */
+/* ── Sparkline ──────────────────────────────────────────────────── */
+.cp-sparkline-wrap {
+  position: relative;
+}
 .cp-sparkline {
   width: 100%;
   height: 44px;
 }
-
-/* Price row */
-.cp-price-row {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--sp-3);
+.cp-sparkline__ts {
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  font-size: 10px;
+  color: var(--text-subtle);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  background: rgba(255,255,255,0.75);
+  padding: 1px 4px;
+  border-radius: 3px;
 }
+
+/* ── Price block (Current Price + Daily Change + % + Trend) ──────── */
+.cp-price-block {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-2);
+}
+.cp-price-block__left {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cp-price-block__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
 .cp-price {
   font-size: 20px;
   font-weight: 800;
   letter-spacing: -0.03em;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
+  line-height: 1.2;
 }
 .cp-price__label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.cp-price__open {
   font-size: 11px;
   color: var(--text-muted);
-  font-weight: 500;
-  margin-bottom: 2px;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
 }
+
+.cp-price-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+/* Daily change label below % badge */
+.cp-daily-change {
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.cp-daily-change--up { color: var(--green); }
+.cp-daily-change--down { color: var(--red); }
+.cp-daily-change--neutral { color: var(--text-muted); }
+
+.cp-percent-change {
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.cp-percent-change--up { color: var(--green); }
+.cp-percent-change--down { color: var(--red); }
+.cp-percent-change--neutral { color: var(--text-muted); }
+
+.cp-trend-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--r-full);
+}
+.cp-trend-badge--up {
+  background: var(--green-light);
+  color: var(--green);
+}
+.cp-trend-badge--down {
+  background: var(--red-light);
+  color: var(--red);
+}
+.cp-trend-badge--stable {
+  background: var(--bg-section);
+  color: var(--text-muted);
+}
+
+.cp-last-updated {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.cp-last-updated__value {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.cp-price-updating {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* Trend badges */
 .cp-trend {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
-  padding: 3px 10px;
+  padding: 3px 9px;
   border-radius: var(--r-full);
 }
 .cp-trend--up   { background: var(--green-light); color: var(--green); }
 .cp-trend--down { background: var(--red-light);   color: var(--red); }
 .cp-trend--flat { background: var(--bg-section);  color: var(--text-muted); }
+
+/* Card accent variants */
+.cp-token-card--up::before   { background: linear-gradient(90deg, var(--green) 0%, #4ADE80 100%); }
+.cp-token-card--down::before { background: linear-gradient(90deg, var(--red)   0%, #F87171 100%); }
+
+/* ── Price History Placeholder ──────────────────────────────────── */
+.cp-price-history {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cp-price-history__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.cp-price-history__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.cp-price-history__source-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--amber);
+  background: var(--amber-light);
+  border: 1px solid rgba(217,119,6,0.2);
+  padding: 2px 6px;
+  border-radius: var(--r-full);
+}
+/* Range bar */
+.cp-range-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+}
+.cp-range-bar__val {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.cp-range-bar__low  { color: var(--red);   }
+.cp-range-bar__high { color: var(--green); }
+.cp-range-bar__track {
+  flex: 1;
+  height: 4px;
+  background: linear-gradient(90deg, var(--red-light) 0%, var(--green-light) 100%);
+  border-radius: 999px;
+  position: relative;
+}
+.cp-range-bar__thumb {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--blue);
+  border: 2px solid var(--bg-white);
+  box-shadow: 0 1px 4px rgba(7,90,216,0.3);
+  transition: left 0.4s ease;
+}
+.cp-price-history__vol {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+/* ── Admin Price Panel ──────────────────────────────────────────── */
+.cp-admin-panel {
+  border: 1.5px dashed rgba(7,90,216,0.3);
+  border-radius: var(--r-md);
+  padding: 10px 12px;
+  background: var(--blue-light);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cp-admin-panel__badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--blue);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.cp-admin-panel__form {
+  display: flex;
+  gap: var(--sp-2);
+  align-items: center;
+}
+.cp-admin-panel__input {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  padding: 6px 10px;
+}
+.cp-admin-panel__note {
+  font-size: 10px;
+  color: var(--blue-dark);
+  line-height: 1.5;
+  opacity: 0.7;
+}
+
+/* ── Feed status badge ──────────────────────────────────────────── */
+.cp-feed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 5px 10px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+.cp-feed-badge--live {
+  background: var(--green-light);
+  color: var(--green);
+  border-color: rgba(22,163,74,0.3);
+}
+.cp-feed-badge--mock {
+  background: var(--amber-light);
+  color: var(--amber);
+  border-color: rgba(217,119,6,0.25);
+}
+.cp-feed-badge__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.cp-feed-badge--live .cp-feed-badge__dot {
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+.cp-feed-badge__ts {
+  font-weight: 500;
+  opacity: 0.8;
+  margin-left: 2px;
+  letter-spacing: 0;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.7); }
+}
 
 /* Ownership bar */
 .cp-ownership {
@@ -344,6 +612,8 @@
   font-size: 13px;
   color: var(--text-muted);
 }
+.cp-portfolio-muted.green { color: var(--green); }
+.cp-portfolio-muted.red   { color: var(--red); }
 
 /* Summary card (right side of portfolio) */
 .cp-summary-card {
@@ -532,6 +802,10 @@
   width: 100%;
 }
 .cp-search input::placeholder { color: var(--text-subtle); }
+.cp-sort-select {
+  min-width: 180px;
+  width: auto;
+}
 .cp-cat-strip {
   display: flex;
   gap: var(--sp-2);
@@ -571,6 +845,8 @@
 @media (max-width: 640px)  {
   .cp-grid { grid-template-columns: 1fr; }
   .cp-stats { grid-template-columns: 1fr 1fr; }
+  .cp-filters { align-items: stretch; }
+  .cp-sort-select { min-width: 100%; }
 }
 @media (max-width: 440px)  {
   .cp-stats { grid-template-columns: 1fr; }

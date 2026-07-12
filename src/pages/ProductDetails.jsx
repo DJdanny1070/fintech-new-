@@ -12,6 +12,56 @@ function shortenHash(h) {
   return `${h.slice(0, 8)}...${h.slice(-6)}`;
 }
 
+function formatCurrency(value) {
+  if (value === null || value === undefined || value === "") return "—";
+  const numericValue = Number(value);
+  if (Number.isNaN(numericValue)) return "—";
+  return `₹${numericValue.toLocaleString("en-IN")}`;
+}
+
+function formatSignedCurrency(value) {
+  if (value === null || value === undefined || value === "") return "—";
+  const numericValue = Number(value);
+  if (Number.isNaN(numericValue)) return "—";
+  const prefix = numericValue > 0 ? "+" : numericValue < 0 ? "−" : "";
+  return `${prefix}₹${Math.abs(numericValue).toLocaleString("en-IN")}`;
+}
+
+function formatPercentChange(value) {
+  if (value === null || value === undefined || value === "") return "—";
+  const numericValue = Number(value);
+  if (Number.isNaN(numericValue)) return "—";
+  const prefix = numericValue > 0 ? "+" : numericValue < 0 ? "−" : "";
+  return `${prefix}${Math.abs(numericValue).toFixed(2)}%`;
+}
+
+function formatTrendLabel(trend) {
+  if (trend === "up") return "Trending Up";
+  if (trend === "down") return "Trending Down";
+  return "Stable";
+}
+
+function formatLastUpdated(value) {
+  if (!value) return "Recently";
+  const time = new Date(value).getTime();
+  if (Number.isNaN(time)) return "Recently";
+  const diffMs = Date.now() - time;
+  const mins = Math.floor(diffMs / 60_000);
+  if (mins < 60) return mins <= 1 ? "just now" : `${mins} min ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return hours === 1 ? "1 hour ago" : `${hours} hours ago`;
+  return "Today";
+}
+
+function MarketMetric({ label, value, valueColor = "var(--text-primary)" }) {
+  return (
+    <div style={{ padding: "10px 12px", border: "1px solid var(--border)", borderRadius: 8, background: "var(--bg-white)" }}>
+      <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-muted)", marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 13, fontWeight: 700, color: valueColor }}>{value}</div>
+    </div>
+  );
+}
+
 function ProductDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -126,6 +176,19 @@ function ProductDetails() {
 
   const isSeller = Boolean(user && product.seller_id === user.id);
   const canBuy = Boolean(user) && !isSeller;
+  const currentPrice = product.current_price ?? product.price ?? null;
+  const previousPrice = product.previous_price ?? product.current_price ?? product.price ?? null;
+  const dailyChange = product.daily_change ?? null;
+  const dailyChangePercent = product.daily_change_percent ?? null;
+  const trend = product.trend ?? "stable";
+  const lastPriceUpdate = product.last_price_update ?? product.last_updated ?? null;
+  const hasPricingData = [currentPrice, previousPrice, dailyChange, dailyChangePercent, trend, lastPriceUpdate].some((value) => value !== null && value !== undefined && value !== "");
+  const priceTone = trend === "up" ? "#16a34a" : trend === "down" ? "#dc2626" : "var(--text-muted)";
+  const dailyTone = dailyChange > 0 ? "#16a34a" : dailyChange < 0 ? "#dc2626" : "var(--text-muted)";
+  const percentTone = dailyChangePercent > 0 ? "#16a34a" : dailyChangePercent < 0 ? "#dc2626" : "var(--text-muted)";
+  const trendLabel = trend === "up" ? "Trending Up" : trend === "down" ? "Trending Down" : "Stable";
+  const verificationState = product.blockchain_hash ? "Verified" : "Pending";
+  const tokenAvailability = product.quantity ?? product.available_units ?? product.availability ?? "Available";
 
   return (
     <div>
@@ -157,9 +220,51 @@ function ProductDetails() {
               <div style={{fontSize:13}}>Image not available</div>
             </div>
           )}
-          <div style={{marginTop:12,display:"flex",gap:8,alignItems:"center"}}>
-            <div style={{fontWeight:700,fontFamily:"monospace"}}>{product.price ? `₹${Number(product.price).toLocaleString('en-IN')}` : '—'}</div>
-            <div style={{marginLeft:"auto",fontSize:13,color:"var(--text-muted)"}}>{new Date(product.created_at).toLocaleString()}</div>
+          <div style={{marginTop:12, display:"flex", flexDirection:"column", gap:10}}>
+            <div style={{padding:"12px 14px", border:"1px solid var(--border)", borderRadius:10, background:"var(--bg)"}}>
+              <div style={{fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.06em", color:"var(--text-muted)", marginBottom:4}}>Current Price</div>
+              {hasPricingData ? (
+                <>
+                  <div style={{fontSize:24, fontWeight:800, color:priceTone}}>{formatCurrency(currentPrice)}</div>
+                  <div style={{marginTop:8, display:"grid", gap:8}}>
+                    <MarketMetric label="Previous Price" value={formatCurrency(previousPrice)} />
+                    <div style={{display:"grid", gridTemplateColumns:"repeat(2, minmax(0, 1fr))", gap:8}}>
+                      <MarketMetric label="Daily Change" value={formatSignedCurrency(dailyChange)} valueColor={dailyTone} />
+                      <MarketMetric label="Percentage Change" value={formatPercentChange(dailyChangePercent)} valueColor={percentTone} />
+                    </div>
+                    <MarketMetric label="Trend" value={trendLabel} valueColor={priceTone} />
+                  </div>
+                </>
+              ) : (
+                <div style={{fontSize:14, color:"var(--text-muted)", lineHeight:1.6}}>Price information is currently unavailable.</div>
+              )}
+            </div>
+
+            <div style={{padding:"12px 14px", border:"1px solid var(--border)", borderRadius:10, background:"var(--bg)"}}>
+              <div style={{fontWeight:700, marginBottom:8}}>Price History</div>
+              <div style={{color:"var(--text-muted)", fontSize:13, lineHeight:1.6}}>Historical token pricing will be available in a future update.</div>
+              <div style={{color:"var(--text-muted)", fontSize:13, lineHeight:1.6, marginTop:4}}>Live market analytics coming soon.</div>
+              <div style={{marginTop:12, display:"flex", alignItems:"flex-end", gap:6, height:44}}>
+                {[28, 40, 34, 52, 44].map((height, index) => (
+                  <div key={index} style={{flex:1, height:`${height}px`, borderRadius:4, background:index % 2 === 0 ? "var(--blue-light)" : "var(--border)"}} />
+                ))}
+              </div>
+            </div>
+
+            <div style={{padding:"12px 14px", border:"1px solid var(--border)", borderRadius:10, background:"var(--bg)"}}>
+              <div style={{fontWeight:700, marginBottom:10}}>Market Statistics</div>
+              <div style={{display:"grid", gridTemplateColumns:"repeat(2, minmax(0, 1fr))", gap:8}}>
+                <MarketMetric label="Last Price Update" value={formatLastUpdated(lastPriceUpdate)} />
+                <MarketMetric label="Current Trend" value={trendLabel} valueColor={priceTone} />
+                <MarketMetric label="Blockchain Verification" value={verificationState} valueColor={product.blockchain_hash ? "#16a34a" : "var(--text-muted)"} />
+                <MarketMetric label="Token Availability" value={tokenAvailability} />
+              </div>
+            </div>
+
+            <div style={{padding:"12px 14px", border:"1px solid var(--border)", borderRadius:10, background:"var(--bg)"}}>
+              <div style={{fontWeight:700, marginBottom:6}}>Price Management</div>
+              <div style={{color:"var(--text-muted)", fontSize:13, lineHeight:1.6}}>Token prices are maintained by authorized CresoX administrators and will automatically reflect future market integrations.</div>
+            </div>
           </div>
         </div>
 
@@ -206,3 +311,4 @@ function ProductDetails() {
 }
 
 export default ProductDetails;
+

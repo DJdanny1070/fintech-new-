@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../components/common/ToastProvider";
 import { getProducts, getMyOrders } from "../services/productService";
+import { usePricing } from "../hooks/usePricing";
 import LoadingSkeleton from "../components/common/LoadingSkeleton";
 import "./Marketplace.css";
 import "./Dashboard.css";
@@ -27,40 +28,46 @@ const CAT_ICONS = {
   "Other":              "📦",
 };
 
-// Deterministic mock daily trend per product id (seed via id chars)
-function mockTrend(id = "") {
-  const seed = id.charCodeAt(0) + (id.charCodeAt(1) || 0);
-  const pct = ((seed % 19) - 8) / 10; // range -0.8% to +1.0%
-  return pct;
-}
+// ─── Sparkline (driven by live PriceRecord.priceHistory) ─────────────────────
 
-// Micro sparkline — 12-point mock data seeded from id
-function Sparkline({ id = "", trend = 0 }) {
-  const seed = (id.charCodeAt(0) || 50) + (id.charCodeAt(2) || 30);
-  const pts = Array.from({ length: 12 }, (_, i) => {
-    const base = 50 + Math.sin((seed + i) * 0.8) * 15;
-    return base + i * trend * 3;
-  });
+/**
+ * Renders a mini sparkline from a priceHistory array.
+ * Falls back to deterministic seed data while prices are loading.
+ *
+ * @param {{ history: number[], trend: 'up'|'down'|'flat', id: string }} props
+ */
+function Sparkline({ history, trend = "flat", id = "" }) {
+  // Fallback: generate 30-point seed data when history not yet available
+  const pts = useMemo(() => {
+    if (history && history.length >= 2) return history;
+    const seed = (id.charCodeAt(0) || 50) + (id.charCodeAt(2) || 30);
+    return Array.from({ length: 30 }, (_, i) => {
+      const base = 50 + Math.sin((seed + i) * 0.8) * 15;
+      return base + i * (trend === "up" ? 0.3 : trend === "down" ? -0.3 : 0);
+    });
+  }, [history, id, trend]);
+
   const W = 200, H = 44;
   const min = Math.min(...pts);
   const max = Math.max(...pts) - min || 1;
   const coords = pts
     .map((v, i) => `${(i / (pts.length - 1)) * W},${H - 4 - ((v - min) / max) * (H - 8)}`)
     .join(" ");
-  const area = `0,${H} ` + coords + ` ${W},${H}`;
+
   const upColor = "#16A34A";
   const downColor = "#E0010B";
-  const color = trend >= 0 ? upColor : downColor;
+  const flatColor = "#6B7280";
+  const color = trend === "up" ? upColor : trend === "down" ? downColor : flatColor;
 
   return (
-    <svg className="cp-sparkline" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+    <svg className="cp-sparkline" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-label="Price trend chart">
       <defs>
         <linearGradient id={`sg-${id}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.15" />
+          <stop offset="0%" stopColor={color} stopOpacity="0.18" />
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
-      <polygon points={area} fill={`url(#sg-${id})`} />
+      <polygon points={`0,${H} ` + coords + ` ${W},${H}`} fill={`url(#sg-${id})`} />
       <polyline
         points={coords}
         fill="none"
@@ -70,6 +77,108 @@ function Sparkline({ id = "", trend = 0 }) {
         strokeLinejoin="round"
       />
     </svg>
+  );
+}
+
+// ─── Price History Placeholder ────────────────────────────────────────────────
+/**
+ * Displays the 24h high/low range bar and volume.
+ * Placeholder panel — connects to real OHLCV data when market feed is live.
+ *
+ * @param {{ record: object }} props
+ */
+function PriceHistoryPanel({ record }) {
+  if (!record) return null;
+  const range = record.high24h - record.low24h;
+  const pos =
+    range > 0
+      ? ((record.currentPrice - record.low24h) / range) * 100
+      : 50;
+
+  return (
+    <div className="cp-price-history">
+      <div className="cp-price-history__header">
+        <span className="cp-price-history__label">24h Range</span>
+        {/* TODO (live): replace label with real data-source tag */}
+        <span className="cp-price-history__source-badge">MOCK DATA</span>
+      </div>
+
+      {/* Range bar */}
+      <div className="cp-range-bar">
+        <span className="cp-range-bar__val cp-range-bar__low">{fmt(record.low24h)}</span>
+        <div className="cp-range-bar__track">
+          <div
+            className="cp-range-bar__thumb"
+            style={{ left: `${Math.min(Math.max(pos, 2), 98)}%` }}
+          />
+        </div>
+        <span className="cp-range-bar__val cp-range-bar__high">{fmt(record.high24h)}</span>
+      </div>
+
+      {/* Volume */}
+      <div className="cp-price-history__vol">
+        <span style={{ color: "var(--text-muted)" }}>24h Vol</span>
+        <span style={{ fontWeight: 700 }}>{record.volume24h?.toLocaleString("en-IN")} units</span>
+      </div>
+    </div>
+  );
+}
+
+// ─── Admin Update Placeholder ─────────────────────────────────────────────────
+/**
+ * Inline admin panel for overriding a token price.
+ * Visible only when `adminMode` prop is true.
+ * Placeholder wired to `onAdminSave(productId, newPrice)`.
+ *
+ * TODO (admin): gate this behind role check (role === 'admin') and
+ * replace onAdminSave with a real API call via priceService.adminOverridePrice.
+ *
+ * @param {{ productId: string, currentPrice: number, onAdminSave: Function }} props
+ */
+function AdminPricePanel({ productId, currentPrice, onAdminSave }) {
+  const [draft, setDraft] = useState("");
+  const [saving, setSaving] = useState(false);
+  const toast = useToast();
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    const val = parseFloat(draft);
+    if (!val || val <= 0) { toast.error("Enter a valid price."); return; }
+    setSaving(true);
+    // TODO (live): replace with: await pricingAPI.overridePrice(productId, val);
+    onAdminSave(productId, val);
+    toast.info(`Price updated to ${fmt(val)} (mock only)`);
+    setDraft("");
+    setSaving(false);
+  };
+
+  return (
+    <div className="cp-admin-panel">
+      <div className="cp-admin-panel__badge">⚙ Admin Override</div>
+      <form className="cp-admin-panel__form" onSubmit={handleSave}>
+        <input
+          className="input cp-admin-panel__input"
+          type="number"
+          min="1"
+          step="1"
+          placeholder={`Current: ${fmt(currentPrice)}`}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+        />
+        <button
+          type="submit"
+          className="btn btn-primary btn-sm"
+          disabled={saving || !draft}
+          style={{ whiteSpace: "nowrap" }}
+        >
+          {saving ? "Saving…" : "Set Price"}
+        </button>
+      </form>
+      <p className="cp-admin-panel__note">
+        {/* TODO (live): Remove this note when connected to real price feed */}
+        Changes apply locally until market data integration is complete.
+      </p>
+    </div>
   );
 }
 
@@ -135,7 +244,92 @@ function DonutChart({ slices }) {
 
 // Format INR
 function fmt(n) {
-  return "₹" + Number(n || 0).toLocaleString("en-IN");
+  if (n === null || n === undefined || n === "") return "Price Updating...";
+  const numericValue = Number(n);
+  if (Number.isNaN(numericValue)) return "Price Updating...";
+  return "₹" + numericValue.toLocaleString("en-IN");
+}
+
+function getNumericValue(value) {
+  if (value === null || value === undefined || value === "") return null;
+  return Number(value);
+}
+
+function getChangeTone(value) {
+  const numericValue = getNumericValue(value);
+  if (numericValue === null) return "neutral";
+  if (numericValue > 0) return "up";
+  if (numericValue < 0) return "down";
+  return "neutral";
+}
+
+function formatSignedCurrency(value) {
+  const numericValue = getNumericValue(value);
+  if (numericValue === null) return "Price Updating...";
+  if (numericValue > 0) return `+₹${Math.abs(numericValue).toLocaleString("en-IN")}`;
+  if (numericValue < 0) return `-₹${Math.abs(numericValue).toLocaleString("en-IN")}`;
+  return "₹0";
+}
+
+function formatPercentChange(value) {
+  const numericValue = getNumericValue(value);
+  if (numericValue === null) return "Price Updating...";
+  if (numericValue > 0) return `(+${Math.abs(numericValue).toFixed(2)}%)`;
+  if (numericValue < 0) return `(-${Math.abs(numericValue).toFixed(2)}%)`;
+  return "(0.00%)";
+}
+
+function normalizeTrend(trendValue) {
+  if (trendValue === "up") return "up";
+  if (trendValue === "down") return "down";
+  return "stable";
+}
+
+function getTrendBadge(trendValue) {
+  const normalizedTrend = normalizeTrend(trendValue);
+  if (normalizedTrend === "up") {
+    return { label: "▲ Trending Up", className: "cp-trend-badge--up" };
+  }
+  if (normalizedTrend === "down") {
+    return { label: "▼ Trending Down", className: "cp-trend-badge--down" };
+  }
+  return { label: "▬ Stable", className: "cp-trend-badge--stable" };
+}
+
+function formatLastUpdated(value) {
+  if (!value) return "Today";
+  const time = new Date(value).getTime();
+  if (Number.isNaN(time)) return "Today";
+  const diffMs = Date.now() - time;
+  const mins = Math.floor(diffMs / 60_000);
+  if (mins < 60) {
+    if (mins <= 1) return "Just now";
+    return `${mins} min ago`;
+  }
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) {
+    return hours === 1 ? "1 hour ago" : `${hours} hours ago`;
+  }
+  return "Today";
+}
+
+function getProductPriceValue(product, priceRecord) {
+  const productPrice = getNumericValue(product?.current_price ?? product?.price ?? null);
+  if (productPrice !== null) return productPrice;
+  return getNumericValue(priceRecord?.currentPrice ?? null);
+}
+
+function getProductTrendSnapshot(product, priceRecord) {
+  const dailyChange = getNumericValue(product?.daily_change ?? priceRecord?.dailyChange ?? null);
+  const dailyChangePercent = getNumericValue(product?.daily_change_percent ?? priceRecord?.pctChange ?? null);
+  const trend = normalizeTrend(product?.trend ?? priceRecord?.trend ?? "stable");
+  return { dailyChange, dailyChangePercent, trend };
+}
+
+function getTrendSortRank(trend) {
+  if (trend === "up") return 0;
+  if (trend === "stable") return 1;
+  return 2;
 }
 
 // ─── Trade Modal ─────────────────────────────────────────────────────────────
@@ -179,14 +373,16 @@ const MODAL_CONFIGS = {
   },
 };
 
-function TradeModal({ mode, asset, onClose }) {
+function TradeModal({ mode, asset, priceRecord, onClose }) {
   const { wallet } = useAuth();
   const toast = useToast();
   const cfg = MODAL_CONFIGS[mode];
   const [qty, setQty] = useState("1");
   const [recipient, setRecipient] = useState("");
-  const trend = mockTrend(asset?.id);
-  const price = Number(asset?.price || 0);
+  // Use live price if available, fall back to DB listed price
+  const price = priceRecord?.currentPrice ?? Number(asset?.price || 0);
+  const trend = priceRecord?.trend ?? "flat";
+  const pctChange = priceRecord?.pctChange ?? 0;
   const total = price * (parseInt(qty) || 0);
   const balance = wallet?.balance ?? 0;
 
@@ -235,10 +431,12 @@ function TradeModal({ mode, asset, onClose }) {
                   Token price: {fmt(price)} · {asset?.category}
                 </div>
               </div>
-              {trend >= 0 ? (
-                <div className="cp-trend cp-trend--up">+{(trend * 100).toFixed(2)}%</div>
+              {trend === "up" ? (
+                <div className="cp-trend cp-trend--up">+{pctChange.toFixed(2)}%</div>
+              ) : trend === "down" ? (
+                <div className="cp-trend cp-trend--down">{pctChange.toFixed(2)}%</div>
               ) : (
-                <div className="cp-trend cp-trend--down">{(trend * 100).toFixed(2)}%</div>
+                <div className="cp-trend cp-trend--flat">±0.00%</div>
               )}
             </div>
 
@@ -325,10 +523,36 @@ function TradeModal({ mode, asset, onClose }) {
 
 // ─── Token card ──────────────────────────────────────────────────────────────
 
-function TokenCard({ product, owned, onAction }) {
-  const trend = mockTrend(product.id);
-  const price = Number(product.price || 0);
+/**
+ * @param {{
+ *   product: object,
+ *   owned: boolean,
+ *   priceRecord: object|null,
+ *   adminMode: boolean,
+ *   onAction: Function,
+ *   onAdminSave: Function,
+ * }} props
+ */
+function TokenCard({ product, owned, priceRecord, adminMode = false, onAction, onAdminSave }) {
   const isVerified = Boolean(product.blockchain_hash);
+
+  // ── Price data — prefer backend pricing fields and fall back to the existing UI price record ──────────
+  const listedPrice = product?.price != null && product?.price !== "" ? Number(product.price) : null;
+  const currentPriceValue = product?.current_price != null && product?.current_price !== ""
+    ? Number(product.current_price)
+    : listedPrice ?? priceRecord?.currentPrice ?? null;
+  const currentPrice = currentPriceValue != null ? currentPriceValue : null;
+  const dailyChange = getNumericValue(product?.daily_change ?? priceRecord?.dailyChange);
+  const pctChange = getNumericValue(product?.daily_change_percent ?? priceRecord?.pctChange);
+  const trendValue = product?.trend ?? priceRecord?.trend ?? "stable";
+  const trend = normalizeTrend(trendValue);
+  const priceHistory = product?.price_history ?? priceRecord?.priceHistory ?? [];
+  const lastUpdated = product?.last_price_update ?? priceRecord?.lastUpdated ?? null;
+  const changeToneClass = `cp-daily-change--${getChangeTone(dailyChange)}`;
+  const percentToneClass = `cp-percent-change--${getChangeTone(pctChange)}`;
+  const trendBadge = getTrendBadge(trend);
+  const hasAnyPricing = currentPrice != null || dailyChange != null || pctChange != null || lastUpdated != null || trendValue != null;
+  // ─────────────────────────────────────────────────────────────────────────
 
   // Deterministic ownership pct (mock, seed from id)
   const ownershipPct = owned
@@ -336,8 +560,9 @@ function TokenCard({ product, owned, onAction }) {
     : 0;
 
   return (
-    <div className="cp-token-card">
-      {/* Head */}
+    <div className={`cp-token-card ${trend === "up" ? "cp-token-card--up" : trend === "down" ? "cp-token-card--down" : ""}`}>
+
+      {/* ── Head ── */}
       <div className="cp-token-card__head">
         <div className="cp-token-icon">
           {product.image_url ? (
@@ -350,40 +575,54 @@ function TokenCard({ product, owned, onAction }) {
           <div className="cp-token-card__name" title={product.title}>{product.title}</div>
           <div className="cp-token-card__category">{product.category || "Other"}</div>
         </div>
-        <div
-          className={`cp-token-badge ${isVerified ? "cp-token-badge--verified" : "cp-token-badge--pending"}`}
-        >
+        <div className={`cp-token-badge ${isVerified ? "cp-token-badge--verified" : "cp-token-badge--pending"}`}>
           {isVerified ? "✔ On-chain" : "⏳ Pending"}
         </div>
       </div>
 
-      {/* Sparkline */}
-      <Sparkline id={product.id} trend={trend} />
-
-      {/* Price + trend */}
-      <div className="cp-price-row">
-        <div>
-          <div className="cp-price__label">Token Price</div>
-          <div className="cp-price">{fmt(price)}</div>
-        </div>
-        {trend >= 0 ? (
-          <div className="cp-trend cp-trend--up">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-              <polyline points="18 15 12 9 6 15" />
-            </svg>
-            +{(trend * 100).toFixed(2)}% today
-          </div>
-        ) : (
-          <div className="cp-trend cp-trend--down">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-            {(trend * 100).toFixed(2)}% today
-          </div>
+      {/* ── Sparkline (price history) ── */}
+      <div className="cp-sparkline-wrap">
+        <Sparkline history={priceHistory} trend={trend} id={product.id} />
+        {lastUpdated && (
+          <span className="cp-sparkline__ts">
+            {new Date(lastUpdated).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+          </span>
         )}
       </div>
 
-      {/* Ownership */}
+      {/* ── Current Price / change / trend / last updated ── */}
+      <div className="cp-price-block">
+        <div className="cp-price-block__left">
+          {hasAnyPricing ? (
+            <>
+              <div className="cp-price__label">Current Price</div>
+              <div className="cp-price">{currentPrice != null ? fmt(currentPrice) : "Price Updating..."}</div>
+              <div className="cp-price-meta">
+                <div className={`cp-daily-change ${changeToneClass}`}>
+                  {formatSignedCurrency(dailyChange)}
+                </div>
+                <div className={`cp-percent-change ${percentToneClass}`}>
+                  {formatPercentChange(pctChange)}
+                </div>
+              </div>
+              <div className={`cp-trend-badge ${trendBadge.className}`}>
+                {trendBadge.label}
+              </div>
+              <div className="cp-last-updated">
+                <span className="cp-last-updated__label">Last Updated</span>
+                <span className="cp-last-updated__value">{formatLastUpdated(lastUpdated)}</span>
+              </div>
+            </>
+          ) : (
+            <div className="cp-price-updating">Price Updating...</div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Price History Placeholder ── */}
+      <PriceHistoryPanel record={priceRecord} />
+
+      {/* ── Ownership bar ── */}
       <div className="cp-ownership">
         <div className="cp-ownership__row">
           <span>Your ownership</span>
@@ -392,19 +631,22 @@ function TokenCard({ product, owned, onAction }) {
           </span>
         </div>
         <div className="cp-ownership__bar">
-          <div
-            className="cp-ownership__fill"
-            style={{ width: `${ownershipPct}%` }}
-          />
+          <div className="cp-ownership__fill" style={{ width: `${ownershipPct}%` }} />
         </div>
       </div>
 
-      {/* Actions */}
+      {/* ── Admin Update Placeholder ── */}
+      {adminMode && (
+        <AdminPricePanel
+          productId={product.id}
+          currentPrice={currentPrice}
+          onAdminSave={onAdminSave}
+        />
+      )}
+
+      {/* ── Actions ── */}
       <div className="cp-actions">
-        <button
-          className="cp-action-btn cp-action-btn--buy"
-          onClick={() => onAction("buy", product)}
-        >
+        <button className="cp-action-btn cp-action-btn--buy" onClick={() => onAction("buy", product)}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
             <polyline points="17 6 23 6 23 12" />
@@ -444,11 +686,15 @@ function TokenCard({ product, owned, onAction }) {
 
 // ─── Portfolio tab ────────────────────────────────────────────────────────────
 
-function PortfolioTab({ ownedProducts, allProducts }) {
-  const totalValue = ownedProducts.reduce((s, p) => s + Number(p.price || 0), 0);
+// eslint-disable-next-line no-unused-vars
+function PortfolioTab({ ownedProducts, allProducts, priceFor }) {
+  const totalValue = ownedProducts.reduce((s, p) => {
+    const rec = priceFor(p.id);
+    return s + (rec?.currentPrice ?? Number(p.price || 0));
+  }, 0);
   const unrealizedPnl = ownedProducts.reduce((s, p) => {
-    const trend = mockTrend(p.id);
-    return s + Number(p.price || 0) * trend;
+    const rec = priceFor(p.id);
+    return s + (rec?.dailyChange ?? 0);
   }, 0);
 
   // Category allocation for donut
@@ -499,35 +745,44 @@ function PortfolioTab({ ownedProducts, allProducts }) {
         </div>
         <div className="cp-portfolio-list">
           {ownedProducts.map((p) => {
-            const trend = mockTrend(p.id);
-            const price = Number(p.price || 0);
+            const rec = priceFor(p.id);
+            const currentPrice = rec?.currentPrice ?? Number(p.price || 0);
+            const pctChange    = rec?.pctChange    ?? 0;
+            const trend        = rec?.trend        ?? "flat";
+            const dailyChange  = rec?.dailyChange  ?? 0;
             const ownershipPct = Math.min(100, 5 + ((p.id.charCodeAt(1) || 40) % 30));
             return (
               <div className="cp-portfolio-row" key={p.id}>
                 <div className="cp-portfolio-name">
-                  <div className="cp-portfolio-icon">
-                    {CAT_ICONS[p.category] || "📦"}
-                  </div>
+                  <div className="cp-portfolio-icon">{CAT_ICONS[p.category] || "📦"}</div>
                   <div>
                     <div className="cp-portfolio-title">{p.title}</div>
                     <div className="cp-portfolio-cat">{p.category || "Other"}</div>
                   </div>
                 </div>
-                <div className="cp-portfolio-val">{fmt(price)}</div>
                 <div>
-                  {trend >= 0 ? (
+                  <div className="cp-portfolio-val">{fmt(currentPrice)}</div>
+                  <div className={`cp-portfolio-muted ${trend === "up" ? "green" : trend === "down" ? "red" : ""}`}
+                    style={{ fontSize: 11, marginTop: 2 }}>
+                    {dailyChange >= 0 ? "+" : ""}{fmt(dailyChange)}
+                  </div>
+                </div>
+                <div>
+                  {trend === "up" ? (
                     <span className="cp-trend cp-trend--up" style={{ fontSize: 12 }}>
-                      +{(trend * 100).toFixed(2)}%
+                      +{Math.abs(pctChange).toFixed(2)}%
+                    </span>
+                  ) : trend === "down" ? (
+                    <span className="cp-trend cp-trend--down" style={{ fontSize: 12 }}>
+                      -{Math.abs(pctChange).toFixed(2)}%
                     </span>
                   ) : (
-                    <span className="cp-trend cp-trend--down" style={{ fontSize: 12 }}>
-                      {(trend * 100).toFixed(2)}%
-                    </span>
+                    <span className="cp-trend cp-trend--flat" style={{ fontSize: 12 }}>±0.00%</span>
                   )}
                 </div>
                 <div className="cp-portfolio-muted">{ownershipPct.toFixed(1)}%</div>
                 <div className="cp-portfolio-val" style={{ textAlign: "right" }}>
-                  {fmt(price)}
+                  {fmt(currentPrice)}
                 </div>
               </div>
             );
@@ -605,6 +860,10 @@ export default function Marketplace() {
   // ── Tab state
   const [tab, setTab] = useState("explore"); // 'explore' | 'portfolio'
 
+  // ── Admin mode toggle (placeholder — gate behind role check when ready)
+  // TODO (admin): replace with: const adminMode = user?.role === 'admin';
+  const [adminMode, setAdminMode] = useState(false);
+
   // ── Filters (Explore)
   const [cat, setCat]             = useState("All");
   const [searchInput, setSearch]  = useState("");
@@ -612,12 +871,17 @@ export default function Marketplace() {
 
   // ── Data
   const [products, setProducts]   = useState([]);
-  const [ownedIds, setOwnedIds]   = useState(new Set()); // product IDs the user has bought
+  const [ownedIds, setOwnedIds]   = useState(new Set());
   const [loading, setLoading]     = useState(true);
   const [loadError, setLoadError] = useState("");
 
   // ── Trade modal
   const [modal, setModal] = useState(null); // { mode: 'buy'|'sell'|'transfer', asset }
+
+  const { priceFor, adminSetPrice, isLive, lastTick } = usePricing(
+    products,
+    { enabled: !loading }
+  );
 
   // Debounce search
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -645,7 +909,7 @@ export default function Marketplace() {
           .map((o) => o.product_id)
       );
       setOwnedIds(bought);
-    } catch (err) {
+    } catch (_err) {
       setLoadError("Failed to load market data. Please try again.");
       toast.error("Network error");
     } finally {
@@ -665,14 +929,37 @@ export default function Marketplace() {
         `${p.title} ${p.description || ""} ${p.category || ""}`.toLowerCase().includes(q)
       );
     }
-    switch (sortBy) {
-      case "price-asc":  result.sort((a, b) => (a.price || 0) - (b.price || 0)); break;
-      case "price-desc": result.sort((a, b) => (b.price || 0) - (a.price || 0)); break;
-      case "oldest":     result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at)); break;
-      default:           result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); break;
-    }
+
+    const sortProducts = (left, right) => {
+      const leftPrice = getProductPriceValue(left, priceFor(left.id));
+      const rightPrice = getProductPriceValue(right, priceFor(right.id));
+      const leftSnapshot = getProductTrendSnapshot(left, priceFor(left.id));
+      const rightSnapshot = getProductTrendSnapshot(right, priceFor(right.id));
+
+      switch (sortBy) {
+        case "price-asc":
+          return (leftPrice ?? 0) - (rightPrice ?? 0);
+        case "price-desc":
+          return (rightPrice ?? 0) - (leftPrice ?? 0);
+        case "top-gainers":
+          return (rightSnapshot.dailyChangePercent ?? 0) - (leftSnapshot.dailyChangePercent ?? 0);
+        case "top-losers":
+          return (leftSnapshot.dailyChangePercent ?? 0) - (rightSnapshot.dailyChangePercent ?? 0);
+        case "trending": {
+          const trendRankDelta = getTrendSortRank(leftSnapshot.trend) - getTrendSortRank(rightSnapshot.trend);
+          if (trendRankDelta !== 0) return trendRankDelta;
+          return (rightPrice ?? 0) - (leftPrice ?? 0);
+        }
+        case "oldest":
+          return new Date(left.created_at) - new Date(right.created_at);
+        default:
+          return new Date(right.created_at) - new Date(left.created_at);
+      }
+    };
+
+    result.sort(sortProducts);
     return result;
-  }, [products, cat, debouncedSearch, sortBy]);
+  }, [products, cat, debouncedSearch, sortBy, priceFor]);
 
   // Owned product objects
   const ownedProducts = useMemo(
@@ -680,14 +967,22 @@ export default function Marketplace() {
     [products, ownedIds]
   );
 
-  // Stats
-  const totalMarketValue = products.reduce((s, p) => s + Number(p.price || 0), 0);
-  const portfolioValue   = ownedProducts.reduce((s, p) => s + Number(p.price || 0), 0);
-  const avgTrend         = products.length
-    ? products.reduce((s, p) => s + mockTrend(p.id), 0) / products.length
+  // ── Stats (live prices) ──────────────────────────────────────────────────
+  const totalMarketValue = products.reduce((s, p) => {
+    const rec = priceFor(p.id);
+    return s + (rec?.currentPrice ?? Number(p.price || 0));
+  }, 0);
+
+  const portfolioValue = ownedProducts.reduce((s, p) => {
+    const rec = priceFor(p.id);
+    return s + (rec?.currentPrice ?? Number(p.price || 0));
+  }, 0);
+
+  const avgPctChange = products.length
+    ? products.reduce((s, p) => s + (priceFor(p.id)?.pctChange ?? 0), 0) / products.length
     : 0;
 
-  const handleAction = (mode, asset) => setModal({ mode, asset });
+  const handleAction    = (mode, asset) => setModal({ mode, asset });
   const handleCloseModal = () => setModal(null);
 
   return (
@@ -703,6 +998,26 @@ export default function Marketplace() {
             </p>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-3)" }}>
+            {/* Live / Mock indicator */}
+            <div className={`cp-feed-badge ${isLive ? "cp-feed-badge--live" : "cp-feed-badge--mock"}`}>
+              <span className="cp-feed-badge__dot" />
+              {isLive ? "LIVE" : "MOCK PRICES"}
+              {lastTick && (
+                <span className="cp-feed-badge__ts">
+                  {lastTick.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                </span>
+              )}
+            </div>
+
+            {/* Admin mode toggle – placeholder */}
+            <button
+              className={`btn btn-sm ${adminMode ? "btn-primary" : "btn-secondary"}`}
+              onClick={() => setAdminMode((v) => !v)}
+              title="Toggle admin price override panels"
+            >
+              ⚙ Admin
+            </button>
+
             <div
               style={{
                 fontSize: 13,
@@ -730,9 +1045,9 @@ export default function Marketplace() {
           <div className="cp-stat__sub neutral">on platform</div>
         </div>
         <div className="cp-stat">
-          <div className="cp-stat__label">Market Value</div>
+          <div className="cp-stat__label">Market Cap</div>
           <div className="cp-stat__value">{fmt(totalMarketValue)}</div>
-          <div className="cp-stat__sub neutral">cumulative</div>
+          <div className="cp-stat__sub neutral">live prices</div>
         </div>
         <div className="cp-stat">
           <div className="cp-stat__label">Portfolio Value</div>
@@ -740,13 +1055,13 @@ export default function Marketplace() {
           <div className="cp-stat__sub neutral">your holdings</div>
         </div>
         <div className="cp-stat">
-          <div className="cp-stat__label">Avg Daily Trend</div>
+          <div className="cp-stat__label">Avg Daily Change</div>
           <div className="cp-stat__value">
-            {avgTrend >= 0 ? "+" : ""}
-            {(avgTrend * 100).toFixed(2)}%
+            {avgPctChange >= 0 ? "+" : ""}
+            {avgPctChange.toFixed(2)}%
           </div>
-          <div className={`cp-stat__sub ${avgTrend >= 0 ? "up" : "down"}`}>
-            {avgTrend >= 0 ? "↑ Market positive" : "↓ Market negative"}
+          <div className={`cp-stat__sub ${avgPctChange >= 0 ? "up" : "down"}`}>
+            {avgPctChange >= 0 ? "↑ Market positive" : "↓ Market negative"}
           </div>
         </div>
       </div>
@@ -819,15 +1134,17 @@ export default function Marketplace() {
               )}
             </div>
             <select
-              className="input"
+              className="input cp-sort-select"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              style={{ minWidth: 160, width: "auto" }}
             >
-              <option value="newest">Newest first</option>
-              <option value="oldest">Oldest first</option>
-              <option value="price-asc">Price: Low → High</option>
-              <option value="price-desc">Price: High → Low</option>
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="top-gainers">Top Gainers</option>
+              <option value="top-losers">Top Losers</option>
+              <option value="trending">Trending</option>
             </select>
           </div>
 
@@ -875,14 +1192,14 @@ export default function Marketplace() {
                     <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
                   </svg>
                 </div>
-                <div className="cp-empty__title">No assets found</div>
+                <div className="cp-empty__title">No matching tokenized assets were found.</div>
                 <div className="cp-empty__sub">
                   {products.length === 0
                     ? "There are no tokenized assets listed yet. Check back soon."
-                    : "Try adjusting your search or category filter."}
+                    : "Try changing your search or filter options."}
                 </div>
-                {(searchInput || cat !== "All") && (
-                  <button className="btn btn-secondary btn-sm" onClick={() => { setSearch(""); setCat("All"); }}>
+                {(searchInput || cat !== "All" || sortBy !== "newest") && (
+                  <button className="btn btn-secondary btn-sm" onClick={() => { setSearch(""); setCat("All"); setSortBy("newest"); }}>
                     Clear filters
                   </button>
                 )}
@@ -895,7 +1212,10 @@ export default function Marketplace() {
                   key={p.id}
                   product={p}
                   owned={ownedIds.has(p.id)}
+                  priceRecord={priceFor(p.id)}
+                  adminMode={adminMode}
                   onAction={handleAction}
+                  onAdminSave={adminSetPrice}
                 />
               ))}
             </div>
@@ -908,7 +1228,11 @@ export default function Marketplace() {
         loading ? (
           <div className="content-card"><LoadingSkeleton rows={4} /></div>
         ) : (
-          <PortfolioTab ownedProducts={ownedProducts} allProducts={products} />
+          <PortfolioTab
+            ownedProducts={ownedProducts}
+            allProducts={products}
+            priceFor={priceFor}
+          />
         )
       )}
 
@@ -917,6 +1241,7 @@ export default function Marketplace() {
         <TradeModal
           mode={modal.mode}
           asset={modal.asset}
+          priceRecord={modal.asset ? priceFor(modal.asset.id) : null}
           onClose={handleCloseModal}
         />
       )}
