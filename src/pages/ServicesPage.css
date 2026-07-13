@@ -1,0 +1,463 @@
+/* ════════════════════════════════════════════════════
+   ServicesPage.css — Standalone /services route
+   Uses existing design tokens from index.css
+   ════════════════════════════════════════════════════ */
+
+/* ── Page Hero ───────────────────────────────────── */
+.sp__hero {
+  background: linear-gradient(135deg, #f0f6ff 0%, #ffffff 55%, #f8fafc 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 80px 0 72px;
+  text-align: center;
+}
+
+.sp__container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 var(--sp-6);
+}
+
+.sp__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--blue);
+  background: var(--blue-light);
+  border: 1px solid var(--blue-mid);
+  border-radius: var(--r-full);
+  padding: 5px 16px;
+  margin-bottom: var(--sp-5);
+}
+
+.sp__hero-title {
+  font-size: clamp(32px, 4.5vw, 48px);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  margin-bottom: var(--sp-5);
+}
+
+.sp__hero-sub {
+  font-size: 18px;
+  line-height: 1.7;
+  color: var(--text-muted);
+  max-width: 580px;
+  margin: 0 auto;
+}
+
+/* ── Service Cards ───────────────────────────────── */
+.sp__services {
+  padding: var(--sp-20) 0;
+  background: var(--bg-white);
+}
+
+.sp__service-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-16);
+  align-items: center;
+  padding: var(--sp-16) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.sp__service-card:last-child {
+  border-bottom: none;
+}
+
+.sp__service-card--reverse {
+  direction: rtl;
+}
+
+.sp__service-card--reverse > * {
+  direction: ltr;
+}
+
+.sp__card-visual {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: var(--sp-8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+}
+
+.sp__card-svg {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+}
+
+.sp__card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.sp__card-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: var(--r-full);
+  width: fit-content;
+}
+
+.sp__card-title {
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.sp__card-headline {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.sp__card-desc {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Plain-language feature points */
+.sp__card-points {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  margin-top: var(--sp-2);
+}
+
+.sp__card-point {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+}
+
+.sp__card-point-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sp__card-point-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+  margin-bottom: 2px;
+}
+
+.sp__card-point-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* Consultancy service tags */
+.sp__consult-list {
+  margin-top: var(--sp-2);
+}
+
+.sp__consult-list-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--sp-3);
+}
+
+.sp__consult-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.sp__consult-tag {
+  display: inline-block;
+  padding: 5px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-section);
+  border: 1px solid var(--border);
+  border-radius: var(--r-full);
+  transition: border-color var(--t), color var(--t);
+}
+
+.sp__consult-tag:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+/* Card CTAs */
+.sp__card-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  margin-top: var(--sp-2);
+}
+
+/* ── Section Header (reusable) ───────────────────── */
+.sp__section-header {
+  text-align: center;
+  max-width: 620px;
+  margin: 0 auto var(--sp-12);
+}
+
+.sp__section-title {
+  font-size: clamp(24px, 3.5vw, 36px);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+  margin-bottom: var(--sp-4);
+}
+
+.sp__section-sub {
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--text-muted);
+}
+
+/* ── Blockchain Section ──────────────────────────── */
+.sp__blockchain {
+  background: var(--bg-section);
+  padding: var(--sp-20) 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.sp__blockchain-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-6);
+}
+
+.sp__blockchain-card {
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: var(--sp-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  transition: border-color var(--t), box-shadow var(--t);
+}
+
+.sp__blockchain-card:hover {
+  border-color: var(--blue);
+  box-shadow: 0 4px 16px rgba(7, 90, 216, 0.08);
+}
+
+.sp__blockchain-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-md);
+  background: var(--blue-light);
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sp__blockchain-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.45;
+}
+
+.sp__blockchain-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+/* ── Journey Section ─────────────────────────────── */
+.sp__journey {
+  background: var(--bg-white);
+  padding: var(--sp-20) 0;
+}
+
+.sp__journey-track {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: var(--sp-12);
+  row-gap: var(--sp-8);
+}
+
+.sp__journey-step {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.sp__journey-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.sp__journey-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  flex-shrink: 0;
+}
+
+.sp__journey-connector {
+  color: #D1D5DB;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--sp-1);
+}
+
+.sp__journey-arrow {
+  flex-shrink: 0;
+}
+
+.sp__journey-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 88px;
+}
+
+.sp__journey-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.sp__journey-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Journey CTA */
+.sp__journey-cta {
+  text-align: center;
+  padding: var(--sp-12) var(--sp-6);
+  background: var(--bg-section);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+}
+
+.sp__journey-cta-text {
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: var(--sp-6);
+}
+
+.sp__journey-cta-btns {
+  display: flex;
+  justify-content: center;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+}
+
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 900px) {
+  .sp__service-card {
+    grid-template-columns: 1fr;
+    gap: var(--sp-8);
+  }
+
+  .sp__service-card--reverse {
+    direction: ltr;
+  }
+
+  .sp__blockchain-grid {
+    grid-template-columns: 1fr;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  .sp__journey-track {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sp__journey-step {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sp__journey-connector {
+    display: none;
+  }
+
+  .sp__journey-labels {
+    max-width: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .sp__hero {
+    padding: 60px 0 52px;
+  }
+
+  .sp__container {
+    padding: 0 var(--sp-4);
+  }
+
+  .sp__service-card {
+    padding: var(--sp-10) 0;
+  }
+
+  .sp__card-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sp__card-actions .btn {
+    justify-content: center;
+  }
+
+  .sp__journey-cta-btns {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sp__journey-cta-btns .btn {
+    justify-content: center;
+  }
+}

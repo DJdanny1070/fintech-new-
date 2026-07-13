@@ -261,14 +261,14 @@ function AssetTokenizationRequest() {
                     <label className="atr-label" htmlFor="atr-applicantName">
                       Applicant Name <span>*</span>
                     </label>
-                    <input id="atr-applicantName" className={`atr-input${errors.applicantName ? " atr-input--error" : ""}`} type="text" placeholder="e.g. Rajesh Kumar" value={form.applicantName} onChange={set("applicantName")} disabled={loading} />
+                    <input id="atr-applicantName" className={`atr-input${errors.applicantName ? " atr-input--error" : ""}`} type="text" value={form.applicantName} onChange={set("applicantName")} disabled={loading} />
                     {errors.applicantName && <span className="atr-error">{errors.applicantName}</span>}
                   </div>
                   <div className="atr-field" id="atr-field-companyName">
                     <label className="atr-label" htmlFor="atr-companyName">
                       Company Name <span>*</span>
                     </label>
-                    <input id="atr-companyName" className={`atr-input${errors.companyName ? " atr-input--error" : ""}`} type="text" placeholder="e.g. Apex Realty Pvt. Ltd." value={form.companyName} onChange={set("companyName")} disabled={loading} />
+                    <input id="atr-companyName" className={`atr-input${errors.companyName ? " atr-input--error" : ""}`} type="text" value={form.companyName} onChange={set("companyName")} disabled={loading} />
                     {errors.companyName && <span className="atr-error">{errors.companyName}</span>}
                   </div>
                 </div>
@@ -276,12 +276,12 @@ function AssetTokenizationRequest() {
                 <div className="atr-row atr-row--2" style={{ marginTop: 18 }}>
                   <div className="atr-field" id="atr-field-email">
                     <label className="atr-label" htmlFor="atr-email">Email Address <span>*</span></label>
-                    <input id="atr-email" className={`atr-input${errors.email ? " atr-input--error" : ""}`} type="email" placeholder="you@company.com" value={form.email} onChange={set("email")} disabled={loading} />
+                    <input id="atr-email" className={`atr-input${errors.email ? " atr-input--error" : ""}`} type="email" value={form.email} onChange={set("email")} disabled={loading} />
                     {errors.email && <span className="atr-error">{errors.email}</span>}
                   </div>
                   <div className="atr-field" id="atr-field-phone">
                     <label className="atr-label" htmlFor="atr-phone">Phone Number <span>*</span></label>
-                    <input id="atr-phone" className={`atr-input${errors.phone ? " atr-input--error" : ""}`} type="tel" placeholder="+91 98765 43210" value={form.phone} onChange={set("phone")} disabled={loading} />
+                    <input id="atr-phone" className={`atr-input${errors.phone ? " atr-input--error" : ""}`} type="tel" value={form.phone} onChange={set("phone")} disabled={loading} />
                     {errors.phone && <span className="atr-error">{errors.phone}</span>}
                   </div>
                 </div>

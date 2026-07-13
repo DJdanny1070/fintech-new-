@@ -987,6 +987,32 @@ export default function Marketplace() {
 
   return (
     <div>
+      {/* ── Marketplace info banner ───────────────────────── */}
+      <div className="mkt-info-banner">
+        <div className="mkt-info-banner__items">
+          <div className="mkt-info-banner__item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/>
+            </svg>
+            <span>Assets become available only after successful tokenization and CresoX verification</span>
+          </div>
+          <div className="mkt-info-banner__sep" aria-hidden="true">·</div>
+          <div className="mkt-info-banner__item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+            <span>Every transaction is securely recorded and cannot be altered</span>
+          </div>
+          <div className="mkt-info-banner__sep" aria-hidden="true">·</div>
+          <div className="mkt-info-banner__item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+            <span>Token prices may change over time based on market activity</span>
+          </div>
+        </div>
+      </div>
+
       {/* ── Page header ─────────────────────────────────── */}
       <div className="page-header">
         <div className="page-header__row">

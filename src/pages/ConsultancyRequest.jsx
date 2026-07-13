@@ -232,24 +232,24 @@ function ConsultancyRequest() {
                 <div className="cr-row cr-row--2">
                   <div className="cr-field" id="cr-field-fullName">
                     <label className="cr-label" htmlFor="cr-fullName">Full Name <span>*</span></label>
-                    <input id="cr-fullName" className={`cr-input${errors.fullName ? " cr-input--error" : ""}`} type="text" placeholder="e.g. Priya Sharma" value={form.fullName} onChange={set("fullName")} disabled={loading} />
+                    <input id="cr-fullName" className={`cr-input${errors.fullName ? " cr-input--error" : ""}`} type="text" value={form.fullName} onChange={set("fullName")} disabled={loading} />
                     {errors.fullName && <span className="cr-error">{errors.fullName}</span>}
                   </div>
                   <div className="cr-field" id="cr-field-company">
                     <label className="cr-label" htmlFor="cr-company">Company / Organisation</label>
-                    <input id="cr-company" className="cr-input" type="text" placeholder="e.g. Nexus Ventures (optional)" value={form.company} onChange={set("company")} disabled={loading} />
+                    <input id="cr-company" className="cr-input" type="text" value={form.company} onChange={set("company")} disabled={loading} />
                   </div>
                 </div>
 
                 <div className="cr-row cr-row--2" style={{ marginTop: 18 }}>
                   <div className="cr-field" id="cr-field-email">
                     <label className="cr-label" htmlFor="cr-email">Email Address <span>*</span></label>
-                    <input id="cr-email" className={`cr-input${errors.email ? " cr-input--error" : ""}`} type="email" placeholder="you@company.com" value={form.email} onChange={set("email")} disabled={loading} />
+                    <input id="cr-email" className={`cr-input${errors.email ? " cr-input--error" : ""}`} type="email"  value={form.email} onChange={set("email")} disabled={loading} />
                     {errors.email && <span className="cr-error">{errors.email}</span>}
                   </div>
                   <div className="cr-field" id="cr-field-phone">
                     <label className="cr-label" htmlFor="cr-phone">Phone Number <span>*</span></label>
-                    <input id="cr-phone" className={`cr-input${errors.phone ? " cr-input--error" : ""}`} type="tel" placeholder="+91 98765 43210" value={form.phone} onChange={set("phone")} disabled={loading} />
+                    <input id="cr-phone" className={`cr-input${errors.phone ? " cr-input--error" : ""}`} type="tel" value={form.phone} onChange={set("phone")} disabled={loading} />
                     {errors.phone && <span className="cr-error">{errors.phone}</span>}
                   </div>
                 </div>

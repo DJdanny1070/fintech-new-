@@ -1,6 +1,50 @@
 /* ── Client Portal (Marketplace) — Light Mode ────────────────── */
 
+/* ── Info Banner ──────────────────────────────────────────────── */
+.mkt-info-banner {
+  background: var(--blue-light);
+  border-bottom: 1px solid var(--blue-mid);
+  padding: 10px var(--sp-6);
+}
+
+.mkt-info-banner__items {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.mkt-info-banner__item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--blue-dark);
+  line-height: 1.4;
+}
+
+.mkt-info-banner__item svg {
+  flex-shrink: 0;
+  color: var(--blue);
+}
+
+.mkt-info-banner__sep {
+  color: var(--text-muted);
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+@media (max-width: 700px) {
+  .mkt-info-banner__sep { display: none; }
+  .mkt-info-banner__items { flex-direction: column; align-items: flex-start; }
+}
+
 /* ── Tab bar ──────────────────────────────────────────────────── */
+
 .cp-tabs {
   display: flex;
   align-items: center;

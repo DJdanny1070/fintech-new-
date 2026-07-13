@@ -46,7 +46,7 @@ export async function createTransaction({ userId, type, amount, counterpartyId =
  * Get transactions for a user (as owner) with optional limit.
  */
 export async function getTransactionsForUser(userId, limit = 50) {
-  const { data, error } = await supabase
+  let query = supabase
     .from("transactions")
     .select(
       `*,
@@ -58,8 +58,13 @@ export async function getTransactionsForUser(userId, limit = 50) {
     `
     )
     .eq("user_id", userId)
-    .order("created_at", { ascending: false })
-    .limit(limit);
+    .order("created_at", { ascending: false });
+
+  if (limit !== null && limit !== undefined) {
+    query = query.limit(limit);
+  }
+
+  const { data, error } = await query;
 
   if (error) throw error;
   return data ?? [];

@@ -41,7 +41,7 @@ const TEAM = [
 
 function Leadership() {
   return (
-    <section className="leadership" id="leadership">
+    <section className="leadership" id="leadership" data-section="team">
       <div className="leadership__container">
         {/* Header */}
         <div className="leadership__header">

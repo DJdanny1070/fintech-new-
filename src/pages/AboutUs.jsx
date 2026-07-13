@@ -4,12 +4,9 @@ import { Link } from "react-router-dom";
 
 /* ─── Team placeholder data ──────────────────────────────────── */
 const TEAM = [
-  { name: "Arjun Mehta",    role: "Chief Executive Officer",      initial: "A" },
-  { name: "Priya Kapoor",   role: "Chief Technology Officer",     initial: "P" },
-  { name: "Rahul Sharma",   role: "Chief Financial Officer",      initial: "R" },
-  { name: "Sneha Iyer",     role: "Head of Product",              initial: "S" },
-  { name: "Vikram Nair",    role: "Head of Compliance",           initial: "V" },
-  { name: "Anita Desai",    role: "Head of Engineering",          initial: "A" },
+  { name: "Wasiullah Shaik Mohammed",    role: "Founder",      initial: "W" },
+  { name: "Ishtiyaq Nadeem",   role: "Co-Founder",     initial: "I" },
+  { name: "Sudheer",   role: "Advisor-Technology Development",      initial: "S" },
 ];
 
 const FEATURES = [

@@ -90,7 +90,7 @@ function JourneyCards() {
               <ul className="journey-card__highlights">
                 {j.highlights.map(h => (
                   <li key={h}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{color:"var(--green-light)", flexShrink:0}}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{color:"var(--green)", flexShrink:0}}>
                       <path d="M20 6L9 17l-5-5"/>
                     </svg>
                     {h}

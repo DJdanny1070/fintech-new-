@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { getMyOrders } from "../services/productService";
+import EmptyState from "../components/common/EmptyState";
+import LoadingSkeleton from "../components/common/LoadingSkeleton";
 import "./Dashboard.css";
 
 function formatOrderDate(value) {
@@ -74,16 +77,13 @@ function Orders() {
 
   if (loading) {
     return (
-      <div className="content-card">
-        <div className="content-card__header">
-          <div>
-            <div className="content-card__title">Orders</div>
-            <div className="content-card__sub">Loading your orders...</div>
-          </div>
+      <div>
+        <div className="page-header">
+          <h1>Orders</h1>
+          <p>Loading your orders&hellip;</p>
         </div>
-        <div style={{padding:"var(--sp-6)",display:"grid",gap:12}}>
-          <div style={{height:72,background:"#f3f3f3",borderRadius:8}} />
-          <div style={{height:72,background:"#f3f3f3",borderRadius:8}} />
+        <div className="content-card">
+          <LoadingSkeleton rows={4} height={64} />
         </div>
       </div>
     );
@@ -91,8 +91,16 @@ function Orders() {
 
   if (error) {
     return (
-      <div className="content-card">
-        <div style={{padding:"var(--sp-6)",color:"var(--red)"}}>{error}</div>
+      <div>
+        <div className="page-header"><h1>Orders</h1></div>
+        <div className="content-card">
+          <EmptyState
+            icon="⚠️"
+            title="Could not load orders"
+            description={error}
+            action={<button className="btn btn-secondary btn-sm" onClick={() => window.location.reload()}>Retry</button>}
+          />
+        </div>
       </div>
     );
   }
@@ -118,12 +126,23 @@ function Orders() {
           <div className="page-header__row">
             <div>
               <h1>Orders</h1>
-              <p>No orders yet</p>
+              <p>{isBusiness ? "Orders received from buyers" : "Your purchases"}</p>
             </div>
           </div>
         </div>
-        <div className="content-card" style={{padding:"var(--sp-6)", color:"var(--text-muted)", textAlign:"center"}}>
-          You do not have any orders yet.
+        <div className="content-card">
+          <EmptyState
+            icon="📦"
+            title="No orders yet"
+            description={isBusiness
+              ? "When buyers purchase your listings, orders will appear here."
+              : "Browse the marketplace and make your first purchase."}
+            action={
+              <Link to="/dashboard/marketplace" className="btn btn-primary btn-sm">
+                Browse Marketplace →
+              </Link>
+            }
+          />
         </div>
       </div>
     );
@@ -152,43 +171,49 @@ function Orders() {
             </div>
 
             {list.length === 0 ? (
-              <div style={{padding:"var(--sp-6)",color:"var(--text-muted)"}}>No {sec.title.toLowerCase()}.</div>
+              <EmptyState
+                icon="📋"
+                title={`No ${sec.title.toLowerCase()}`}
+                description="Nothing to show here yet."
+              />
             ) : (
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th>Buyer</th>
-                    <th>Seller</th>
-                    <th>Price</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {list.map(o => (
-                    <tr key={o.id}>
-                      <td style={{display:"flex",alignItems:"center",gap:12}}>
-                        {o.product?.image_url ? (
-                          <img src={o.product.image_url} alt={o.product?.title} style={{width:44,height:44,objectFit:"cover",borderRadius:6}} />
-                        ) : (
-                          <div style={{width:44,height:44,background:"var(--bg)",borderRadius:6}} />
-                        )}
-                        <div style={{fontWeight:700}}>{o.product?.title || "Unknown"}</div>
-                      </td>
-                      <td>{o.buyer?.full_name || 'Unknown'}</td>
-                      <td>{o.seller?.full_name || 'Unknown'}</td>
-                      <td style={{fontFamily:"monospace",fontWeight:700}}>{o.product?.price ? `₹${Number(o.product.price).toLocaleString('en-IN')}` : '—'}</td>
-                      <td>{formatOrderDate(o.created_at)}</td>
-                      <td>
-                        <span className={`status-badge ${o.status === 'completed' ? 'status-badge--success' : o.status === 'cancelled' ? 'status-badge--danger' : 'status-badge--pending'}`}>
-                          {o.status}
-                        </span>
-                      </td>
+              <div className="data-table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Buyer</th>
+                      <th>Seller</th>
+                      <th>Price</th>
+                      <th>Date</th>
+                      <th>Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {list.map(o => (
+                      <tr key={o.id}>
+                        <td style={{display:"flex",alignItems:"center",gap:12}}>
+                          {o.product?.image_url ? (
+                            <img src={o.product.image_url} alt={o.product?.title || "Product image"} style={{width:44,height:44,objectFit:"cover",borderRadius:6}} />
+                          ) : (
+                            <div style={{width:44,height:44,background:"var(--bg)",borderRadius:6,flexShrink:0}} aria-hidden="true" />
+                          )}
+                          <div style={{fontWeight:700}}>{o.product?.title || "Unknown"}</div>
+                        </td>
+                        <td>{o.buyer?.full_name || 'Unknown'}</td>
+                        <td>{o.seller?.full_name || 'Unknown'}</td>
+                        <td style={{fontFamily:"monospace",fontWeight:700}}>{o.product?.price ? `₹${Number(o.product.price).toLocaleString('en-IN')}` : '—'}</td>
+                        <td style={{whiteSpace:"nowrap"}}>{formatOrderDate(o.created_at)}</td>
+                        <td>
+                          <span className={`status-badge ${o.status === 'completed' ? 'status-badge--success' : o.status === 'cancelled' ? 'status-badge--danger' : 'status-badge--pending'}`}>
+                            {o.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         );

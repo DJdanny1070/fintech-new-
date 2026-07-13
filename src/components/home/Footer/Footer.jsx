@@ -4,30 +4,29 @@ import cresoxLogo from "../../../assets/cresox-logo.png";
 
 const FOOTER_LINKS = {
   Company: [
-    { label: "About Us", to: "/", state: { scrollTo: "leadership" } },
-    { label: "Careers", to: null },
-    { label: "Press", to: null },
-    { label: "Contact", to: "/contact" },
+    { label: "About Us",    to: "/about" },
+    { label: "Team CresoX", to: "/",     state: { scrollTo: "leadership" } },
+    { label: "Contact",     to: "/contact" },
   ],
-  Solutions: [
-    { label: "Digital Wallet", to: "/register?role=individual" },
-    { label: "Marketplace", href: "#marketplace" },
-    { label: "Business Banking", to: "/register?role=business" },
-    { label: "Developer APIs", to: "/register?role=developer" },
+  Services: [
+    { label: "Asset Tokenization", to: "/services/asset-tokenization" },
+    { label: "Direct Consultancy", to: "/services/direct-consultancy" },
+    { label: "Request Tokenization", to: "/request/asset-tokenization" },
+    { label: "Request Consultancy",  to: "/consultation-request" },
   ],
   Resources: [
     { label: "Documentation", to: "/docs" },
-    { label: "API Reference", to: null },
-    { label: "Help Centre", to: "/help" },
-    { label: "Status", to: "/status" },
+    { label: "Help Centre",   to: "/help" },
+    { label: "Status",        to: "/status" },
   ],
   Legal: [
-    { label: "Privacy Policy", to: "/privacy-policy" },
+    { label: "Privacy Policy",   to: "/privacy-policy" },
     { label: "Terms of Service", to: "/terms" },
-    { label: "Cookie Policy", to: "/cookie-policy" },
-    { label: "Compliance", to: "/compliance" },
+    { label: "Cookie Policy",    to: "/cookie-policy" },
+    { label: "Compliance",       to: "/compliance" },
   ],
 };
+
 
 const SOCIAL = [
   {

@@ -1,5 +1,13 @@
+import { Link } from "react-router-dom";
 import { ArrowRight, PhoneCall } from "lucide-react";
 import "./Hero.css";
+
+const VALUE_PROPS = [
+  { label: "Asset Tokenization" },
+  { label: "Blockchain-backed Ownership" },
+  { label: "Secure Digital Asset Marketplace" },
+  { label: "Direct Financial Consultancy" },
+];
 
 function Hero() {
   return (
@@ -10,24 +18,34 @@ function Hero() {
           <span className="hero__eyebrow">CresoX Fintech Private Limited</span>
 
           <h1 className="hero__headline">
-            Empowering Investments Through{" "}
-            <span className="hero__headline-accent">Tokenization</span>
+            Real Assets.{" "}
+            <span className="hero__headline-accent">Digital Ownership.</span>
           </h1>
 
           <p className="hero__description">
-            Building innovative fintech solutions that bridge real-world assets
-            with modern investment opportunities through secure tokenization.
+            To create an innovative and efficient channel for businesses
+            and investors for investment through tokenization and fintech solutions
           </p>
 
+          {/* Value-prop pills */}
+          <div className="hero__pills">
+            {VALUE_PROPS.map(({ label }) => (
+              <span key={label} className="hero__pill">
+                <span className="hero__pill-dot" aria-hidden="true" />
+                {label}
+              </span>
+            ))}
+          </div>
+
           <div className="hero__actions">
-            <a href="#solutions" className="btn btn-primary btn-lg hero__btn">
-              Explore Our Solutions
+            <Link to="/services" className="btn btn-primary btn-lg hero__btn">
+              Explore Our Services
               <ArrowRight size={16} strokeWidth={1.75} />
-            </a>
-            <a href="#contact" className="btn btn-secondary btn-lg hero__btn">
+            </Link>
+            <Link to="/contact" className="btn btn-secondary btn-lg hero__btn">
               <PhoneCall size={16} strokeWidth={1.75} />
               Contact Us
-            </a>
+            </Link>
           </div>
         </div>
       </div>

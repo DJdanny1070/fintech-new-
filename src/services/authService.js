@@ -44,6 +44,20 @@ export async function signUpWithEmail(email, password, metadata = {}) {
 }
 
 /**
+ * Send a password reset email via Supabase Auth.
+ */
+export async function sendPasswordResetEmail(email, redirectTo = null) {
+  const options = {};
+  if (redirectTo) {
+    options.redirectTo = redirectTo;
+  }
+
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email, options);
+  if (error) throw error;
+  return data;
+}
+
+/**
  * Sign out the current user.
  */
 export async function signOut() {

@@ -5,6 +5,7 @@ import { getProduct, getRelatedProducts, createOrder } from "../services/product
 import { useToast } from "../components/common/ToastProvider";
 import LoadingSkeleton from "../components/common/LoadingSkeleton";
 import NetworkError from "../components/common/NetworkError";
+import "./Dashboard.css";
 
 function shortenHash(h) {
   if (!h) return "—";
@@ -210,10 +211,14 @@ function ProductDetails() {
         </div>
       </div>
 
-      <div className="content-card" style={{display:"grid",gridTemplateColumns:"320px 1fr",gap:24}}>
+      {/* TODO (Future Integration): Real-time Token Pricing
+          Replace hasPricingData static display with a live price feed.
+          Subscribe to a WebSocket channel (e.g. priceService.subscribe(product.id))
+          that pushes updated current_price, daily_change, and trend on tick. */}
+      <div className="content-card product-detail-grid">
         <div>
           {product.image_url ? (
-            <img src={product.image_url} alt={product.title} style={{width:"100%",borderRadius:8}} />
+            <img src={product.image_url} alt={`${product.title} — product image`} style={{width:"100%",borderRadius:8}} />
           ) : (
             <div style={{width:"100%",height:200,background:"var(--bg)",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",color:"var(--text-muted)",flexDirection:'column',gap:8}}>
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="14" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 21l-6-5-4 4-3-3-5 4"/></svg>
@@ -283,7 +288,15 @@ function ProductDetails() {
             </div>
             <div style={{display:"flex",gap:8,alignItems:"center"}}>
               <div style={{fontFamily:"monospace"}}>{shortenHash(product.blockchain_hash)}</div>
-              {product.blockchain_hash && <button className="btn btn-ghost btn-sm" onClick={handleCopy}>Copy</button>}
+            {product.blockchain_hash && (
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={handleCopy}
+                aria-label={`Copy blockchain hash: ${product.blockchain_hash.slice(0,12)}…`}
+              >
+                Copy
+              </button>
+            )}
             </div>
           </div>
 

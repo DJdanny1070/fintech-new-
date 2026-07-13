@@ -1,13 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { getProducts, getRecentOrders } from "../services/productService";
 import { getTransactionsForUser } from "../services/transactionService";
+import LoadingSkeleton from "../components/common/LoadingSkeleton";
 import "./Dashboard.css";
 
-function BarChart({ data, color="#075AD8" }) {
-  const max = Math.max(...data.map(d => d.v));
+// TODO (Future Integration): Replace MONTHLY / WEEKLY static data with live
+// aggregated data from the Supabase database. Consider adding a Postgres
+// function or edge function that buckets transactions by week / month.
+// For real-time updates, subscribe via Supabase Realtime channels.
+
+// TODO (Future Integration): Market API integration point — connect MONTHLY
+// and WEEKLY data to a financial market data provider (e.g. Alpha Vantage,
+// Polygon.io) once regulatory approval is in place.
+
+function BarChart({ data, color = "#075AD8" }) {
+  const max = Math.max(1, ...data.map(d => d.v));
   return (
-    <svg className="analytics-bar-chart" viewBox="0 0 500 110" style={{width:"100%",height:110}} preserveAspectRatio="none">
+    <svg className="analytics-bar-chart" viewBox="0 0 500 110" style={{width:"100%",height:110}} preserveAspectRatio="none" aria-hidden="true">
       <defs>
         <linearGradient id={`bg${color.slice(1)}`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={color} stopOpacity="0.85"/>
@@ -16,10 +27,10 @@ function BarChart({ data, color="#075AD8" }) {
       </defs>
       {data.map((d, i) => {
         const bw = 28, gap = (500 - data.length * bw) / (data.length + 1);
-        const x = gap + i * (bw + gap);
-        const h = (d.v / max) * 90;
+        const x  = gap + i * (bw + gap);
+        const h  = (d.v / max) * 90;
         return (
-          <g key={d.l}>
+          <g key={`${d.l}-${i}`}>
             <rect x={x} y={100-h} width={bw} height={h} fill={`url(#bg${color.slice(1)})`} rx="3"/>
             <text x={x+bw/2} y="108" textAnchor="middle" fontSize="8" fill="#9CA3AF">{d.l}</text>
           </g>
@@ -29,13 +40,13 @@ function BarChart({ data, color="#075AD8" }) {
   );
 }
 
-function LineChart({ data, color="#075AD8" }) {
-  const max = Math.max(...data.map(d => d.v));
+function LineChart({ data, color = "#075AD8" }) {
+  const max = Math.max(1, ...data.map(d => d.v));
   const W=500, H=90;
-  const pts = data.map((d,i) => `${(i/(data.length-1))*(W-20)+10},${H-12-((d.v/max)*(H-24))}`).join(" ");
+  const pts  = data.map((d,i) => `${(i/(data.length-1))*(W-20)+10},${H-12-((d.v/max)*(H-24))}`).join(" ");
   const area = `10,${H} ` + pts + ` ${W-10},${H}`;
   return (
-    <svg className="analytics-line-chart" viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:90}} preserveAspectRatio="none">
+    <svg className="analytics-line-chart" viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:90}} preserveAspectRatio="none" aria-hidden="true">
       <defs>
         <linearGradient id={`lf${color.slice(1)}`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={color} stopOpacity="0.12"/>
@@ -67,12 +78,14 @@ const ASSETS = [
 ];
 
 function Analytics() {
-  const { user } = useAuth();
-  const [range, setRange] = useState("1Y");
-  const [products, setProducts] = useState([]);
-  const [orders, setOrders] = useState([]);
+  const navigate = useNavigate();
+  const { user }  = useAuth();
+  const [range, setRange]             = useState("1Y");
+  const [products, setProducts]       = useState([]);
+  const [orders, setOrders]           = useState([]);
   const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]         = useState(true);
+  const [error, setError]             = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -85,6 +98,7 @@ function Analytics() {
         return;
       }
       setLoading(true);
+      setError("");
       try {
         const [productData, orderData, txData] = await Promise.all([
           getProducts({}),
@@ -95,6 +109,9 @@ function Analytics() {
         setProducts(productData || []);
         setOrders(orderData || []);
         setTransactions(txData || []);
+      } catch (err) {
+        console.error("Analytics load failed:", err.message);
+        if (mounted) setError("We couldn't load your analytics right now. Please try again.");
       } finally {
         if (mounted) setLoading(false);
       }
@@ -106,13 +123,9 @@ function Analytics() {
 
   const summary = useMemo(() => {
     const marketplaceValue = (products || []).reduce((sum, p) => sum + (Number(p.price) || 0), 0);
-    const orderCount = (orders || []).length;
-    const txCount = (transactions || []).length;
-    return {
-      marketplaceValue,
-      orderCount,
-      txCount,
-    };
+    const orderCount       = (orders || []).length;
+    const txCount          = (transactions || []).length;
+    return { marketplaceValue, orderCount, txCount };
   }, [products, orders, transactions]);
 
   return (
@@ -123,28 +136,49 @@ function Analytics() {
             <h1>Analytics</h1>
             <p>Track your financial performance across all activity</p>
           </div>
-          <div style={{display:"flex",gap:"var(--sp-1)"}}>
+          <div style={{display:"flex",gap:"var(--sp-1)",flexWrap:"wrap"}}>
             {["7D","1M","3M","6M","1Y"].map(r => (
-              <button key={r} onClick={() => setRange(r)}
-                className={`btn btn-sm ${range===r?"btn-primary":"btn-secondary"}`}>{r}</button>
+              <button
+                key={r}
+                onClick={() => setRange(r)}
+                className={`btn btn-sm ${range===r?"btn-primary":"btn-secondary"}`}
+                aria-pressed={range === r}
+              >
+                {r}
+              </button>
             ))}
           </div>
         </div>
       </div>
 
+      {error && (
+        <div className="auth-error" style={{marginBottom:"var(--sp-5)",display:"flex",justifyContent:"space-between",alignItems:"center",gap:12}}>
+          <span>{error}</span>
+          <button className="btn btn-ghost btn-sm" onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      )}
+
       <div className="kpi-grid" style={{marginBottom:"var(--sp-5)"}}>
-        {[
-          { label:"Total Revenue",       value:`₹${Math.round(summary.marketplaceValue).toLocaleString("en-IN")}`,  change:"Live marketplace value",  up:true  },
-          { label:"Marketplace Volume",  value:`${summary.orderCount} orders`,  change:"Recent activity",       up:true  },
-          { label:"Avg. Monthly Growth", value:`${summary.txCount} txns`,    change:"Recent transactions",      up:true  },
-          { label:"Blockchain Savings",  value:loading ? "—" : "Active",   change:"Hash-backed records",up:null },
-        ].map(k => (
-          <div className="kpi-card" key={k.label}>
-            <div className="kpi-card__label">{k.label}</div>
-            <div className="kpi-card__value" style={{marginTop:"var(--sp-2)"}}>{k.value}</div>
-            <div className={`kpi-card__change ${k.up===true?"up":k.up===false?"down":"neutral"}`}>{k.change}</div>
-          </div>
-        ))}
+        {loading ? (
+          Array.from({length: 4}).map((_, i) => (
+            <div className="kpi-card" key={i}>
+              <LoadingSkeleton rows={2} height={22} gap={8} />
+            </div>
+          ))
+        ) : (
+          [
+            { label:"Total Revenue",       value:`₹${Math.round(summary.marketplaceValue).toLocaleString("en-IN")}`, change:"Live marketplace value",  up:true  },
+            { label:"Marketplace Volume",  value:`${summary.orderCount} orders`,   change:"Recent activity",         up:true  },
+            { label:"Avg. Monthly Growth", value:`${summary.txCount} txns`,        change:"Recent transactions",     up:true  },
+            { label:"Blockchain Records",  value:"Active",                         change:"Hash-backed records",     up:null  },
+          ].map(k => (
+            <div className="kpi-card" key={k.label}>
+              <div className="kpi-card__label">{k.label}</div>
+              <div className="kpi-card__value" style={{marginTop:"var(--sp-2)"}}>{k.value}</div>
+              <div className={`kpi-card__change ${k.up===true?"up":k.up===false?"down":"neutral"}`}>{k.change}</div>
+            </div>
+          ))
+        )}
       </div>
 
       <div className="two-col" style={{marginBottom:"var(--sp-5)"}}>
@@ -156,6 +190,8 @@ function Analytics() {
             </div>
             <span className="badge badge-green">↑ 22.4%</span>
           </div>
+          {/* TODO (Future Integration): Replace MONTHLY with aggregated
+              monthly revenue from the transactions table */}
           <BarChart data={MONTHLY}/>
         </div>
         <div className="content-card">
@@ -166,6 +202,8 @@ function Analytics() {
             </div>
             <span className="badge badge-blue">↑ 34.1%</span>
           </div>
+          {/* TODO (Future Integration): Replace WEEKLY with real weekly
+              transaction volume bucketed from the transactions table */}
           <LineChart data={WEEKLY} color="#8b5cf6"/>
         </div>
       </div>
@@ -173,23 +211,32 @@ function Analytics() {
       <div className="content-card">
         <div className="content-card__header">
           <div className="content-card__title">Top Assets</div>
-          <button className="btn btn-ghost btn-sm">View Portfolio →</button>
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={() => navigate("/dashboard/analytics/portfolio")}
+          >
+            View Portfolio →
+          </button>
         </div>
-        <table className="data-table">
-          <thead>
-            <tr><th>Asset</th><th>Type</th><th>Value</th><th>Change</th></tr>
-          </thead>
-          <tbody>
-            {ASSETS.map(a => (
-              <tr key={a.name}>
-                <td style={{fontWeight:600,color:"var(--text-primary)"}}>{a.name}</td>
-                <td><span className="badge badge-gray">{a.type}</span></td>
-                <td style={{fontWeight:700,letterSpacing:"-0.02em"}}>{a.value}</td>
-                <td style={{fontWeight:700,color:a.up?"var(--green)":"var(--red)"}}>{a.change}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {/* TODO (Future Integration): Replace static ASSETS array with real
+            portfolio data from the portfolio analytics engine once integrated. */}
+        <div className="data-table-wrap">
+          <table className="data-table">
+            <thead>
+              <tr><th>Asset</th><th>Type</th><th>Value</th><th>Change</th></tr>
+            </thead>
+            <tbody>
+              {ASSETS.map(a => (
+                <tr key={a.name}>
+                  <td style={{fontWeight:600,color:"var(--text-primary)"}}>{a.name}</td>
+                  <td><span className="badge badge-gray">{a.type}</span></td>
+                  <td style={{fontWeight:700,letterSpacing:"-0.02em"}}>{a.value}</td>
+                  <td style={{fontWeight:700,color:a.up?"var(--green)":"var(--red)"}}>{a.change}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

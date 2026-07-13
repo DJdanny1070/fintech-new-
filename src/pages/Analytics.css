@@ -25,8 +25,8 @@
 .analytics-kpi__top { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp-3); }
 .analytics-kpi__icon  { font-size: 20px; }
 .analytics-kpi__change { font-size: 12px; font-weight: 600; color: var(--text-muted); }
-.analytics-kpi__change.up   { color: var(--green-light); }
-.analytics-kpi__change.down { color: var(--red-light); }
+.analytics-kpi__change.up   { color: var(--green); }
+.analytics-kpi__change.down { color: var(--red); }
 .analytics-kpi__value {
   font-family: var(--font-display); font-size: 26px; font-weight: 800;
   letter-spacing: -0.04em; color: var(--text-primary); margin-bottom: var(--sp-1);
@@ -96,8 +96,8 @@
 .analytics-asset-type  { font-size: 12px; color: var(--text-muted); }
 .analytics-asset-value { font-size: 14px; font-weight: 700; font-family: var(--font-display); letter-spacing: -0.02em; color: var(--text-primary); }
 .analytics-asset-change { font-size: 13px; font-weight: 700; }
-.analytics-asset-change.up   { color: var(--green-light); }
-.analytics-asset-change.down { color: var(--red-light); }
+.analytics-asset-change.up   { color: var(--green); }
+.analytics-asset-change.down { color: var(--red); }
 
 /* Donut Card */
 .analytics-donut-card { padding: var(--sp-5); }

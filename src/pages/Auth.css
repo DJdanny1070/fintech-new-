@@ -165,7 +165,7 @@
   .auth-roles__grid { grid-template-columns: repeat(3, 1fr); }
 }
 
-/* ── Error message ───────────────────────────────────────────── */
+/* ── Error / success message ───────────────────────────────── */
 .auth-error {
   background: var(--red-light);
   border: 1px solid rgba(224, 1, 11, 0.18);
@@ -175,5 +175,59 @@
   font-weight: 500;
   padding: 10px 14px;
   line-height: 1.5;
+  margin-bottom: var(--sp-4);
+}
+.auth-success {
+  background: rgba(5, 150, 105, 0.08);
+  border: 1px solid rgba(5, 150, 105, 0.16);
+  border-radius: var(--r-md);
+  color: var(--green);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 14px;
+  line-height: 1.5;
+  margin-bottom: var(--sp-4);
 }
 
+/* ── Field hint text ────────────────────────────────────────── */
+.auth-field__hint {
+  font-size: 12px;
+  color: var(--text-subtle);
+  line-height: 1.5;
+  margin-top: 2px;
+}
+
+/* ── Disabled input state ────────────────────────────────────── */
+.input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--bg-section);
+}
+
+.auth-social-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ── Panel notice (bottom of left panel) ────────────────────── */
+.auth-panel__notice {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: 13px;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.5;
+  padding-top: var(--sp-4);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  flex-wrap: wrap;
+}
+
+.auth-panel__notice svg {
+  flex-shrink: 0;
+  color: rgba(255,255,255,0.45);
+}

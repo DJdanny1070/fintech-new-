@@ -269,7 +269,14 @@
   transform: translateX(3px);
 }
 
-/* ── Responsive ────────────────────────────────────────────── */
+/* ── Card action row (Learn More + Request button) ─ */
+
+.services__card-body > .btn {
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+
 
 @media (max-width: 900px) {
   .services {

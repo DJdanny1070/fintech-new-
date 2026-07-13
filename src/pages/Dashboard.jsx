@@ -5,6 +5,7 @@ import { getProducts, getOrdersCounts, getRecentOrders, getGlobalCounts, getMyPr
 import { getHashCount, getRecentHashes } from "../services/hashService";
 import { getCounts, getRecentProfiles } from "../services/profileService";
 import { getTotalCount, getTransactionsForUser } from "../services/transactionService";
+import LoadingSkeleton from "../components/common/LoadingSkeleton";
 import "./Dashboard.css";
 
 function SummaryBarChart({ values, labels, color = "#075AD8" }) {
@@ -311,9 +312,13 @@ function Dashboard() {
           <div className="kpi-card" key={k.label}>
             <div className="kpi-card__top">
               <span className="kpi-card__label">{k.label}</span>
-              <div className="kpi-card__icon" style={{background:k.bg}}>{k.icon}</div>
+              <div className="kpi-card__icon" style={{background:k.bg}} aria-hidden="true">{k.icon}</div>
             </div>
-            <div className="kpi-card__value">{k.value}</div>
+            {loadingData ? (
+              <div className="skeleton" style={{height:28,borderRadius:6,marginBottom:4,width:"60%"}} />
+            ) : (
+              <div className="kpi-card__value">{k.value}</div>
+            )}
             <div className={`kpi-card__change ${k.up===true?"up":k.up===false?"down":"neutral"}`}>
               {k.change}
             </div>
@@ -332,18 +337,27 @@ function Dashboard() {
             </div>
             <span className="badge badge-green">Live</span>
           </div>
+          {/* TODO (Future Integration): Replace static chart data with live data
+              from a market analytics API or Supabase aggregation function.
+              Consider WebSocket subscription for real-time updates. */}
           <div style={{display:"grid",gap:"var(--sp-4)"}}>
             <div>
               <div style={{fontWeight:700,marginBottom:4}}>Orders over time</div>
-              <SummaryBarChart values={ordersTrend.map((item) => item.count)} labels={ordersTrend.map((item) => item.label)} />
+              {loadingData
+                ? <LoadingSkeleton rows={2} height={24} />
+                : <SummaryBarChart values={ordersTrend.map((item) => item.count)} labels={ordersTrend.map((item) => item.label)} />}
             </div>
             <div>
               <div style={{fontWeight:700,marginBottom:4}}>Transactions over time</div>
-              <SummaryBarChart values={transactionsTrend.map((item) => item.count)} labels={transactionsTrend.map((item) => item.label)} color="#16a34a" />
+              {loadingData
+                ? <LoadingSkeleton rows={2} height={24} />
+                : <SummaryBarChart values={transactionsTrend.map((item) => item.count)} labels={transactionsTrend.map((item) => item.label)} color="#16a34a" />}
             </div>
             <div>
               <div style={{fontWeight:700,marginBottom:4}}>Products by category</div>
-              <CategoryBarChart items={categoryBreakdown} />
+              {loadingData
+                ? <LoadingSkeleton rows={3} height={20} gap={6} />
+                : <CategoryBarChart items={categoryBreakdown} />}
             </div>
           </div>
         </div>
@@ -395,9 +409,7 @@ function Dashboard() {
           <Link to="/dashboard/marketplace" className="btn btn-ghost btn-sm">View all →</Link>
         </div>
         {loadingData ? (
-          <div style={{textAlign:"center",padding:"var(--sp-8)",color:"var(--text-muted)"}}>
-            Loading...
-          </div>
+          <LoadingSkeleton rows={3} height={52} />
         ) : recentProducts.length === 0 ? (
           <div style={{textAlign:"center",padding:"var(--sp-8)",color:"var(--text-muted)"}}>
             No products listed yet.{" "}
@@ -476,7 +488,7 @@ function Dashboard() {
             <Link to="/dashboard/analytics" className="btn btn-ghost btn-sm">More →</Link>
           </div>
           {loadingData ? (
-            <div style={{textAlign:'center',padding:'var(--sp-6)',color:'var(--text-muted)'}}>Loading recent activity...</div>
+            <LoadingSkeleton rows={4} height={44} />
           ) : activityItems.length === 0 ? (
             <div style={{textAlign:'center',padding:'var(--sp-6)',color:'var(--text-muted)'}}>No recent activity yet.</div>
           ) : (
@@ -503,9 +515,7 @@ function Dashboard() {
           </div>
         </div>
         {loadingData ? (
-          <div style={{textAlign:"center",padding:"var(--sp-8)",color:"var(--text-muted)"}}>
-            Loading...
-          </div>
+          <LoadingSkeleton rows={3} height={52} />
         ) : recentOrders.length === 0 ? (
           <div style={{textAlign:"center",padding:"var(--sp-8)",color:"var(--text-muted)"}}>
             No orders yet.

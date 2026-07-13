@@ -44,10 +44,6 @@ function Profile() {
     return () => clearTimeout(timer);
   }, [profile, user]);
 
-  const showToast = (msg) => {
-    toast.success(msg);
-  };
-
   const handleSave = async (e) => {
     e.preventDefault();
     if (!user) return;
@@ -73,7 +69,7 @@ function Profile() {
       if (form.avatar) {
         toast.success("Avatar uploaded");
       }
-      showToast("Profile updated successfully.");
+      toast.success("Profile updated successfully.");
     } catch (err) {
       console.error(err);
       setError(err.message || "Failed to update profile.");
@@ -144,11 +140,11 @@ function Profile() {
     return (
       <div className="content-card">
         <div style={{display:"flex",gap:20}}>
-          <div style={{width:120,height:120,background:"#f3f3f3",borderRadius:8}} />
-          <div style={{flex:1}}>
-            <div style={{height:24,background:"#f3f3f3",width:"40%",marginBottom:8}} />
-            <div style={{height:12,background:"#f3f3f3",width:"60%",marginBottom:8}} />
-            <div style={{height:12,background:"#f3f3f3",width:"80%"}} />
+          <div className="skeleton" style={{width:120,height:120,borderRadius:8,flexShrink:0}} />
+          <div style={{flex:1,display:"grid",gap:12}}>
+            <div className="skeleton" style={{height:24,width:"40%",borderRadius:6}} />
+            <div className="skeleton" style={{height:14,width:"60%",borderRadius:6}} />
+            <div className="skeleton" style={{height:14,width:"80%",borderRadius:6}} />
           </div>
         </div>
       </div>
@@ -186,7 +182,7 @@ function Profile() {
           <div>
             <div style={{width:140,height:140,borderRadius:8,overflow:"hidden",background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center"}}>
               {avatarPreview ? (
-                <img src={avatarPreview} alt="avatar" style={{width:"100%",height:"100%",objectFit:"cover"}} />
+                <img src={avatarPreview} alt={`${profile?.full_name || "User"}'s profile photo`} style={{width:"100%",height:"100%",objectFit:"cover"}} />
               ) : (
                 <div style={{fontSize:28,fontWeight:700,color:"var(--text-muted)"}}>{(profile?.full_name||"?")[0]}</div>
               )}

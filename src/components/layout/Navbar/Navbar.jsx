@@ -1,50 +1,20 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import {
-  ChevronDown,
-  Menu,
-  X,
-  Wallet,
-  Building2,
-  Store,
-} from "lucide-react";
+import { Menu, X } from "lucide-react";
 import "./Navbar.css";
 import cresoxLogo from "../../../assets/cresox-logo.png";
 
 const NAV_LINKS = [
-  { label: "Services", href: "#services" },
-  { label: "Blockchain", href: "#blockchain" },
-  { label: "Company", href: "#company" },
-  { label: "Contact", href: "#contact" },
-];
-
-const SOLUTIONS_ITEMS = [
-  {
-    title: "Digital Wallet",
-    desc: "Personal accounts, transfers, and balance management.",
-    icon: Wallet,
-    path: "/register?role=individual",
-  },
-  {
-    title: "Business Banking",
-    desc: "Team permissions, invoicing, and B2B payments.",
-    icon: Building2,
-    path: "/register?role=business",
-  },
-  {
-    title: "Marketplace",
-    desc: "Buy and sell verified products within the ecosystem.",
-    icon: Store,
-    path: "/register?role=individual",
-  },
+  { label: "Home",        to: "/",        isRoute: true },
+  { label: "Services",    to: "/services", isRoute: true },
+  { label: "About",       to: "/about",   isRoute: true },
+  { label: "Team CresoX", to: "/",        isRoute: true, scrollTo: "leadership" },
+  { label: "Contact",     to: "/contact", isRoute: true },
 ];
 
 function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
+  const [scrolled, setScrolled]     = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [solutionsOpen, setSolutionsOpen] = useState(false);
-  const [mobileSolutionsOpen, setMobileSolutionsOpen] = useState(false);
-  const solutionsRef = useRef(null);
   const location = useLocation();
 
   useEffect(() => {
@@ -53,47 +23,32 @@ function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Close mobile menu on route change
   useEffect(() => {
-    if (!location.key) return;
-    const cleanupId = setTimeout(() => {
-      setMobileOpen(false);
-      setSolutionsOpen(false);
-      setMobileSolutionsOpen(false);
-    }, 0);
-    return () => clearTimeout(cleanupId);
-  }, [location.key]);
+    setMobileOpen(false);
+  }, [location.pathname]);
 
-  useEffect(() => {
-    if (!solutionsOpen) return;
-
-    const handleClickOutside = (event) => {
-      if (solutionsRef.current && !solutionsRef.current.contains(event.target)) {
-        setSolutionsOpen(false);
-      }
-    };
-
-    const handleEscape = (event) => {
-      if (event.key === "Escape") setSolutionsOpen(false);
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleEscape);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, [solutionsOpen]);
-
+  // Lock body scroll when mobile menu is open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
+    return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
+
+  const handleNavClick = (link) => {
+    setMobileOpen(false);
+    if (link.scrollTo) {
+      // If already on home, scroll directly; otherwise navigate then scroll
+      if (location.pathname === "/") {
+        const el = document.getElementById(link.scrollTo);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  };
 
   return (
     <header className={`navbar ${scrolled ? "navbar--scrolled" : ""}`}>
       <div className="navbar__inner">
+        {/* Logo */}
         <Link to="/" className="navbar__logo" aria-label="CresoX Fintech Private Limited">
           <img
             src={cresoxLogo}
@@ -102,69 +57,46 @@ function Navbar() {
           />
         </Link>
 
+        {/* Desktop nav */}
         <nav className="navbar__nav" aria-label="Main navigation">
-          <div
-            className="navbar__dropdown-wrap"
-            ref={solutionsRef}
-            onMouseEnter={() => setSolutionsOpen(true)}
-            onMouseLeave={() => setSolutionsOpen(false)}
-          >
-            <button
-              type="button"
-              className={`navbar__link navbar__link--trigger ${solutionsOpen ? "navbar__link--active" : ""}`}
-              aria-expanded={solutionsOpen}
-              aria-haspopup="true"
-              onClick={() => setSolutionsOpen((prev) => !prev)}
-            >
-              Solutions
-              <ChevronDown
-                size={14}
-                className={`navbar__chevron ${solutionsOpen ? "navbar__chevron--open" : ""}`}
-                aria-hidden="true"
-              />
-            </button>
-
-            <div
-              className={`navbar__dropdown ${solutionsOpen ? "navbar__dropdown--open" : ""}`}
-              role="menu"
-              aria-label="Solutions"
-            >
-              {SOLUTIONS_ITEMS.map((item) => (
-                <Link
-                  key={item.title}
-                  to={item.path}
-                  className="navbar__dropdown-link"
-                  role="menuitem"
-                  onClick={() => setSolutionsOpen(false)}
-                >
-                  <span className="navbar__dropdown-icon">
-                    <item.icon size={18} strokeWidth={1.75} />
-                  </span>
-                  <span className="navbar__dropdown-text">
-                    <span className="navbar__dropdown-title">{item.title}</span>
-                    <span className="navbar__dropdown-desc">{item.desc}</span>
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {NAV_LINKS.map((link) => (
-            <a key={link.label} href={link.href} className="navbar__link">
-              {link.label}
-            </a>
-          ))}
+          {NAV_LINKS.map((link) =>
+            link.scrollTo ? (
+              <Link
+                key={link.label}
+                to={link.to}
+                state={{ scrollTo: link.scrollTo }}
+                className={`navbar__link ${
+                  location.pathname === link.to ? "navbar__link--active" : ""
+                }`}
+                onClick={() => handleNavClick(link)}
+              >
+                {link.label}
+              </Link>
+            ) : (
+              <Link
+                key={link.label}
+                to={link.to}
+                className={`navbar__link ${
+                  location.pathname === link.to ? "navbar__link--active" : ""
+                }`}
+              >
+                {link.label}
+              </Link>
+            )
+          )}
         </nav>
 
+        {/* Actions */}
         <div className="navbar__actions">
           <Link to="/login" className="navbar__login">
-            Login
+            Sign In
           </Link>
-          <Link to="/register" className="btn btn-primary btn-sm navbar__cta">
-            Get Started
+          <Link to="/services" className="btn btn-primary btn-sm navbar__cta">
+            Explore Our Services
           </Link>
         </div>
 
+        {/* Mobile toggle */}
         <button
           type="button"
           className="navbar__toggle"
@@ -176,55 +108,49 @@ function Navbar() {
         </button>
       </div>
 
-      <div className={`navbar__mobile ${mobileOpen ? "navbar__mobile--open" : ""}`} aria-hidden={!mobileOpen}>
+      {/* Mobile menu */}
+      <div
+        className={`navbar__mobile ${mobileOpen ? "navbar__mobile--open" : ""}`}
+        aria-hidden={!mobileOpen}
+      >
         <div className="navbar__mobile-inner">
-          <div className="navbar__mobile-group">
-            <button
-              type="button"
-              className="navbar__mobile-trigger"
-              aria-expanded={mobileSolutionsOpen}
-              onClick={() => setMobileSolutionsOpen((prev) => !prev)}
-            >
-              Solutions
-              <ChevronDown
-                size={16}
-                className={`navbar__chevron ${mobileSolutionsOpen ? "navbar__chevron--open" : ""}`}
-              />
-            </button>
-            {mobileSolutionsOpen && (
-              <div className="navbar__mobile-submenu">
-                {SOLUTIONS_ITEMS.map((item) => (
-                  <Link
-                    key={item.title}
-                    to={item.path}
-                    className="navbar__mobile-sublink"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    <item.icon size={16} strokeWidth={1.75} />
-                    {item.title}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {NAV_LINKS.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="navbar__mobile-link"
-              onClick={() => setMobileOpen(false)}
-            >
-              {link.label}
-            </a>
-          ))}
+          {NAV_LINKS.map((link) =>
+            link.scrollTo ? (
+              <Link
+                key={link.label}
+                to={link.to}
+                state={{ scrollTo: link.scrollTo }}
+                className="navbar__mobile-link"
+                onClick={() => handleNavClick(link)}
+              >
+                {link.label}
+              </Link>
+            ) : (
+              <Link
+                key={link.label}
+                to={link.to}
+                className="navbar__mobile-link"
+                onClick={() => setMobileOpen(false)}
+              >
+                {link.label}
+              </Link>
+            )
+          )}
 
           <div className="navbar__mobile-actions">
-            <Link to="/login" className="btn btn-secondary w-full navbar__mobile-btn" onClick={() => setMobileOpen(false)}>
-              Login
+            <Link
+              to="/login"
+              className="btn btn-secondary w-full navbar__mobile-btn"
+              onClick={() => setMobileOpen(false)}
+            >
+              Sign In
             </Link>
-            <Link to="/register" className="btn btn-primary w-full navbar__mobile-btn" onClick={() => setMobileOpen(false)}>
-              Get Started
+            <Link
+              to="/services"
+              className="btn btn-primary w-full navbar__mobile-btn"
+              onClick={() => setMobileOpen(false)}
+            >
+              Explore Our Services
             </Link>
           </div>
         </div>

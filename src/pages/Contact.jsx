@@ -27,7 +27,7 @@ const CONTACT_INFO = [
       </svg>
     ),
     label: "Office Address",
-    value: "CresoX Fintech Pvt Ltd, Level 12, One BKC, Bandra Kurla Complex, Mumbai — 400051, Maharashtra, India",
+    value: "CresoX Fintech Pvt Ltd, 120 Seethakathi Estate, GST Rd, Vandalur, Tamil Nadu 600048",
   },
   {
     icon: (
@@ -94,7 +94,7 @@ function Contact() {
                     id="contact-name"
                     name="name"
                     className="input"
-                    placeholder="Arjun Mehta"
+                    
                     value={form.name}
                     onChange={handleChange}
                     required
@@ -107,7 +107,7 @@ function Contact() {
                     name="email"
                     type="email"
                     className="input"
-                    placeholder="arjun@company.com"
+                    
                     value={form.email}
                     onChange={handleChange}
                     required

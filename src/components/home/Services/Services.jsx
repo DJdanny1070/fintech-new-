@@ -10,11 +10,12 @@ const SERVICES = [
     description:
       "Convert physical and financial assets into secure, blockchain-anchored digital tokens. Enable fractional ownership, enhanced liquidity, and broader investor access — all within a compliant, enterprise-grade infrastructure.",
     features: [
-      "Fractional ownership of real-world assets",
-      "Immutable on-chain ownership records",
-      "Regulatory-compliant token issuance",
-      "Seamless secondary market integration",
+      "Your asset's ownership is split into smaller tradeable digital tokens",
+      "Ownership is permanently recorded and cannot be altered by anyone",
+      "Compliant, structured token issuance within regulatory guidelines",
+      "Tokens can be traded on the marketplace after tokenization",
     ],
+    requestTo: "/request/asset-tokenization",
     illustration: (
       <svg
         viewBox="0 0 280 200"
@@ -100,17 +101,18 @@ const SERVICES = [
   },
   {
     id: "direct-consultancy",
-    href: "/contact",
+    href: "/services/direct-consultancy",
     eyebrow: "Advisory Service",
     title: "Direct Consultancy",
     description:
-      "Gain direct access to CresoX's senior fintech and investment strategists. From structuring tokenized offerings to navigating digital asset regulations — we provide bespoke strategic guidance tailored to your business goals.",
+      "Speak directly with a CresoX expert. Whether you need a digital asset strategy, tokenization plan, or help getting your business onboarded, we build a plan around your goals — not a template.",
     features: [
+      "Digital asset strategy and planning",
+      "Blockchain consultation in plain language",
+      "Business onboarding and enterprise integration",
       "One-on-one sessions with senior advisors",
-      "Regulatory & compliance roadmapping",
-      "Digital asset structuring & due diligence",
-      "Investment model design & financial simulations",
     ],
+    requestTo: "/consultation-request",
     illustration: (
       <svg
         viewBox="0 0 280 200"
@@ -291,7 +293,7 @@ function Services() {
 
         {/* Premium Service Cards */}
         <div className="services__grid">
-          {SERVICES.map(({ id, href, eyebrow, title, description, features, illustration }) => (
+          {SERVICES.map(({ id, href, eyebrow, title, description, features, illustration, requestTo }) => (
             <article className="services__card" key={id} id={id}>
               {/* Illustration */}
               <div className="services__card-visual">
@@ -320,6 +322,17 @@ function Services() {
                 >
                   Learn More
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" className="services__btn-arrow">
+                    <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </Link>
+                <Link
+                  to={requestTo}
+                  className="btn btn-primary btn-sm"
+                  aria-label={`Submit a request for ${title}`}
+                  style={{ marginTop: 4 }}
+                >
+                  {id === "asset-tokenization" ? "Request Tokenization" : "Request Consultancy"}
+                  <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                     <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </Link>

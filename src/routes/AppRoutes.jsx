@@ -6,11 +6,13 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import ResetPassword from "../pages/ResetPassword";
 import Dashboard from "../pages/Dashboard";
 import Marketplace from "../pages/Marketplace";
 import Wallet from "../pages/Wallet";
 import BlockchainPage from "../pages/Blockchain";
 import Analytics from "../pages/Analytics";
+import PortfolioAnalytics from "../pages/PortfolioAnalytics";
 import ProductDetails from "../pages/ProductDetails";
 import Orders from "../pages/Orders";
 import Profile from "../pages/Profile";
@@ -31,6 +33,7 @@ import TokenizationRequest from "../pages/TokenizationRequest";
 import DirectConsultancy from "../pages/DirectConsultancy";
 import AssetTokenizationRequest from "../pages/AssetTokenizationRequest";
 import ConsultancyRequest from "../pages/ConsultancyRequest";
+import ServicesPage from "../pages/ServicesPage";
 
 function AppRoutes() {
   return (
@@ -45,6 +48,7 @@ function AppRoutes() {
 
           {/* Auth Routes */}
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ResetPassword />} />
           {/* /register shows a closed-access notice — no self-registration form */}
           <Route path="/register" element={<Register />} />
 
@@ -58,6 +62,7 @@ function AppRoutes() {
           <Route path="/docs" element={<Documentation />} />
           <Route path="/help" element={<HelpCentre />} />
           <Route path="/status" element={<StatusPage />} />
+          <Route path="/services" element={<ServicesPage />} />
           <Route path="/services/asset-tokenization" element={<AssetTokenization />} />
           <Route path="/tokenization-request" element={<TokenizationRequest />} />
           <Route path="/services/direct-consultancy" element={<DirectConsultancy />} />
@@ -79,6 +84,7 @@ function AppRoutes() {
             <Route path="wallet" element={<Wallet />} />
             <Route path="blockchain" element={<BlockchainPage />} />
             <Route path="analytics" element={<Analytics />} />
+            <Route path="analytics/portfolio" element={<PortfolioAnalytics />} />
             <Route path="orders" element={<Orders />} />
             <Route path="profile" element={<Profile />} />
           </Route>
