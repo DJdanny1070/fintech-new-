@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/layout/Navbar/Navbar";
 import Footer from "../components/home/Footer/Footer";
+import FloatingScrollTop from "../components/common/FloatingScrollTop";
 import {
   createRequest,
   uploadDocuments,
@@ -493,6 +494,7 @@ function AssetTokenizationRequest() {
       </div>
 
       <Footer />
+      <FloatingScrollTop />
     </div>
   );
 }

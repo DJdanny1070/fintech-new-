@@ -14,10 +14,13 @@ function Register() {
     <div className="auth-page">
       {/* Left panel — brand */}
       <div className="auth-page__panel">
-        <div className="auth-panel__logo">
-          <span style={{ color: "#4FA3FF" }}>Creso</span>
-          <span style={{ color: "#FF5A5A" }}>X</span>
-        </div>
+        <Link to="/" className="auth-panel__logo">
+          <div className="auth-panel__logo-brand">
+            <span className="auth-panel__logo-creso">creso</span>
+            <span className="auth-panel__logo-x">x</span>
+          </div>
+          <span className="auth-panel__logo-sub">FINTECH PRIVATE LIMITED</span>
+        </Link>
         <p className="auth-panel__tagline">
           Access by invitation only.
         </p>

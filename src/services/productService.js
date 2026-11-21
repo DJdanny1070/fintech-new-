@@ -2,12 +2,35 @@ import { supabase } from "./supabase";
 import { createTransaction } from "./transactionService";
 import { getWallet, updateWalletBalance } from "./walletService";
 import { hashTokenPurchase, hashOwnershipChange, hashAssetCreation } from "./hashService";
+import {
+  isDemoMode,
+  getDemoProducts,
+  getDemoOrders,
+  addDemoOrder,
+} from "../data/demoData";
 
 /**
  * Fetch all products with optional filters.
  * @param {{ search?: string, category?: string }} filters
  */
 export async function getProducts({ search = "", category = "" } = {}) {
+  if (isDemoMode()) {
+    let list = getDemoProducts();
+    if (category && category !== "All") {
+      list = list.filter((p) => p.category.toLowerCase() === category.toLowerCase());
+    }
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(
+        (p) =>
+          p.title.toLowerCase().includes(q) ||
+          p.description.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }
+
   let query = supabase
     .from("products")
     .select(
@@ -44,14 +67,15 @@ export async function createProduct(productData) {
     daily_change: 0,
     daily_change_percent: 0,
     price_history: [],
-    last_price_update: new Date().toISOString(),};
+    last_price_update: new Date().toISOString(),
+  };
 
   const payload = {
     ...productData,
     ...defaultPricing,
   };
 
-    const { data, error } = await supabase
+  const { data, error } = await supabase
     .from("products")
     .insert([payload])
     .select()
@@ -120,100 +144,69 @@ export async function uploadProductImage(file, userId) {
 
 /**
  * Create an order when a buyer purchases a product.
+ * Uses atomic execute_purchase RPC function to enforce strict RLS and avoid cross-user wallet conflicts.
  */
 export async function createOrder({ buyerId, sellerId, productId }) {
-  const { data: productData, error: productError } = await supabase
-    .from("products")
-    .select("id, price, seller_id, title")
-    .eq("id", productId)
-    .single();
-
-  if (productError) throw productError;
-
-  const effectiveSellerId = productData?.seller_id || sellerId;
-  const amount = Number(productData?.price || 0);
-
-  const buyerWallet = await getWallet(buyerId);
-  const sellerWallet = await getWallet(effectiveSellerId);
-
-  if (!buyerWallet) throw new Error("Buyer wallet not found.");
-  if (!sellerWallet) throw new Error("Seller wallet not found.");
-  if (amount > 0 && (buyerWallet.balance || 0) < amount) {
-    throw new Error("Insufficient balance to complete this purchase.");
+  if (isDemoMode()) {
+    const list = getDemoProducts();
+    const product = list.find((p) => p.id === productId) || list[0];
+    const order = addDemoOrder(product);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("orders:changed"));
+      window.dispatchEvent(new Event("marketplace:changed"));
+    }
+    return order;
   }
 
-  const { data, error } = await supabase
-    .from("orders")
-    .insert([
-      {
-        buyer_id: buyerId,
-        seller_id: effectiveSellerId,
-        product_id: productId,
-        status: "pending",
-      },
-    ])
-    .select()
-    .single();
+  const { data, error } = await supabase.rpc("execute_purchase", {
+    p_buyer_id: buyerId,
+    p_product_id: productId,
+  });
 
-  if (error) throw error;
-
-  if (amount > 0) {
-    await updateWalletBalance(buyerId, (buyerWallet.balance || 0) - amount);
-    await updateWalletBalance(effectiveSellerId, (sellerWallet.balance || 0) + amount);
-
-    await createTransaction({
-      userId: buyerId,
-      type: "purchase",
-      amount: -amount,
-      counterpartyId: effectiveSellerId,
-      counterpartyName: productData?.title || "Seller",
-      note: `Purchased ${productData?.title || "product"}`,
-      status: "verified",
-    });
-
-    await createTransaction({
-      userId: effectiveSellerId,
-      type: "sale",
-      amount,
-      counterpartyId: buyerId,
-      counterpartyName: "Buyer",
-      note: `Sold ${productData?.title || "product"}`,
-      status: "verified",
-    });
+  if (error) {
+    throw new Error(error.message || "Failed to create order.");
   }
 
-  // ── Blockchain hashes ────────────────────────────────────────────
-  // Fire-and-forget: hash failures must never block the order.
+  // ── Blockchain hashes (fire and forget) ────────────────────────────
   try {
-    // 1. Token purchase event
-    await hashTokenPurchase(data.id, {
-      buyerId,
-      sellerId: effectiveSellerId,
-      assetId: productId,
-      assetTitle: productData?.title || "Asset",
-      price: amount,
-    });
+    if (data?.order_id) {
+      await hashTokenPurchase(data.order_id, {
+        buyerId,
+        sellerId: data.seller_id || sellerId,
+        assetId: productId,
+        assetTitle: data.title || "Asset",
+        price: data.price,
+      });
 
-    // 2. Ownership change event (buyer gains ownership)
-    // Ownership percentage is indicative (1 unit = 1 share of total supply);
-    // replace with real token ledger values when the trading engine launches.
-    await hashOwnershipChange(productId, {
-      userId: buyerId,
-      previousPct: 0,
-      newPct: 1, // placeholder: 1 token unit acquired
-      trigger: "purchase",
-    });
+      await hashOwnershipChange(productId, {
+        userId: buyerId,
+        previousPct: 0,
+        newPct: 1,
+        trigger: "purchase",
+      });
+    }
   } catch (err) {
     console.error("[blockchain] Order hash generation failed:", err.message);
   }
 
-  return data;
+  return {
+    id: data?.order_id,
+    buyer_id: data?.buyer_id,
+    seller_id: data?.seller_id,
+    product_id: data?.product_id,
+    status: data?.status || "pending",
+    created_at: data?.created_at,
+  };
 }
 
 /**
  * Get orders for the current user (as buyer or seller).
  */
 export async function getMyOrders(userId) {
+  if (isDemoMode()) {
+    return getDemoOrders();
+  }
+
   const { data, error } = await supabase
     .from("orders")
     .select(
@@ -235,6 +228,10 @@ export async function getMyOrders(userId) {
  * Get the user's own products (for seller dashboard).
  */
 export async function getMyProducts(sellerId) {
+  if (isDemoMode()) {
+    return getDemoProducts().slice(0, 2);
+  }
+
   const { data, error } = await supabase
     .from("products")
     .select("*")
@@ -249,6 +246,10 @@ export async function getMyProducts(sellerId) {
  * Fetch recent products with optional limit.
  */
 export async function getRecentProducts(limit = 3) {
+  if (isDemoMode()) {
+    return getDemoProducts().slice(0, limit);
+  }
+
   const { data, error } = await supabase
     .from("products")
     .select(
@@ -268,6 +269,10 @@ export async function getRecentProducts(limit = 3) {
  * Fetch recent orders across the platform (admin/dashboard view)
  */
 export async function getRecentOrdersGlobal(limit = 5) {
+  if (isDemoMode()) {
+    return getDemoOrders().slice(0, limit);
+  }
+
   const { data, error } = await supabase
     .from("orders")
     .select(
@@ -289,6 +294,13 @@ export async function getRecentOrdersGlobal(limit = 5) {
  * Get counts of orders for a user (received as seller, purchased as buyer).
  */
 export async function getOrdersCounts(userId) {
+  if (isDemoMode()) {
+    return {
+      received: 1,
+      purchased: 4,
+    };
+  }
+
   const [receivedRes, purchasedRes] = await Promise.all([
     supabase.from("orders").select("id", { count: "exact", head: true }).eq("seller_id", userId),
     supabase.from("orders").select("id", { count: "exact", head: true }).eq("buyer_id", userId),
@@ -307,6 +319,10 @@ export async function getOrdersCounts(userId) {
  * Fetch recent orders related to the user (buyer or seller).
  */
 export async function getRecentOrders(userId, limit = 5) {
+  if (isDemoMode()) {
+    return getDemoOrders().slice(0, limit);
+  }
+
   const { data, error } = await supabase
     .from("orders")
     .select(
@@ -329,6 +345,13 @@ export async function getRecentOrders(userId, limit = 5) {
  * Get total counts for products and orders in the marketplace.
  */
 export async function getGlobalCounts() {
+  if (isDemoMode()) {
+    return {
+      products: getDemoProducts().length,
+      orders: getDemoOrders().length,
+    };
+  }
+
   const [productsRes, ordersRes] = await Promise.all([
     supabase.from("products").select("id", { count: "exact", head: true }),
     supabase.from("orders").select("id", { count: "exact", head: true }),
@@ -347,6 +370,12 @@ export async function getGlobalCounts() {
  * Fetch a single product by id with seller info.
  */
 export async function getProduct(id) {
+  if (isDemoMode()) {
+    const list = getDemoProducts();
+    const found = list.find((p) => p.id === id);
+    return found || list[0] || null;
+  }
+
   const { data, error } = await supabase
     .from("products")
     .select(
@@ -366,6 +395,12 @@ export async function getProduct(id) {
  * Fetch related products by category excluding a product id.
  */
 export async function getRelatedProducts(category, excludeId) {
+  if (isDemoMode()) {
+    return getDemoProducts()
+      .filter((p) => p.id !== excludeId && (!category || p.category === category))
+      .slice(0, 6);
+  }
+
   if (!category) return [];
   const { data, error } = await supabase
     .from("products")
@@ -382,8 +417,8 @@ export async function getRelatedProducts(category, excludeId) {
 }
 
 export function calculatePriceChange(currentPrice, previousPrice) {
-  const current = Number(current || 0);
-  const previous = Number(previous || 0);
+  const current = Number(currentPrice || 0);
+  const previous = Number(previousPrice || 0);
 
   const change = current - previous;
   const percent = previous === 0 ? 0 : (change / previous) * 100;
@@ -418,15 +453,14 @@ export async function updateTokenPrice(productId, newPrice) {
 export async function getPriceHistory(productId) {
   const product = await getProduct(productId);
 
-  return product?.price_history ?? []; }
-
-export async function getMarketplaceSummary(){
-  const products = await getProducts();
-
-  return{
-    totalAssets: products.length,
-    totalMarketValue: products.reduce((sum,product) => sum + Number(product.current_price || 0), 0),
-  
-  };
+  return product?.price_history ?? [];
 }
 
+export async function getMarketplaceSummary() {
+  const products = await getProducts();
+
+  return {
+    totalAssets: products.length,
+    totalMarketValue: products.reduce((sum, product) => sum + Number(product.current_price || 0), 0),
+  };
+}

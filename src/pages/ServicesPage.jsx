@@ -227,13 +227,13 @@ const BLOCKCHAIN_POINTS = [
 
 /* ── User journey steps ────────────────────────────────────── */
 const JOURNEY_STEPS = [
-  { num: "01", label: "Visit CresoX",      sub: "Browse our services",                color: "#EFF6FF", iconColor: "#075AD8" },
-  { num: "02", label: "Read & Understand", sub: "Learn about our services",            color: "#FFFBEB", iconColor: "#D97706" },
-  { num: "03", label: "Accept T&C",        sub: "Review terms & conditions",           color: "#F0FDF4", iconColor: "#16A34A" },
-  { num: "04", label: "Submit Request",    sub: "Fill in the service request form",    color: "#EFF6FF", iconColor: "#075AD8" },
-  { num: "05", label: "Verification",      sub: "CresoX reviews your application",     color: "#F0FDF4", iconColor: "#16A34A" },
-  { num: "06", label: "Approved",          sub: "Receive your account credentials",    color: "#F0FDF4", iconColor: "#16A34A" },
-  { num: "07", label: "Sign In",           sub: "Access your secure dashboard",        color: "#EFF6FF", iconColor: "#075AD8" },
+  { num: "01", label: "Visit CresoX",      sub: "Browse our services",                color: "rgba(56, 189, 248, 0.15)", iconColor: "#38BDF8" },
+  { num: "02", label: "Read & Understand", sub: "Learn about our services",            color: "rgba(245, 158, 11, 0.15)", iconColor: "#F59E0B" },
+  { num: "03", label: "Accept T&C",        sub: "Review terms & conditions",           color: "rgba(16, 185, 129, 0.15)", iconColor: "#10B981" },
+  { num: "04", label: "Submit Request",    sub: "Fill in the service request form",    color: "rgba(56, 189, 248, 0.15)", iconColor: "#38BDF8" },
+  { num: "05", label: "Verification",      sub: "CresoX reviews your application",     color: "rgba(16, 185, 129, 0.15)", iconColor: "#10B981" },
+  { num: "06", label: "Approved",          sub: "Receive your account credentials",    color: "rgba(16, 185, 129, 0.15)", iconColor: "#10B981" },
+  { num: "07", label: "Sign In",           sub: "Access your secure dashboard",        color: "rgba(255, 87, 34, 0.15)", iconColor: "#FF5722" },
 ];
 
 /* ─────────────────────────────────────────────────────────── */

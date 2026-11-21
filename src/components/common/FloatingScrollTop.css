@@ -1,0 +1,32 @@
+/* ═══════════════════════════════════════════════════════════════
+   CresoX Floating Scroll To Top Button (Image 3 & 4)
+   ═══════════════════════════════════════════════════════════════ */
+
+.cx-scroll-top {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #FF5722;
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 24px rgba(255, 87, 34, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 990;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cx-scroll-top:hover {
+  background: #E64A19;
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 12px 30px rgba(255, 87, 34, 0.6);
+}
+
+.cx-scroll-top:active {
+  transform: translateY(0) scale(0.96);
+}

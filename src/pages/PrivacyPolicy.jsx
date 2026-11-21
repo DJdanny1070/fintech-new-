@@ -1,4 +1,4 @@
-import StaticPageLayout from "../components/layout/StaticPageLayout/StaticPageLayout";
+ import StaticPageLayout from "../components/layout/StaticPageLayout/StaticPageLayout";
 
 const SECTIONS = [
   {

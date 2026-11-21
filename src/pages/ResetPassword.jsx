@@ -42,10 +42,13 @@ function ResetPassword() {
   return (
     <div className="auth-page">
       <div className="auth-page__panel">
-        <div className="auth-panel__logo">
-          <span style={{ color: "#4FA3FF" }}>Creso</span>
-          <span style={{ color: "#FF5A5A" }}>X</span>
-        </div>
+        <Link to="/" className="auth-panel__logo">
+          <div className="auth-panel__logo-brand">
+            <span className="auth-panel__logo-creso">creso</span>
+            <span className="auth-panel__logo-x">x</span>
+          </div>
+          <span className="auth-panel__logo-sub">FINTECH PRIVATE LIMITED</span>
+        </Link>
         <p className="auth-panel__tagline">Reset access securely.</p>
         <p className="auth-panel__sub">
           Enter the email linked to your approved account. We will send a password reset link if the account exists.
@@ -76,7 +79,7 @@ function ResetPassword() {
                 id="reset-email"
                 className="input"
                 type="email"
-                placeholder="you@company.com"
+            
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

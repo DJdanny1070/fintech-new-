@@ -216,12 +216,13 @@
   bottom: 2px;
   right: 4px;
   font-size: 10px;
-  color: var(--text-subtle);
+  color: var(--text-muted);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
-  background: rgba(255,255,255,0.75);
-  padding: 1px 4px;
-  border-radius: 3px;
+  background: rgba(14, 21, 38, 0.9);
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* ── Price block (Current Price + Daily Change + % + Trend) ──────── */
@@ -719,8 +720,9 @@
 .cp-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(3px);
+  background: rgba(4, 7, 13, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -728,12 +730,14 @@
   padding: var(--sp-4);
 }
 .cp-modal {
-  background: var(--bg-white);
-  border: 1.5px solid var(--border);
+  background: rgba(14, 21, 38, 0.95);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--r-xl);
   width: 100%;
   max-width: 440px;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
   animation: fade-up 200ms ease both;
   overflow: hidden;
 }

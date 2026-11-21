@@ -1,0 +1,71 @@
+/* ═══════════════════════════════════════════════════════════════
+   CresoX Marquee Ticker — Full-Width Deep Tech Ribbon
+   ═══════════════════════════════════════════════════════════════ */
+
+.cx-ticker {
+  position: relative;
+  overflow: hidden;
+  background: #04070D;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 18px 0;
+  display: flex;
+  align-items: center;
+  user-select: none;
+}
+
+.cx-ticker__track {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  width: max-content;
+  animation: tickerScroll 38s linear infinite;
+  white-space: nowrap;
+}
+
+.cx-ticker__track:hover {
+  animation-play-state: paused;
+}
+
+.cx-ticker__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.cx-ticker__diamond {
+  color: #FF5722;
+  font-size: 10px;
+}
+
+.cx-ticker__text {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: #94A3B8;
+  text-transform: uppercase;
+}
+
+.cx-ticker__fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.cx-ticker__fade--left {
+  left: 0;
+  background: linear-gradient(to right, #04070D, transparent);
+}
+
+.cx-ticker__fade--right {
+  right: 0;
+  background: linear-gradient(to left, #04070D, transparent);
+}
+
+@keyframes tickerScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}

@@ -66,12 +66,12 @@ function Footer() {
       <div className="footer__container">
         <div className="footer__top">
           <div className="footer__brand">
-            <Link to="/" className="footer__logo">
-              <img
-                src={cresoxLogo}
-                alt="CresoX Fintech Private Limited"
-                className="footer__logo-img"
-              />
+            <Link to="/" className="cx-nav__logo footer__logo" aria-label="CresoX Fintech Private Limited">
+              <div className="cx-nav__logo-brand">
+                <span className="cx-nav__logo-creso">creso</span>
+                <span className="cx-nav__logo-x">x</span>
+              </div>
+              <span className="cx-nav__logo-sub">FINTECH PRIVATE LIMITED</span>
             </Link>
             <p className="footer__desc">
               A complete financial ecosystem for wallets, marketplace trading,

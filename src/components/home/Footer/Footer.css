@@ -1,8 +1,20 @@
 /* ── Footer ─────────────────────────────────────────────────── */
 
 .footer {
-  background: #2c3e58;
+  background: #060910;
   color: rgba(255, 255, 255, 0.75);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+}
+
+.footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(56, 189, 248, 0.4) 50%, transparent 100%);
 }
 
 .footer__container {
@@ -20,16 +32,43 @@
 }
 
 .footer__logo {
-  display: inline-block;
+  display: inline-flex;
+  flex-direction: column;
+  text-decoration: none;
+  line-height: 1.15;
   margin-bottom: var(--sp-4);
+  cursor: pointer;
+  user-select: none;
 }
 
-.footer__logo-img {
-  display: block;
-  height: 52px;
-  width: auto;
-  object-fit: contain;
-  border-radius: var(--r-sm);
+.footer__logo .cx-nav__logo-brand {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: #FFFFFF;
+  display: flex;
+  align-items: baseline;
+}
+
+.footer__logo .cx-nav__logo-creso {
+  color: #FFFFFF;
+  letter-spacing: -0.03em;
+}
+
+.footer__logo .cx-nav__logo-x {
+  color: #FF5722;
+  font-weight: 900;
+  margin-left: 0.5px;
+  filter: drop-shadow(0 0 10px rgba(255, 87, 34, 0.45));
+}
+
+.footer__logo .cx-nav__logo-sub {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #94A3B8;
+  margin-top: 2px;
+  text-transform: uppercase;
 }
 
 .footer__desc {

@@ -2,14 +2,13 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Navbar from "../components/layout/Navbar/Navbar";
 import Hero from "../components/home/Hero/Hero";
-import TrustedBy from "../components/home/TrustedBy/TrustedBy";
-import Services from "../components/home/Services/Services";
-import RealWorldAssets from "../components/home/RealWorldAssets/RealWorldAssets";
-import HowItWorks from "../components/home/HowItWorks/HowItWorks";
+import MarqueeTicker from "../components/home/MarqueeTicker/MarqueeTicker";
+import WhatWeDo from "../components/home/WhatWeDo/WhatWeDo";
+import OurObjectives from "../components/home/OurObjectives/OurObjectives";
 import BlockchainViz from "../components/home/BlockchainViz/BlockchainViz";
 import Leadership from "../components/home/Leadership/Leadership";
-import Platform from "../components/home/Platform/Platform";
 import Footer from "../components/home/Footer/Footer";
+import FloatingScrollTop from "../components/common/FloatingScrollTop";
 
 function Home() {
   const location = useLocation();
@@ -29,15 +28,16 @@ function Home() {
   return (
     <>
       <Navbar />
-      <Hero />
-      <TrustedBy />
-      <Services />
-      <RealWorldAssets />
-      <HowItWorks />
-      <BlockchainViz />
-      <Leadership />
-      <Platform />
+      <main>
+        <Hero />
+        <MarqueeTicker />
+        <WhatWeDo />
+        <OurObjectives />
+        <BlockchainViz />
+        <Leadership />
+      </main>
       <Footer />
+      <FloatingScrollTop />
     </>
   );
 }

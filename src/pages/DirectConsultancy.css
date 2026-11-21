@@ -14,7 +14,9 @@
    HERO
    ══════════════════════════════════════════════════════════════ */
 .dc-hero {
-  background: linear-gradient(150deg, #0d1f3c 0%, #1a2e50 40%, #0f2545 70%, #0a1b38 100%);
+  background: radial-gradient(ellipse 65% 65% at 80% 20%, rgba(2, 96, 198, 0.22) 0%, transparent 60%),
+              radial-gradient(ellipse 50% 60% at 15% 80%, rgba(255, 87, 34, 0.14) 0%, transparent 60%),
+              #080C14;
   padding: 110px 0 90px;
   position: relative;
   overflow: hidden;
@@ -745,20 +747,20 @@
   font-size: 16px;
   font-weight: 700;
   padding: 15px 36px;
-  border-radius: var(--r-md);
-  background: #075AD8;
+  border-radius: var(--r-full);
+  background: linear-gradient(135deg, #FF6B35 0%, #FF5722 100%);
   color: #fff;
   border: none;
   cursor: pointer;
   text-decoration: none;
   transition: background 180ms ease, transform 180ms ease, box-shadow 180ms ease;
-  box-shadow: 0 4px 20px rgba(7, 90, 216, 0.5);
+  box-shadow: 0 4px 20px rgba(255, 87, 34, 0.4);
 }
 
 .dc-cta__btn-primary:hover {
-  background: #054BB5;
+  background: linear-gradient(135deg, #FF7A45 0%, #E64A19 100%);
   transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(7, 90, 216, 0.6);
+  box-shadow: 0 8px 30px rgba(255, 87, 34, 0.55);
 }
 
 .dc-cta__btn-secondary {

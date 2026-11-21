@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { updateProfile, uploadAvatar, requestBusinessVerification } from "../services/profileService";
 import { useToast } from "../components/common/ToastProvider";
+import { isDemoMode } from "../data/demoData";
+import "./Dashboard.css";
 
 function Profile() {
   const { user, profile, refreshProfile } = useAuth();
@@ -178,17 +180,69 @@ function Profile() {
           </div>
         </div>
 
-        <form onSubmit={handleSave} style={{display:"grid",gridTemplateColumns:"160px 1fr",gap:20,alignItems:"start"}}>
-          <div>
-            <div style={{width:140,height:140,borderRadius:8,overflow:"hidden",background:"var(--bg)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+        <form onSubmit={handleSave} style={{display:"grid",gridTemplateColumns:"130px 1fr",gap:28,alignItems:"start"}}>
+          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:12}}>
+            <div
+              style={{
+                width: 96,
+                height: 96,
+                borderRadius: "50%",
+                overflow: "hidden",
+                background: "linear-gradient(135deg, rgba(2, 96, 198, 0.25) 0%, rgba(56, 189, 248, 0.15) 100%)",
+                border: "2px solid rgba(56, 189, 248, 0.4)",
+                boxShadow: "0 0 18px rgba(56, 189, 248, 0.2)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
               {avatarPreview ? (
                 <img src={avatarPreview} alt={`${profile?.full_name || "User"}'s profile photo`} style={{width:"100%",height:"100%",objectFit:"cover"}} />
               ) : (
-                <div style={{fontSize:28,fontWeight:700,color:"var(--text-muted)"}}>{(profile?.full_name||"?")[0]}</div>
+                <div style={{fontSize:32,fontWeight:800,color:"#FFFFFF"}}>{(profile?.full_name||"?")[0]}</div>
               )}
             </div>
-            <div style={{marginTop:12}}>
-              <input type="file" accept="image/*" onChange={handleAvatarChange} />
+
+            <div style={{width:"100%",textAlign:"center"}}>
+              <label
+                htmlFor="avatar-file-input"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  padding: "6px 14px",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "#E2E8F0",
+                  background: "rgba(255, 255, 255, 0.06)",
+                  border: "1px solid rgba(255, 255, 255, 0.14)",
+                  borderRadius: 8,
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  width: "100%",
+                  boxSizing: "border-box",
+                }}
+                onMouseOver={(e) => { e.currentTarget.style.background = "rgba(255, 87, 34, 0.15)"; e.currentTarget.style.borderColor = "#FF5722"; e.currentTarget.style.color = "#FF5722"; }}
+                onMouseOut={(e) => { e.currentTarget.style.background = "rgba(255, 255, 255, 0.06)"; e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.14)"; e.currentTarget.style.color = "#E2E8F0"; }}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+                <span>{form.avatar ? "Change" : "Upload"}</span>
+              </label>
+              <input
+                id="avatar-file-input"
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                style={{ display: "none" }}
+              />
+              <div style={{fontSize:10.5,color:"#64748B",marginTop:5,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                {form.avatar ? form.avatar.name : "JPG or PNG"}
+              </div>
             </div>
           </div>
 
@@ -202,8 +256,8 @@ function Profile() {
               </div>
 
               <div className="auth-field">
-                <label className="input-label">Email</label>
-                <input className="input" value={profile?.email || ""} disabled />
+                <label className="input-label">{isDemoMode() ? "Account / Username" : "Email"}</label>
+                <input className="input" value={isDemoMode() ? "demo" : (profile?.email || "")} disabled />
               </div>
 
               <div className="auth-field">

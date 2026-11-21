@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../components/common/ToastProvider";
 import AccessPending from "../pages/AccessPending";
+import { isDemoMode } from "../data/demoData";
 
 /**
  * ProtectedRoute
@@ -59,6 +60,11 @@ function ProtectedRoute({ children }) {
   // ── 2. Not authenticated → login ────────────────────────────────
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // ── Demo Mode: Instant Access (Bypass Approval Gates) ────────────
+  if (isDemoMode()) {
+    return children;
   }
 
   // ── 3. Authenticated but approval not yet resolved ───────────────

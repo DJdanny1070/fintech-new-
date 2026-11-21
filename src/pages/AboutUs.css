@@ -1,0 +1,156 @@
+/* ═══════════════════════════════════════════════════════════════
+   CresoX About Us Page — High-Tech Deep-Midnight Theme
+   ═══════════════════════════════════════════════════════════════ */
+
+.cx-about {
+  min-height: 100vh;
+  background: #080C14;
+  color: #F8FAFC;
+  padding-top: 74px; /* nav height */
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background Ambient Glows & Grid */
+.cx-about::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -20%;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(2, 96, 198, 0.16) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cx-about::after {
+  content: "";
+  position: absolute;
+  top: 300px;
+  right: -10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(255, 87, 34, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Top Hero / Intro ─────────────────────────────────────────── */
+.cx-about-hero {
+  padding: 80px 0 60px;
+  position: relative;
+  z-index: 1;
+}
+
+.cx-about-hero__container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 28px;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 56px;
+  align-items: center;
+}
+
+.cx-about-hero__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #94A3B8;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.cx-about-hero__tag-dash {
+  color: #FF5722;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.cx-about-hero__title {
+  font-size: clamp(32px, 3.8vw, 50px);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: #FFFFFF;
+  margin-bottom: 24px;
+}
+
+.cx-about-hero__lead {
+  font-size: 17px;
+  line-height: 1.8;
+  color: #CBD5E1;
+  max-width: 620px;
+}
+
+/* ── Right Constellation Preview Card ─────────────────────────── */
+.cx-about-hero__card {
+  background: rgba(14, 21, 38, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+.cx-about-hero__card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #FF5722 0%, #38BDF8 100%);
+}
+
+.cx-about-hero__card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #FFFFFF;
+}
+
+.cx-about-hero__badge-dot {
+  width: 7px;
+  height: 7px;
+  background: #FF5722;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #FF5722;
+}
+
+.cx-about-hero__card-canvas-wrap {
+  position: relative;
+  height: 220px;
+  margin-top: 16px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: radial-gradient(circle at 60% 40%, rgba(2, 96, 198, 0.25) 0%, rgba(9, 14, 26, 0.95) 70%);
+}
+
+.cx-about-hero__card-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ── Responsive ────────────────────────────────────────────────── */
+@media (max-width: 960px) {
+  .cx-about-hero__container {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}

@@ -33,7 +33,13 @@ function Login() {
       toast.success("Signed in successfully.");
       navigate(from, { replace: true });
     } catch (err) {
-      const message = err.message || "We could not sign you in. Please check your credentials and try again.";
+      const rawMessage = err?.message || "";
+      let message = "We could not sign you in. Please check your credentials and try again.";
+      if (/failed to fetch|network|load failed/i.test(rawMessage)) {
+        message = `Cannot connect to Supabase backend (${rawMessage}). The project host is unreachable. Please verify your Supabase project is active and that VITE_SUPABASE_URL in .env matches your project.`;
+      } else if (rawMessage) {
+        message = rawMessage;
+      }
       setError(message);
       toast.error("Login failed");
     } finally {
@@ -47,7 +53,13 @@ function Login() {
     try {
       await loginWithGoogle();
     } catch (err) {
-      const message = err.message || "Google login failed.";
+      const rawMessage = err?.message || "";
+      let message = "Google login failed.";
+      if (/failed to fetch|network|load failed/i.test(rawMessage)) {
+        message = `Cannot connect to Supabase backend (${rawMessage}). Please verify your Supabase project is active and that VITE_SUPABASE_URL in .env is correct.`;
+      } else if (rawMessage) {
+        message = rawMessage;
+      }
       setError(message);
       toast.error("Login failed");
       setGoogleLoading(false);
@@ -60,10 +72,13 @@ function Login() {
     <div className="auth-page">
       {/* Left panel */}
       <div className="auth-page__panel">
-        <div className="auth-panel__logo">
-          <span style={{ color: "#4FA3FF" }}>Creso</span>
-          <span style={{ color: "#FF5A5A" }}>X</span>
-        </div>
+        <Link to="/" className="auth-panel__logo">
+          <div className="auth-panel__logo-brand">
+            <span className="auth-panel__logo-creso">creso</span>
+            <span className="auth-panel__logo-x">x</span>
+          </div>
+          <span className="auth-panel__logo-sub">FINTECH PRIVATE LIMITED</span>
+        </Link>
 
         <p className="auth-panel__tagline">Access is by invitation only.</p>
         <p className="auth-panel__sub">
@@ -138,20 +153,20 @@ function Login() {
 
           <form className="auth-form" onSubmit={handleSubmit} noValidate>
             <div className="auth-field">
-              <label className="input-label" htmlFor="login-email">Email address</label>
+              <label className="input-label" htmlFor="login-email">Email address or Username</label>
               <input
                 id="login-email"
                 className="input"
-                type="email"
-                placeholder="you@company.com"
+                type="text"
+                placeholder="name@company.com or demo"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 required
-                autoComplete="email"
+                autoComplete="username"
                 disabled={isDisabled}
               />
               <span className="auth-field__hint">
-                Use the email address associated with your approved account.
+                Use your approved account credentials or demo credentials to sign in.
               </span>
             </div>
 
@@ -186,6 +201,38 @@ function Login() {
             >
               {loading ? <><span className="spinner" /> Signing in...</> : "Sign In →"}
             </button>
+
+            {/* Demo Mode Quick Access Card for Internship Report & Screenshots */}
+            <div
+              style={{
+                marginTop: "16px",
+                padding: "12px 14px",
+                borderRadius: "8px",
+                background: "var(--blue-light)",
+                border: "1px solid var(--border-focus)",
+                display: "flex",
+                flexDirection: "column",
+                gap: "6px",
+                textAlign: "left",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: "12px", fontWeight: "700", color: "var(--blue)" }}>
+                  Demo Access (Internship Screenshots)
+                </span>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  style={{ fontSize: "11px", padding: "2px 8px", height: "auto" }}
+                  onClick={() => setForm({ email: "demo", password: "CresoXDemo@2026" })}
+                >
+                  Autofill
+                </button>
+              </div>
+              <div style={{ fontSize: "12px", color: "var(--text-secondary)", fontFamily: "monospace" }}>
+                User: <strong>demo</strong> | Pass: <strong>CresoXDemo@2026</strong>
+              </div>
+            </div>
           </form>
 
           <div className="auth-card__footer">

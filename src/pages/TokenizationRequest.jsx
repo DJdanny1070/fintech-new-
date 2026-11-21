@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/layout/Navbar/Navbar";
 import Footer from "../components/home/Footer/Footer";
+import FloatingScrollTop from "../components/common/FloatingScrollTop";
 import "./TokenizationRequest.css";
 
 /* ── Progress steps ── */
@@ -285,7 +286,7 @@ function TokenizationRequest() {
                       name="fullName"
                       type="text"
                       className="tr-form__input"
-                      placeholder="e.g. Rajiv Sharma"
+                      
                       value={form.fullName}
                       onChange={handleChange}
                       required
@@ -302,7 +303,7 @@ function TokenizationRequest() {
                       name="email"
                       type="email"
                       className="tr-form__input"
-                      placeholder="e.g. rajiv@company.com"
+                      
                       value={form.email}
                       onChange={handleChange}
                       required
@@ -319,7 +320,7 @@ function TokenizationRequest() {
                       name="phone"
                       type="tel"
                       className="tr-form__input"
-                      placeholder="+91 98765 43210"
+                      
                       value={form.phone}
                       onChange={handleChange}
                       required
@@ -336,7 +337,7 @@ function TokenizationRequest() {
                       name="organization"
                       type="text"
                       className="tr-form__input"
-                      placeholder="e.g. Sharma Properties Pvt. Ltd."
+                     
                       value={form.organization}
                       onChange={handleChange}
                       autoComplete="organization"
@@ -385,7 +386,7 @@ function TokenizationRequest() {
                       name="assetName"
                       type="text"
                       className="tr-form__input"
-                      placeholder="e.g. Horizon Tower, Wing B"
+                      
                       value={form.assetName}
                       onChange={handleChange}
                       required
@@ -401,7 +402,7 @@ function TokenizationRequest() {
                       name="assetLocation"
                       type="text"
                       className="tr-form__input"
-                      placeholder="e.g. Bandra Kurla Complex, Mumbai"
+                      
                       value={form.assetLocation}
                       onChange={handleChange}
                       required
@@ -438,7 +439,7 @@ function TokenizationRequest() {
                       min="0"
                       max="100"
                       className="tr-form__input"
-                      placeholder="e.g. 5"
+                      
                       value={form.ownershipYears}
                       onChange={handleChange}
                     />
@@ -637,6 +638,7 @@ function TokenizationRequest() {
       </div>
 
       <Footer />
+      <FloatingScrollTop />
     </div>
   );
 }

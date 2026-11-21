@@ -1,8 +1,8 @@
 /* ── Trusted By ─────────────────────────────────────────────── */
 
 .trusted-by {
-  background: #f8fafc;
-  border-bottom: 1px solid var(--border);
+  background: #080C14;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding: 56px 0;
 }
 
@@ -23,14 +23,14 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: #38BDF8 !important;
   margin-bottom: var(--sp-2);
 }
 
 .trusted-by__subtitle {
   font-size: 15px;
   font-weight: 400;
-  color: var(--text-muted);
+  color: #94A3B8 !important;
   line-height: 1.5;
 }
 
@@ -52,7 +52,7 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--text-subtle);
+  color: #64748B;
 }
 
 .trusted-by__logos {
@@ -66,16 +66,16 @@
   align-items: center;
   gap: var(--sp-3);
   padding: 12px 14px;
-  background: #ffffff;
-  border: 1px solid var(--border);
+  background: rgba(14, 21, 38, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--r-sm);
-  box-shadow: 0 1px 2px rgba(17, 24, 39, 0.04);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   transition: border-color var(--t), transform var(--t);
 }
 
 .trusted-by__logo:hover {
-  border-color: #d1d5db;
-  transform: scale(1.02);
+  border-color: rgba(56, 189, 248, 0.3);
+  transform: translateY(-2px);
 }
 
 .trusted-by__mark {
@@ -86,18 +86,18 @@
   height: 32px;
   flex-shrink: 0;
   border-radius: var(--r-sm);
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.09);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: #9ca3af;
+  color: #CBD5E1;
 }
 
 .trusted-by__name {
   font-size: 13px;
   font-weight: 600;
-  color: #9ca3af;
+  color: #E2E8F0 !important;
   letter-spacing: -0.01em;
   white-space: nowrap;
   overflow: hidden;

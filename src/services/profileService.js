@@ -1,5 +1,6 @@
 import { supabase } from "./supabase";
 import { hashVerificationApproval } from "./hashService";
+import { isDemoMode, DEMO_PROFILE, DEMO_RECENT_USERS } from "../data/demoData";
 
 /**
  * Create a new profile row for a newly registered user.
@@ -39,6 +40,10 @@ export async function createProfile(userId, { full_name, email, role }) {
  * Fetch a user's profile by their auth user ID.
  */
 export async function getProfile(userId) {
+  if (isDemoMode()) {
+    return DEMO_PROFILE;
+  }
+
   const { data, error } = await supabase
     .from("profiles")
     .select("*")
@@ -53,6 +58,10 @@ export async function getProfile(userId) {
  * Fetch a profile by email address.
  */
 export async function getProfileByEmail(email) {
+  if (isDemoMode()) {
+    return DEMO_PROFILE;
+  }
+
   const { data, error } = await supabase
     .from("profiles")
     .select("*")
@@ -67,6 +76,10 @@ export async function getProfileByEmail(email) {
  * Get recent profiles (most recently registered users)
  */
 export async function getRecentProfiles(limit = 5) {
+  if (isDemoMode()) {
+    return DEMO_RECENT_USERS.slice(0, limit);
+  }
+
   const { data, error } = await supabase
     .from("profiles")
     .select("id, full_name, email, role, created_at, verification_status, avatar_url")
@@ -84,6 +97,12 @@ export async function searchSellers(query, { limit = 6 } = {}) {
   const trimmed = (query || "").trim();
   if (!trimmed) return [];
 
+  if (isDemoMode()) {
+    return DEMO_RECENT_USERS.filter((u) =>
+      u.full_name.toLowerCase().includes(trimmed.toLowerCase())
+    ).slice(0, limit);
+  }
+
   const { data, error } = await supabase
     .from("profiles")
     .select("id, full_name, company_name, role, email, verification_status, avatar_url")
@@ -99,6 +118,13 @@ export async function searchSellers(query, { limit = 6 } = {}) {
  * Get simple counts: users and verified sellers
  */
 export async function getCounts() {
+  if (isDemoMode()) {
+    return {
+      users: 18,
+      verified_sellers: 8,
+    };
+  }
+
   const [usersRes, verifiedRes] = await Promise.all([
     supabase.from("profiles").select("id", { count: "exact", head: true }),
     supabase.from("profiles").select("id", { count: "exact", head: true }).eq("verification_status", "Verified"),
@@ -117,6 +143,10 @@ export async function getCounts() {
  * Update profile fields.
  */
 export async function updateProfile(userId, fields) {
+  if (isDemoMode()) {
+    return { ...DEMO_PROFILE, ...fields };
+  }
+
   const { data, error } = await supabase
     .from("profiles")
     .update(fields)

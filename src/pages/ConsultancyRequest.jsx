@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/layout/Navbar/Navbar";
 import Footer from "../components/home/Footer/Footer";
+import FloatingScrollTop from "../components/common/FloatingScrollTop";
 import {
   createRequest,
   REQUEST_TYPES,
@@ -421,6 +422,7 @@ function ConsultancyRequest() {
       </div>
 
       <Footer />
+      <FloatingScrollTop />
     </div>
   );
 }

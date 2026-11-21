@@ -1,180 +1,141 @@
-import { useState } from "react";
-import StaticPageLayout from "../components/layout/StaticPageLayout/StaticPageLayout";
-import { Link } from "react-router-dom";
-
-/* ─── Team placeholder data ──────────────────────────────────── */
-const TEAM = [
-  { name: "Wasiullah Shaik Mohammed",    role: "Founder",      initial: "W" },
-  { name: "Ishtiyaq Nadeem",   role: "Co-Founder",     initial: "I" },
-  { name: "Sudheer",   role: "Advisor-Technology Development",      initial: "S" },
-];
-
-const FEATURES = [
-  {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M16 12h.01"/>
-      </svg>
-    ),
-    title: "Digital Wallet",
-    body: "Multi-currency digital wallets with real-time balance, transfers, and transaction history.",
-    color: "var(--blue-light)", text: "var(--blue)",
-  },
-  {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
-      </svg>
-    ),
-    title: "Marketplace",
-    body: "A verified asset marketplace enabling buy/sell of real-world tokenised assets on-chain.",
-    color: "var(--green-light)", text: "var(--green)",
-  },
-  {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-      </svg>
-    ),
-    title: "Blockchain Verification",
-    body: "Hash-based immutable record keeping ensuring every transaction is tamper-proof and auditable.",
-    color: "var(--amber-light)", text: "var(--amber)",
-  },
-  {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
-      </svg>
-    ),
-    title: "Developer APIs",
-    body: "RESTful APIs, webhooks, and sandbox environments for seamless third-party integrations.",
-    color: "#EEF0F4", text: "var(--slate)",
-  },
-];
+import { useEffect, useRef } from "react";
+import Navbar from "../components/layout/Navbar/Navbar";
+import Footer from "../components/home/Footer/Footer";
+import MarqueeTicker from "../components/home/MarqueeTicker/MarqueeTicker";
+import OurObjectives from "../components/home/OurObjectives/OurObjectives";
+import Leadership from "../components/home/Leadership/Leadership";
+import FloatingScrollTop from "../components/common/FloatingScrollTop";
+import "./AboutUs.css";
 
 function AboutUs() {
+  const canvasRef = useRef(null);
+
+  // Dynamic particle constellation inside the Shared Ledger card
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    let animId;
+
+    let width = (canvas.width = canvas.offsetWidth);
+    let height = (canvas.height = canvas.offsetHeight);
+
+    const onResize = () => {
+      if (!canvas) return;
+      width = canvas.width = canvas.offsetWidth;
+      height = canvas.height = canvas.offsetHeight;
+    };
+    window.addEventListener("resize", onResize);
+
+    const nodes = Array.from({ length: 22 }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * 0.45,
+      vy: (Math.random() - 0.5) * 0.45,
+      radius: Math.random() * 2 + 1.2,
+      isOrange: Math.random() > 0.8,
+    }));
+
+    const render = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      // Connect lines
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[i].x - nodes[j].x;
+          const dy = nodes[i].y - nodes[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 90) {
+            const alpha = (1 - dist / 90) * 0.35;
+            ctx.beginPath();
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            ctx.lineTo(nodes[j].x, nodes[j].y);
+            ctx.strokeStyle = `rgba(56, 189, 248, ${alpha})`;
+            ctx.lineWidth = 0.85;
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Draw nodes
+      nodes.forEach((n) => {
+        n.x += n.vx;
+        n.y += n.vy;
+        if (n.x < 0 || n.x > width) n.vx *= -1;
+        if (n.y < 0 || n.y > height) n.vy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.radius, 0, Math.PI * 2);
+        ctx.fillStyle = n.isOrange ? "#FF5722" : "rgba(148, 163, 184, 0.85)";
+        if (n.isOrange) {
+          ctx.shadowColor = "#FF5722";
+          ctx.shadowBlur = 8;
+        } else {
+          ctx.shadowBlur = 0;
+        }
+        ctx.fill();
+      });
+
+      animId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
+
   return (
-    <StaticPageLayout
-      eyebrow="Company"
-      title="Powering the Future of Finance"
-      subtitle="CresoX Fintech Private Limited is building India's most trusted digital financial ecosystem — connecting wallets, markets, and blockchains in one platform."
-    >
-      {/* Mission & Vision */}
-      <div className="sp-grid" style={{ marginBottom: "var(--sp-16)" }}>
-        <div className="sp-card">
-          <div
-            className="sp-card__icon"
-            style={{ background: "var(--blue-light)", color: "var(--blue)" }}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-            </svg>
-          </div>
-          <p className="sp-card__title">Our Mission</p>
-          <p className="sp-card__body">
-            To democratise access to financial infrastructure for individuals,
-            businesses, and developers across India — making digital payments,
-            asset trading, and blockchain verification as simple as a tap.
-          </p>
-        </div>
-        <div className="sp-card">
-          <div
-            className="sp-card__icon"
-            style={{ background: "var(--green-light)", color: "var(--green)" }}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
-            </svg>
-          </div>
-          <p className="sp-card__title">Our Vision</p>
-          <p className="sp-card__body">
-            A borderless financial future where trust is enforced by code, not
-            paperwork — and where every participant from solo freelancer to
-            enterprise has access to the same institutional-grade tools.
-          </p>
-        </div>
-      </div>
+    <div className="cx-about">
+      <Navbar />
 
-      {/* Company Overview */}
-      <div className="sp-section">
-        <span className="sp-section__eyebrow">Who We Are</span>
-        <h2 className="sp-section__title">A Complete Financial Ecosystem</h2>
-        <p className="sp-section__lead">
-          Founded in 2024 and headquartered in Mumbai, CresoX Fintech Private
-          Limited (CIN: U74999MH2024PTC123456) is a regulated financial
-          technology company operating under RBI and SEBI guidelines. We serve
-          individuals, businesses, and developers with a unified platform that
-          spans digital payments, tokenised asset trading, and blockchain-backed
-          audit trails.
-        </p>
-      </div>
-
-      {/* Platform Features */}
-      <div className="sp-section">
-        <span className="sp-section__eyebrow">Platform</span>
-        <h2 className="sp-section__title">What We Offer</h2>
-        <div className="sp-grid" style={{ marginTop: "var(--sp-6)" }}>
-          {FEATURES.map((f) => (
-            <div className="sp-card" key={f.title}>
-              <div
-                className="sp-card__icon"
-                style={{ background: f.color, color: f.text }}
-              >
-                {f.icon}
-              </div>
-              <p className="sp-card__title">{f.title}</p>
-              <p className="sp-card__body">{f.body}</p>
+      {/* Hero / Intro matching cresox.in/about.html */}
+      <section className="cx-about-hero">
+        <div className="cx-about-hero__container">
+          <div className="cx-about-hero__content">
+            <div className="cx-about-hero__tag">
+              <span className="cx-about-hero__tag-dash">—</span>
+              <span>FINTECH · TOKENISATION · DEEP-TECH ADVISORY</span>
             </div>
-          ))}
-        </div>
-      </div>
+            <h1 className="cx-about-hero__title">
+              Engineering institutional fintech for real-world assets.
+            </h1>
+            <p className="cx-about-hero__lead">
+              We support and take up projects such as the development of
+              technology frameworks, digital platforms, applications for
+              real-world asset management, real-estate project management,
+              business analysis and financial decision-making. We also offer
+              consultancy in digital transformation, business strategy, financial
+              modelling and technology implementation.
+            </p>
+          </div>
 
-      <hr className="sp-divider" />
-
-      {/* Team */}
-      <div className="sp-section">
-        <span className="sp-section__eyebrow">Team</span>
-        <h2 className="sp-section__title">Leadership</h2>
-        <p className="sp-section__lead">
-          Our leadership team brings decades of combined experience in fintech,
-          banking, engineering, and compliance.
-        </p>
-        <div className="sp-grid sp-grid--3" style={{ marginTop: "var(--sp-6)" }}>
-          {TEAM.map((member) => (
-            <div className="sp-card" key={member.name} style={{ display: "flex", alignItems: "center", gap: "var(--sp-4)" }}>
-              <div
-                style={{
-                  width: 48, height: 48, borderRadius: "50%",
-                  background: "var(--blue)", color: "#fff",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontWeight: 700, fontSize: 18, flexShrink: 0,
-                }}
-              >
-                {member.initial}
-              </div>
-              <div>
-                <div style={{ fontWeight: 600, fontSize: 15, color: "var(--text-primary)" }}>{member.name}</div>
-                <div style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 2 }}>{member.role}</div>
-              </div>
+          <div className="cx-about-hero__card">
+            <div className="cx-about-hero__card-badge">
+              <span className="cx-about-hero__badge-dot" />
+              <span>SHARED LEDGER</span>
             </div>
-          ))}
+            <div className="cx-about-hero__card-canvas-wrap">
+              <canvas ref={canvasRef} className="cx-about-hero__card-canvas" />
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* CTA */}
-      <div className="sp-banner" style={{ marginTop: "var(--sp-12)" }}>
-        <div className="sp-banner__icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-          </svg>
-        </div>
-        <div className="sp-banner__text">
-          <strong>Want to partner or learn more?</strong>
-          Reach out to our team — we'd love to hear from you.{" "}
-          <Link to="/contact" style={{ color: "var(--blue)", fontWeight: 600 }}>Contact us →</Link>
-        </div>
-      </div>
-    </StaticPageLayout>
+      {/* Marquee Ticker */}
+      <MarqueeTicker />
+
+      {/* Our Objectives Section (Image 4) */}
+      <OurObjectives />
+
+      {/* Team / Leadership */}
+      <Leadership />
+
+      <Footer />
+      <FloatingScrollTop />
+    </div>
   );
 }
 

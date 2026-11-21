@@ -1,8 +1,8 @@
 /* ── FAQ ─────────────────────────────────────────────────────── */
 .faq {
   padding: 96px 0;
-  background: var(--bg-white);
-  border-bottom: 1px solid var(--border);
+  background: #080C14;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .faq__layout {
@@ -19,11 +19,12 @@
 
 .faq__copy h2 {
   margin-bottom: 12px;
+  color: #FFFFFF !important;
 }
 
 .faq__copy-sub {
   font-size: 14px;
-  color: var(--text-muted);
+  color: #94A3B8;
   line-height: 1.7;
   margin-top: 10px;
 }
@@ -32,7 +33,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--blue);
+  color: #38BDF8;
   font-weight: 600;
   font-size: 14px;
   margin-top: 16px;
@@ -41,21 +42,22 @@
 }
 
 .faq__copy-link:hover {
-  color: var(--blue-dark);
+  color: #7DD3FC;
 }
 
 .faq__list {
   display: flex;
   flex-direction: column;
   gap: 0;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 12px;
   overflow: hidden;
+  background: rgba(14, 21, 38, 0.6);
 }
 
 .faq__item {
-  border-bottom: 1px solid var(--border);
-  background: #fff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(14, 21, 38, 0.65);
   transition: background var(--t);
 }
 
@@ -64,7 +66,7 @@
 }
 
 .faq__item--open {
-  background: #FAFBFF;
+  background: rgba(22, 33, 56, 0.85);
 }
 
 .faq__question {
@@ -75,7 +77,7 @@
   padding: 18px 20px;
   font-size: 15px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #FFFFFF !important;
   text-align: left;
   gap: 16px;
   cursor: pointer;
@@ -84,7 +86,7 @@
 }
 
 .faq__question:hover {
-  color: var(--blue);
+  color: #38BDF8 !important;
 }
 
 .faq__question-icon {
@@ -92,25 +94,25 @@
   width: 28px;
   height: 28px;
   border-radius: 6px;
-  background: var(--bg-section);
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-muted);
+  color: #94A3B8;
   transition: background var(--t), color var(--t), border-color var(--t);
 }
 
 .faq__item--open .faq__question-icon {
-  background: var(--blue-light);
-  border-color: #DBEAFE;
-  color: var(--blue);
+  background: rgba(56, 189, 248, 0.15);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: #38BDF8;
 }
 
 .faq__answer {
   padding: 0 20px 18px;
   font-size: 14.5px;
-  color: var(--text-muted);
+  color: #CBD5E1 !important;
   line-height: 1.75;
   animation: fade-in 180ms ease both;
 }

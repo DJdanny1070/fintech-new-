@@ -1,5 +1,6 @@
 import { supabase } from "./supabase";
 import { generateSHA256 } from "../utils/hashGenerator";
+import { isDemoMode, DEMO_HASH_RECORDS } from "../data/demoData";
 
 // ─── Entity type registry ─────────────────────────────────────────────────────
 //
@@ -163,6 +164,10 @@ export async function hashOwnershipChange(assetId, { userId, previousPct, newPct
 // ─── Query helpers ────────────────────────────────────────────────────────────
 
 export async function getHashCount() {
+  if (isDemoMode()) {
+    return DEMO_HASH_RECORDS.length;
+  }
+
   const { count, error } = await supabase
     .from("hash_records")
     .select("id", { count: "exact", head: true });
@@ -174,6 +179,10 @@ export async function getHashCount() {
  * Recent hash records ordered by time (most recent first).
  */
 export async function getRecentHashes(limit = 10) {
+  if (isDemoMode()) {
+    return DEMO_HASH_RECORDS.slice(0, limit);
+  }
+
   const { data, error } = await supabase
     .from("hash_records")
     .select("*")
@@ -188,6 +197,14 @@ export async function getRecentHashes(limit = 10) {
  * Used by the Blockchain Explorer page for the live feed.
  */
 export async function getHashFeed({ entityType = null, limit = 20 } = {}) {
+  if (isDemoMode()) {
+    let list = DEMO_HASH_RECORDS;
+    if (entityType && entityType !== "all") {
+      list = list.filter((r) => r.entity_type === entityType);
+    }
+    return list.slice(0, limit);
+  }
+
   let query = supabase
     .from("hash_records")
     .select("*")
@@ -211,6 +228,17 @@ export async function getHashFeed({ entityType = null, limit = 20 } = {}) {
  * entity types in parallel via individual count queries.
  */
 export async function getHashStatsByType() {
+  if (isDemoMode()) {
+    const counts = {};
+    for (const r of DEMO_HASH_RECORDS) {
+      counts[r.entity_type] = (counts[r.entity_type] || 0) + 1;
+    }
+    return Object.entries(counts).map(([entity_type, count]) => ({
+      entity_type,
+      count,
+    }));
+  }
+
   const TYPES = [
     "profile",
     "asset",
@@ -240,8 +268,17 @@ export async function getHashStatsByType() {
  * Search hash records by SHA-256 fragment OR numeric record ID.
  */
 export async function searchHashes(query, limit = 20) {
-  const trimmed = (query || "").trim();
+  const trimmed = (query || "").trim().toLowerCase();
   if (!trimmed) return [];
+
+  if (isDemoMode()) {
+    return DEMO_HASH_RECORDS.filter(
+      (r) =>
+        r.sha256_hash.toLowerCase().includes(trimmed) ||
+        String(r.id) === trimmed ||
+        r.entity_type.toLowerCase().includes(trimmed)
+    ).slice(0, limit);
+  }
 
   const numericMatch = Number(trimmed);
   if (!Number.isNaN(numericMatch) && String(numericMatch) === trimmed) {
@@ -269,7 +306,15 @@ export async function searchHashes(query, limit = 20) {
  * Find hashes by (partial) SHA string.
  */
 export async function findHashesBySha(query, limit = 50) {
-  if (!query) return [];
+  const trimmed = (query || "").trim().toLowerCase();
+  if (!trimmed) return [];
+
+  if (isDemoMode()) {
+    return DEMO_HASH_RECORDS.filter((r) =>
+      r.sha256_hash.toLowerCase().includes(trimmed)
+    ).slice(0, limit);
+  }
+
   const { data, error } = await supabase
     .from("hash_records")
     .select("*")
@@ -285,6 +330,13 @@ export async function findHashesBySha(query, limit = 50) {
  */
 export async function getHashesByEntity(entityType, entityId, limit = 50) {
   if (!entityType || !entityId) return [];
+
+  if (isDemoMode()) {
+    return DEMO_HASH_RECORDS.filter(
+      (r) => r.entity_type === entityType || r.entity_id === entityId
+    ).slice(0, limit);
+  }
+
   const { data, error } = await supabase
     .from("hash_records")
     .select("*")

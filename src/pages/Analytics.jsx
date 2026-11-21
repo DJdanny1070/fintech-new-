@@ -15,24 +15,30 @@ import "./Dashboard.css";
 // and WEEKLY data to a financial market data provider (e.g. Alpha Vantage,
 // Polygon.io) once regulatory approval is in place.
 
-function BarChart({ data, color = "#075AD8" }) {
+function BarChart({ data, color = "#38BDF8" }) {
   const max = Math.max(1, ...data.map(d => d.v));
   return (
-    <svg className="analytics-bar-chart" viewBox="0 0 500 110" style={{width:"100%",height:110}} preserveAspectRatio="none" aria-hidden="true">
+    <svg className="analytics-bar-chart" viewBox="0 0 500 120" style={{width:"100%",height:120}} preserveAspectRatio="none" aria-hidden="true">
       <defs>
-        <linearGradient id={`bg${color.slice(1)}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.85"/>
-          <stop offset="100%" stopColor={color} stopOpacity="0.45"/>
+        <linearGradient id={`bg${color.replace(/[^a-zA-Z0-9]/g, "")}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="1"/>
+          <stop offset="100%" stopColor={color} stopOpacity="0.25"/>
         </linearGradient>
+        <filter id="bar-glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="3" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
       </defs>
       {data.map((d, i) => {
         const bw = 28, gap = (500 - data.length * bw) / (data.length + 1);
         const x  = gap + i * (bw + gap);
-        const h  = (d.v / max) * 90;
+        const h  = (d.v / max) * 85;
         return (
           <g key={`${d.l}-${i}`}>
-            <rect x={x} y={100-h} width={bw} height={h} fill={`url(#bg${color.slice(1)})`} rx="3"/>
-            <text x={x+bw/2} y="108" textAnchor="middle" fontSize="8" fill="#9CA3AF">{d.l}</text>
+            <rect x={x} y={100-h} width={bw} height={h} fill={`url(#bg${color.replace(/[^a-zA-Z0-9]/g, "")})`} rx="4" filter="url(#bar-glow)"/>
+            <circle cx={x+bw/2} cy={100-h} r="2.5" fill="#FFFFFF" opacity="0.9"/>
+            <text x={x+bw/2} y={94-h} textAnchor="middle" fontSize="9" fontWeight="700" fill={color} style={{fontFamily:"monospace"}}>{d.v}</text>
+            <text x={x+bw/2} y="114" textAnchor="middle" fontSize="9.5" fontWeight="600" fill="#64748B">{d.l}</text>
           </g>
         );
       })}
@@ -40,21 +46,25 @@ function BarChart({ data, color = "#075AD8" }) {
   );
 }
 
-function LineChart({ data, color = "#075AD8" }) {
+function LineChart({ data, color = "#FF5722" }) {
   const max = Math.max(1, ...data.map(d => d.v));
-  const W=500, H=90;
-  const pts  = data.map((d,i) => `${(i/(data.length-1))*(W-20)+10},${H-12-((d.v/max)*(H-24))}`).join(" ");
+  const W=500, H=100;
+  const pts  = data.map((d,i) => `${(i/(data.length-1))*(W-20)+10},${H-16-((d.v/max)*(H-30))}`).join(" ");
   const area = `10,${H} ` + pts + ` ${W-10},${H}`;
   return (
-    <svg className="analytics-line-chart" viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:90}} preserveAspectRatio="none" aria-hidden="true">
+    <svg className="analytics-line-chart" viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:100}} preserveAspectRatio="none" aria-hidden="true">
       <defs>
-        <linearGradient id={`lf${color.slice(1)}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.12"/>
+        <linearGradient id={`lf${color.replace(/[^a-zA-Z0-9]/g, "")}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.3"/>
           <stop offset="100%" stopColor={color} stopOpacity="0"/>
         </linearGradient>
+        <filter id="line-glow" x="-10%" y="-10%" width="120%" height="120%">
+          <feGaussianBlur stdDeviation="2.5" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
       </defs>
-      <polygon points={area} fill={`url(#lf${color.slice(1)})`}/>
-      <polyline points={pts} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points={area} fill={`url(#lf${color.replace(/[^a-zA-Z0-9]/g, "")})`}/>
+      <polyline points={pts} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" filter="url(#line-glow)"/>
     </svg>
   );
 }
@@ -204,7 +214,7 @@ function Analytics() {
           </div>
           {/* TODO (Future Integration): Replace WEEKLY with real weekly
               transaction volume bucketed from the transactions table */}
-          <LineChart data={WEEKLY} color="#8b5cf6"/>
+          <LineChart data={WEEKLY} color="#FF5722"/>
         </div>
       </div>
 

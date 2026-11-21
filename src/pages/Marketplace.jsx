@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../components/common/ToastProvider";
 import { getProducts, getMyOrders } from "../services/productService";
@@ -465,7 +466,7 @@ function TradeModal({ mode, asset, priceRecord, onClose }) {
                   id="cp-recipient"
                   className="input"
                   type="text"
-                  placeholder="USR-XXXXXXXX or you@example.com"
+                  placeholder="wallet address or email"
                   value={recipient}
                   onChange={(e) => setRecipient(e.target.value)}
                   required
@@ -572,7 +573,14 @@ function TokenCard({ product, owned, priceRecord, adminMode = false, onAction, o
           )}
         </div>
         <div className="cp-token-card__meta">
-          <div className="cp-token-card__name" title={product.title}>{product.title}</div>
+          <Link
+            to={`/dashboard/marketplace/product/${product.id}`}
+            className="cp-token-card__name"
+            title={product.title}
+            style={{ textDecoration: "none", color: "inherit" }}
+          >
+            {product.title}
+          </Link>
           <div className="cp-token-card__category">{product.category || "Other"}</div>
         </div>
         <div className={`cp-token-badge ${isVerified ? "cp-token-badge--verified" : "cp-token-badge--pending"}`}>
@@ -646,6 +654,13 @@ function TokenCard({ product, owned, priceRecord, adminMode = false, onAction, o
 
       {/* ── Actions ── */}
       <div className="cp-actions">
+        <Link
+          to={`/dashboard/marketplace/product/${product.id}`}
+          className="cp-action-btn"
+          style={{ textDecoration: "none", textAlign: "center", justifyContent: "center" }}
+        >
+          Details
+        </Link>
         <button className="cp-action-btn cp-action-btn--buy" onClick={() => onAction("buy", product)}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />

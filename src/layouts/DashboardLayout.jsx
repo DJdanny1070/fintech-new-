@@ -4,6 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../components/common/ToastProvider";
 import { getProducts } from "../services/productService";
 import { searchSellers } from "../services/profileService";
+import { isDemoMode, DEMO_NOTIFICATIONS } from "../data/demoData";
 import "./DashboardLayout.css";
 
 const NAV = [
@@ -172,26 +173,17 @@ function DashboardLayout() {
             aria-label="Go to CresoX home"
           >
             <div className="db-sidebar__logo-box">
-              <span className="db-logo-creso">Creso</span>
-              <span className="db-logo-x">X</span>
+              <span className="db-logo-creso">creso</span>
+              <span className="db-logo-x">x</span>
             </div>
-            <span className="db-sidebar__logo-sub">Platform</span>
+            <span className="db-sidebar__logo-tag">● FINTECH LEDGER</span>
           </div>
-
-          <button
-            className="db-sidebar__collapse"
-            onClick={handleBack}
-            title="Go back"
-            aria-label="Go back to previous page"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-            </svg>
-            <span>Back</span>
-          </button>
         </div>
 
-        <div className="db-sidebar__section-label">Main Menu</div>
+        <div className="db-sidebar__section-label">
+          <span className="db-sidebar__section-dash">—</span>
+          <span>MAIN MENU</span>
+        </div>
 
         <nav className="db-sidebar__nav" aria-label="Dashboard navigation">
           {NAV.map(item => (
@@ -218,7 +210,10 @@ function DashboardLayout() {
             </div>
             <div className="db-sidebar__user-info">
               <div className="db-sidebar__user-name">{displayName}</div>
-              <div className="db-sidebar__user-role">{displayRole}</div>
+              <div className="db-sidebar__user-role-wrap">
+                <span className="db-sidebar__user-dot" />
+                <span className="db-sidebar__user-role">{displayRole}</span>
+              </div>
             </div>
           </div>
           <button
@@ -243,6 +238,19 @@ function DashboardLayout() {
         {/* ── Topbar ─────────────────────────────────────────── */}
         <header className="db-topbar">
           <div className="db-topbar__left">
+            <button
+              type="button"
+              className="db-topbar__back-btn"
+              onClick={handleBack}
+              title="Go back"
+              aria-label="Go back to previous page"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+              <span>Back</span>
+            </button>
+
             <div className="db-topbar__search-wrap" ref={searchWrapRef}>
               <div className="db-topbar__search">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
@@ -307,7 +315,7 @@ function DashboardLayout() {
                                   key={seller.id}
                                   className="db-topbar__search-item db-topbar__search-item--static"
                                 >
-                                  <span>{seller.full_name || seller.company_name || seller.email}</span>
+                                  <span>{seller.full_name || seller.company_name || (seller.username || "Verified Seller")}</span>
                                   <small>{seller.company_name || seller.role || "Seller"}</small>
                                 </div>
                               ))}
@@ -323,16 +331,13 @@ function DashboardLayout() {
           </div>
 
           <div className="db-topbar__right">
-            {/* System status badge — hidden on very small screens via CSS */}
-            <span className="badge badge-green db-topbar__status-badge">
-              <span className="dot-live" aria-hidden="true"></span>
-              All systems operational
+            {/* System status badge with radar pulse effect */}
+            <span className="db-topbar__status-badge">
+              <span className="db-topbar__status-pulse" aria-hidden="true" />
+              <span>All systems operational</span>
             </span>
 
             {/* ── Notification Bell ──────────────────────────── */}
-            {/* TODO (Future Integration): Connect to Supabase Realtime or a push
-                notification service here. Replace the static empty state with live
-                notification items. Add an unread count badge over the bell icon. */}
             <div className="db-topbar__notification-wrap" ref={notificationRef}>
               <button
                 className="db-topbar__icon-btn"
@@ -341,10 +346,24 @@ function DashboardLayout() {
                 onClick={() => setShowNotifications((prev) => !prev)}
                 aria-expanded={showNotifications}
                 aria-controls="notification-panel"
+                style={{ position: "relative" }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
                 </svg>
+                {isDemoMode() && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: 4,
+                      right: 4,
+                      width: 7,
+                      height: 7,
+                      borderRadius: "50%",
+                      background: "var(--blue)",
+                    }}
+                  />
+                )}
               </button>
 
               {showNotifications && (
@@ -368,12 +387,36 @@ function DashboardLayout() {
                       </svg>
                     </button>
                   </div>
-                  {/* Empty state — will be replaced by live notifications in a future update */}
-                  <div className="db-topbar__notification-empty">
-                    <div className="db-topbar__notification-empty-title">No Notifications</div>
-                    <div className="db-topbar__notification-empty-body">You&apos;re all caught up.</div>
-                    <div className="db-topbar__notification-empty-meta">New activity will appear here.</div>
-                  </div>
+                  {isDemoMode() ? (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10, padding: 12 }}>
+                      {DEMO_NOTIFICATIONS.map((n) => (
+                        <div
+                          key={n.id}
+                          style={{
+                            padding: "10px 12px",
+                            borderRadius: "8px",
+                            background: n.read ? "transparent" : "var(--blue-light)",
+                            border: "1px solid var(--border)",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 4,
+                          }}
+                        >
+                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 700, color: "var(--text-primary)" }}>
+                            <span>{n.title}</span>
+                            <span style={{ fontSize: 11, fontWeight: 400, color: "var(--text-muted)" }}>{n.time}</span>
+                          </div>
+                          <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{n.message}</div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="db-topbar__notification-empty">
+                      <div className="db-topbar__notification-empty-title">No Notifications</div>
+                      <div className="db-topbar__notification-empty-body">You&apos;re all caught up.</div>
+                      <div className="db-topbar__notification-empty-meta">New activity will appear here.</div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

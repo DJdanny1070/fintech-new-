@@ -61,20 +61,22 @@
 /* ── Card ────────────────────────────────────────────────────── */
 
 .leadership__card {
-  background: #ffffff;
-  border: 1px solid var(--border);
+  background: rgba(14, 21, 38, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--r-xl);
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(17, 24, 39, 0.05);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   transition: box-shadow var(--t-slow), transform var(--t-slow), border-color var(--t-slow);
   display: flex;
   flex-direction: column;
 }
 
 .leadership__card:hover {
-  box-shadow: 0 12px 32px rgba(7, 90, 216, 0.12);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.15);
   transform: translateY(-6px);
-  border-color: var(--blue-mid);
+  border-color: rgba(56, 189, 248, 0.3);
 }
 
 /* ── Photo ───────────────────────────────────────────────────── */
@@ -84,7 +86,7 @@
   width: 100%;
   aspect-ratio: 1 / 1;           /* square crop — ensures equal sizes */
   overflow: hidden;
-  background: #e5e7eb;
+  background: #090E1A;
 }
 
 .leadership__photo {

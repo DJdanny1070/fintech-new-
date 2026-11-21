@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/layout/Navbar/Navbar";
 import Footer from "../components/home/Footer/Footer";
+import FloatingScrollTop from "../components/common/FloatingScrollTop";
 import "./DirectConsultancy.css";
 
 /* ─────────────────────────────── WHY CRESOX DATA ─────────────────────────────── */
@@ -394,11 +395,11 @@ const FAQS = [
 
 /* ─────────────────────────────── HERO VISUAL SERVICES ─────────────────────────── */
 const HERO_SERVICES = [
-  { label: "Blockchain Consulting", bg: "#EFF6FF", color: "#075AD8" },
-  { label: "Asset Tokenization", bg: "#F0FDF4", color: "#16A34A" },
-  { label: "Product Development", bg: "#FFFBEB", color: "#D97706" },
-  { label: "Digital Transformation", bg: "#FDF2F8", color: "#DB2777" },
-  { label: "Business Strategy", bg: "#EEF0F4", color: "#2C3E58" },
+  { label: "Blockchain Consulting", bg: "rgba(56, 189, 248, 0.15)", color: "#38BDF8" },
+  { label: "Asset Tokenization", bg: "rgba(16, 185, 129, 0.15)", color: "#34D399" },
+  { label: "Product Development", bg: "rgba(245, 158, 11, 0.15)", color: "#FBBF24" },
+  { label: "Digital Transformation", bg: "rgba(236, 72, 153, 0.15)", color: "#F472B6" },
+  { label: "Business Strategy", bg: "rgba(255, 87, 34, 0.15)", color: "#FF5722" },
 ];
 
 /* ─────────────────────────────── FAQ ITEM COMPONENT ─────────────────────────── */
@@ -703,6 +704,7 @@ function DirectConsultancy() {
       </section>
 
       <Footer />
+      <FloatingScrollTop />
     </div>
   );
 }

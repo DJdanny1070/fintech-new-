@@ -3,6 +3,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../components/common/ToastProvider";
 import { getTransactionsForUser, depositSimulation, withdrawSimulation, transferBetweenUsers } from "../services/transactionService";
 import LoadingSkeleton from "../components/common/LoadingSkeleton";
+import { isDemoMode } from "../data/demoData";
 import "./Dashboard.css";
 
 // TODO (Future Integration): Real-time token pricing — subscribe to a market
@@ -17,22 +18,24 @@ const ACTIONS = [
 ];
 
 function MiniLineChart() {
-  const pts = [40,55,48,62,70,65,80,74,88,82,95,91];
-  const W=500, H=80, max=100;
-  const s = pts.map((v,i) => `${(i/(pts.length-1))*(W-20)+10},${H-8-((v/max)*(H-16))}`).join(" ");
-  const area = `10,${H} ` + s + ` ${W-10},${H}`;
+  const pts = [40, 55, 48, 62, 70, 65, 80, 74, 88, 82, 95, 91];
+  const W = 500, H = 80, max = 100;
+  const s = pts.map((v, i) => `${(i / (pts.length - 1)) * (W - 20) + 10},${H - 8 - ((v / max) * (H - 16))}`).join(" ");
+  const area = `10,${H} ` + s + ` ${W - 10},${H}`;
   return (
-    // TODO (Future Integration): Replace static sparkline data with real
-    // rolling 30-day balance history from the transaction ledger.
-    <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:80}} preserveAspectRatio="none" aria-hidden="true">
+    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: 80 }} preserveAspectRatio="none" aria-hidden="true">
       <defs>
         <linearGradient id="wfill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#075AD8" stopOpacity="0.12"/>
-          <stop offset="100%" stopColor="#075AD8" stopOpacity="0"/>
+          <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.32" />
+          <stop offset="100%" stopColor="#0260C6" stopOpacity="0.0" />
         </linearGradient>
+        <filter id="glow-line" x="-10%" y="-10%" width="120%" height="120%">
+          <feGaussianBlur stdDeviation="2.5" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
       </defs>
-      <polygon points={area} fill="url(#wfill)"/>
-      <polyline points={s} fill="none" stroke="#075AD8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <polygon points={area} fill="url(#wfill)" />
+      <polyline points={s} fill="none" stroke="#38BDF8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" filter="url(#glow-line)" />
     </svg>
   );
 }
@@ -58,9 +61,11 @@ function Wallet() {
 
   const balance          = wallet?.balance ?? 0;
   const formattedBalance = "₹" + Number(balance).toLocaleString("en-IN");
-  const walletUserId     = user?.id
-    ? `USR-${user.id.slice(0,8).toUpperCase()}-CRESOX`
-    : "USR-XXXXXX-CRESOX";
+  const walletUserId     = isDemoMode()
+    ? "USR-DEMO-CRESOX"
+    : user?.id
+      ? `USR-${user.id.slice(0,8).toUpperCase()}-CRESOX`
+      : "USR-XXXXXX-CRESOX";
   const monthLabel = getCurrentMonthLabel();
 
   useEffect(() => {
@@ -149,7 +154,10 @@ function Wallet() {
       ];
 
       (exportTransactions || []).forEach((tx) => {
-        const counterparty = tx.counterparty_name || tx.counterparty?.full_name || tx.counterparty?.email || "—";
+        const counterparty =
+          tx.counterparty_name ||
+          tx.counterparty?.full_name ||
+          (isDemoMode() ? "CresoX Network Partner" : (tx.counterparty?.email || "—"));
         const status = tx.status
           ? (tx.status === "verified" ? "Verified" : tx.status.charAt(0).toUpperCase() + tx.status.slice(1))
           : "Pending";
@@ -212,7 +220,7 @@ function Wallet() {
         toast.success("Withdrawal completed successfully.");
       } else if (modal === "Send") {
         const amt = Number(amountInput);
-        if (!recipientInput.trim()) throw new Error("Enter the recipient email or user ID.");
+        if (!recipientInput.trim()) throw new Error(isDemoMode() ? "Enter the recipient account or user ID." : "Enter the recipient email or user ID.");
         if (!amt || amt <= 0) throw new Error("Enter a valid transfer amount.");
         if (amt > (wallet?.balance || 0)) throw new Error("Insufficient balance");
         await transferBetweenUsers(user.id, recipientInput.trim(), amt, noteInput.trim());
@@ -228,7 +236,7 @@ function Wallet() {
       console.error("Wallet action failed:", err.message);
       const message = err.message || "We couldn't complete that request.";
       if (message.includes("Recipient not found")) {
-        setActionError("We couldn't find that recipient. Please check the email or user ID and try again.");
+        setActionError(isDemoMode() ? "We couldn't find that recipient. Please check the account ID and try again." : "We couldn't find that recipient. Please check the email or user ID and try again.");
         toast.warning("Recipient not found");
       } else if (message.includes("Insufficient balance")) {
         setActionError("You do not have enough funds to complete this action.");
@@ -254,26 +262,58 @@ function Wallet() {
 
       <div className="two-col" style={{marginBottom:"var(--sp-5)"}}>
         {/* Balance card */}
-        <div className="content-card" style={{borderLeft:"3px solid var(--blue)"}}>
+        <div
+          className="content-card"
+          style={{
+            position: "relative",
+            overflow: "hidden",
+            border: "1px solid rgba(56, 189, 248, 0.25)",
+            background: "linear-gradient(135deg, rgba(14, 21, 38, 0.9) 0%, rgba(9, 14, 25, 0.95) 100%)",
+            boxShadow: "0 12px 36px rgba(0, 0, 0, 0.45)",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 2,
+              background: "linear-gradient(90deg, #FF5722 0%, #0260C6 50%, #38BDF8 100%)",
+            }}
+          />
           <div className="content-card__header">
             <div>
               <div className="content-card__title">Available Balance</div>
-              <div className="content-card__sub">CresoX Wallet · Individual</div>
+              <div className="content-card__sub">CresoX Verified Individual Wallet · Mainnet</div>
             </div>
             <span className="badge badge-green"><span className="dot-live" aria-hidden="true"></span> Active</span>
           </div>
-          <div style={{fontSize:38,fontWeight:800,letterSpacing:"-0.04em",color:"var(--text-primary)",marginBottom:"var(--sp-1)"}}>
+          <div style={{fontSize:40,fontWeight:800,letterSpacing:"-0.03em",color:"#FFFFFF",fontFamily:"monospace",marginBottom:"var(--sp-1)",textShadow:"0 0 16px rgba(56, 189, 248, 0.3)"}}>
             {formattedBalance}
           </div>
-          <div style={{fontSize:13,color:"var(--text-muted)",marginBottom:"var(--sp-6)"}}>
-            Current balance · CresoX Wallet
+          <div style={{fontSize:13,color:"#94A3B8",marginBottom:"var(--sp-6)"}}>
+            Verified on-chain balance · CresoX Ledger
           </div>
           <MiniLineChart/>
           <div style={{display:"flex",gap:"var(--sp-3)",marginTop:"var(--sp-5)",flexWrap:"wrap"}}>
             {ACTIONS.map(a => (
               <button
                 key={a.label}
-                className="btn btn-secondary"
+                className="btn btn-ghost"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "8px 16px",
+                  borderRadius: 999,
+                  background: "rgba(255, 255, 255, 0.05)",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  color: "#FFFFFF",
+                  fontWeight: 600,
+                  fontSize: 13,
+                  cursor: "pointer",
+                }}
                 onClick={() => handleModalOpen(a.label)}
                 aria-label={`${a.label} funds`}
               >
@@ -351,7 +391,9 @@ function Wallet() {
                   <tr key={tx.id}>
                     <td style={{fontFamily:"monospace",color:"var(--text-muted)",fontSize:12}}>{tx.id}</td>
                     <td>{tx.type}</td>
-                    <td style={{fontWeight:600,color:"var(--text-primary)"}}>{tx.counterparty_name || tx.counterparty?.full_name || tx.counterparty?.email || '—'}</td>
+                    <td style={{fontWeight:600,color:"var(--text-primary)"}}>
+                      {tx.counterparty_name || tx.counterparty?.full_name || (isDemoMode() ? "CresoX Network Partner" : (tx.counterparty?.email || "—"))}
+                    </td>
                     <td style={{fontWeight:700,fontFamily:"monospace",color:(tx.amount>0)?"var(--green)":"var(--text-primary)"}}>
                       {tx.amount>0 ? `+₹${Number(tx.amount).toLocaleString('en-IN')}` : `-₹${Math.abs(Number(tx.amount)).toLocaleString('en-IN')}`}
                     </td>
@@ -398,11 +440,13 @@ function Wallet() {
               {modal === "Send" && (
                 <>
                   <div className="auth-field">
-                    <label className="input-label" htmlFor="wallet-recipient">Recipient Email or User ID</label>
+                    <label className="input-label" htmlFor="wallet-recipient">
+                      {isDemoMode() ? "Recipient Account or User ID" : "Recipient Email or User ID"}
+                    </label>
                     <input
                       id="wallet-recipient"
                       className="input"
-                      placeholder="user@example.com or user-id"
+                      placeholder={isDemoMode() ? "e.g. USR-7821-CRESOX" : "User id (or) User mail"}
                       value={recipientInput}
                       onChange={e => setRecipientInput(e.target.value)}
                       autoComplete="off"

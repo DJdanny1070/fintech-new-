@@ -10,6 +10,14 @@ import {
 import { createProfile, getProfile } from "../services/profileService";
 import { createWallet, getWallet } from "../services/walletService";
 import { hashProfileCreation } from "../services/hashService";
+import {
+  isDemoMode,
+  enableDemoMode,
+  disableDemoMode,
+  DEMO_USER,
+  DEMO_PROFILE,
+  getDemoWallet,
+} from "../data/demoData";
 
 const AuthContext = createContext(null);
 
@@ -21,6 +29,12 @@ export function AuthProvider({ children }) {
 
   // Load profile + wallet for a given user id
   const loadUserData = useCallback(async (userId) => {
+    if (isDemoMode()) {
+      setProfile(DEMO_PROFILE);
+      setWallet(getDemoWallet());
+      return;
+    }
+
     try {
       const [prof, wal] = await Promise.all([
         getProfile(userId),
@@ -39,6 +53,14 @@ export function AuthProvider({ children }) {
 
   // Listen for auth state changes (login, logout, token refresh)
   useEffect(() => {
+    if (isDemoMode()) {
+      setUser(DEMO_USER);
+      setProfile(DEMO_PROFILE);
+      setWallet(getDemoWallet());
+      setLoading(false);
+      return;
+    }
+
     let unsubscribe;
 
     const init = async () => {
@@ -76,6 +98,19 @@ export function AuthProvider({ children }) {
   // ── Auth actions ─────────────────────────────────────────────
 
   const login = async (email, password) => {
+    const cleaned = (email || "").trim().toLowerCase();
+    if (
+      (cleaned === "demo" || cleaned === "demo@cresox.internal") &&
+      password === "CresoXDemo@2026"
+    ) {
+      enableDemoMode();
+      setUser(DEMO_USER);
+      setProfile(DEMO_PROFILE);
+      setWallet(getDemoWallet());
+      setLoading(false);
+      return { user: DEMO_USER, session: { user: DEMO_USER } };
+    }
+
     const data = await signInWithEmail(email, password);
     // onAuthStateChange will fire and call loadUserData
     return data;
@@ -131,6 +166,14 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
+    if (isDemoMode()) {
+      disableDemoMode();
+      setUser(null);
+      setProfile(null);
+      setWallet(null);
+      return;
+    }
+
     await authSignOut();
     setUser(null);
     setProfile(null);
@@ -139,6 +182,11 @@ export function AuthProvider({ children }) {
 
   // Reload wallet (call after balance changes)
   const refreshWallet = async () => {
+    if (isDemoMode()) {
+      setWallet(getDemoWallet());
+      return;
+    }
+
     if (user) {
       const wal = await getWallet(user.id);
       setWallet(wal);
@@ -147,6 +195,11 @@ export function AuthProvider({ children }) {
 
   // Reload profile explicitly (call after profile updates)
   const refreshProfile = async () => {
+    if (isDemoMode()) {
+      setProfile(DEMO_PROFILE);
+      return;
+    }
+
     try {
       if (user) {
         const prof = await getProfile(user.id);
@@ -173,7 +226,8 @@ export function AuthProvider({ children }) {
     refreshProfile,
     isAuthenticated: !!user,
     // Convenience: 'Pending' | 'Approved' | 'Rejected' | null
-    approvalStatus: profile?.approval_status ?? null,
+    approvalStatus: isDemoMode() ? "Approved" : (profile?.approval_status ?? null),
+    isDemo: isDemoMode(),
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -12,7 +12,9 @@
 
 /* ── Hero ────────────────────────────────────────────────────── */
 .at-hero {
-  background: linear-gradient(150deg, #0d1f3c 0%, #1a2e50 40%, #0f2545 70%, #0a1b38 100%);
+  background: radial-gradient(ellipse 65% 65% at 80% 20%, rgba(2, 96, 198, 0.22) 0%, transparent 60%),
+              radial-gradient(ellipse 50% 60% at 15% 80%, rgba(255, 87, 34, 0.14) 0%, transparent 60%),
+              #080C14;
   padding: 100px 0 80px;
   position: relative;
   overflow: hidden;
@@ -763,8 +765,8 @@
   align-items: flex-start;
   gap: 14px;
   padding: 20px 24px;
-  background: var(--blue-light);
-  border: 1px solid var(--blue-mid);
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.2);
   border-radius: 12px;
   margin-bottom: var(--sp-6);
   cursor: pointer;
@@ -772,7 +774,7 @@
 }
 
 .at-terms__checkbox-row:hover {
-  background: #dbeafe;
+  background: rgba(56, 189, 248, 0.15);
   border-color: var(--blue);
 }
 
@@ -780,11 +782,11 @@
   width: 20px;
   height: 20px;
   border-radius: 5px;
-  border: 2px solid rgba(7,90,216,0.4);
-  background: #fff;
+  border: 2px solid rgba(56, 189, 248, 0.4);
+  background: rgba(14, 21, 38, 0.9);
   cursor: pointer;
   flex-shrink: 0;
-  accent-color: var(--blue);
+  accent-color: #FF5722;
   margin-top: 1px;
 }
 
@@ -808,7 +810,7 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: var(--blue);
+  background: linear-gradient(135deg, #FF6B35 0%, #FF5722 100%);
   color: #ffffff;
   font-size: 16px;
   font-weight: 700;
@@ -816,6 +818,7 @@
   border-radius: var(--r-full);
   border: none;
   cursor: pointer;
+  box-shadow: 0 4px 20px rgba(255, 87, 34, 0.35);
   transition: background 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease, opacity 0.22s ease;
   width: 100%;
   justify-content: center;
@@ -823,18 +826,18 @@
 }
 
 .at-terms__apply-btn:disabled {
-  background: var(--border-hover);
+  background: rgba(255, 255, 255, 0.1);
   color: var(--text-muted);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
-  opacity: 0.65;
+  opacity: 0.5;
 }
 
 .at-terms__apply-btn:not(:disabled):hover {
-  background: var(--blue-dark);
+  background: linear-gradient(135deg, #FF7A45 0%, #E64A19 100%);
+  box-shadow: 0 8px 30px rgba(255, 87, 34, 0.5);
   transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(7,90,216,0.4);
 }
 
 .at-terms__btn-hint {

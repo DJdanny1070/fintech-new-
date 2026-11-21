@@ -54,11 +54,11 @@ function formatLastUpdated(value) {
   return "Today";
 }
 
-function MarketMetric({ label, value, valueColor = "var(--text-primary)" }) {
+function MarketMetric({ label, value, valueColor = "#FFFFFF" }) {
   return (
-    <div style={{ padding: "10px 12px", border: "1px solid var(--border)", borderRadius: 8, background: "var(--bg-white)" }}>
-      <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-muted)", marginBottom: 4 }}>{label}</div>
-      <div style={{ fontSize: 13, fontWeight: 700, color: valueColor }}>{value}</div>
+    <div style={{ padding: "10px 12px", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: 10, background: "rgba(255, 255, 255, 0.03)" }}>
+      <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#64748B", marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 13, fontWeight: 700, color: valueColor, fontFamily: "monospace" }}>{value}</div>
     </div>
   );
 }
@@ -226,12 +226,12 @@ function ProductDetails() {
             </div>
           )}
           <div style={{marginTop:12, display:"flex", flexDirection:"column", gap:10}}>
-            <div style={{padding:"12px 14px", border:"1px solid var(--border)", borderRadius:10, background:"var(--bg)"}}>
-              <div style={{fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.06em", color:"var(--text-muted)", marginBottom:4}}>Current Price</div>
+            <div style={{padding:"14px 16px", border:"1px solid rgba(255, 255, 255, 0.09)", borderRadius:12, background:"rgba(255, 255, 255, 0.03)"}}>
+              <div style={{fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.08em", color:"#64748B", marginBottom:4}}>Current Price</div>
               {hasPricingData ? (
                 <>
-                  <div style={{fontSize:24, fontWeight:800, color:priceTone}}>{formatCurrency(currentPrice)}</div>
-                  <div style={{marginTop:8, display:"grid", gap:8}}>
+                  <div style={{fontSize:26, fontWeight:800, color:"#FFFFFF", fontFamily:"monospace", textShadow:"0 0 12px rgba(56, 189, 248, 0.35)"}}>{formatCurrency(currentPrice)}</div>
+                  <div style={{marginTop:10, display:"grid", gap:8}}>
                     <MarketMetric label="Previous Price" value={formatCurrency(previousPrice)} />
                     <div style={{display:"grid", gridTemplateColumns:"repeat(2, minmax(0, 1fr))", gap:8}}>
                       <MarketMetric label="Daily Change" value={formatSignedCurrency(dailyChange)} valueColor={dailyTone} />
@@ -308,7 +308,7 @@ function ProductDetails() {
             ) : (
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12}}>
                 {related.map(r => (
-                  <Link key={r.id} to={`/marketplace/product/${r.id}`} className="card-link" style={{padding:12,border:"1px solid var(--border)",borderRadius:8,textDecoration:"none",color:"inherit"}}>
+                  <Link key={r.id} to={`/dashboard/marketplace/product/${r.id}`} className="card-link" style={{padding:12,border:"1px solid var(--border)",borderRadius:8,textDecoration:"none",color:"inherit"}}>
                     <div style={{fontWeight:700}}>{r.title}</div>
                     <div style={{fontSize:12,color:"var(--text-muted)"}}>{r.seller?.full_name || 'Unknown'}</div>
                     <div style={{marginTop:6,fontFamily:"monospace",fontWeight:700}}>{r.price ? `₹${Number(r.price).toLocaleString('en-IN')}` : '—'}</div>

@@ -44,13 +44,13 @@ function fmtDateShort(v) {
 
 const EVENT_TYPES = {
   all:                   { label: "All Events",             color: "var(--blue)",    bg: "var(--blue-light)",    icon: "⬡" },
-  profile:               { label: "Profile Created",        color: "#6366f1",        bg: "#EEF2FF",              icon: "👤" },
+  profile:               { label: "Profile Created",        color: "#818cf8",        bg: "rgba(99, 102, 241, 0.15)", icon: "👤" },
   asset:                 { label: "Asset Listed",           color: "var(--blue)",    bg: "var(--blue-light)",    icon: "🏷️" },
   token_purchase:        { label: "Token Purchase",         color: "var(--green)",   bg: "var(--green-light)",   icon: "🛒" },
-  token_transfer:        { label: "Token Transfer",         color: "#0891b2",        bg: "#ECFEFF",              icon: "↔️" },
+  token_transfer:        { label: "Token Transfer",         color: "#38bdf8",        bg: "rgba(56, 189, 248, 0.15)", icon: "↔️" },
   wallet_transaction:    { label: "Wallet Transaction",     color: "var(--amber)",   bg: "var(--amber-light)",   icon: "💳" },
   verification_approval: { label: "Verification Approval",  color: "var(--green)",   bg: "var(--green-light)",   icon: "✅" },
-  ownership_change:      { label: "Ownership Change",       color: "#7c3aed",        bg: "#F5F3FF",              icon: "📊" },
+  ownership_change:      { label: "Ownership Change",       color: "#a78bfa",        bg: "rgba(167, 139, 250, 0.15)", icon: "📊" },
   // Legacy types
   transaction:           { label: "Transaction (Legacy)",   color: "var(--amber)",   bg: "var(--amber-light)",   icon: "💸" },
   product:               { label: "Product (Legacy)",       color: "var(--text-muted)", bg: "var(--bg-section)", icon: "📦" },
@@ -617,7 +617,6 @@ export default function Blockchain() {
               <textarea
                 className="input"
                 rows={3}
-                placeholder="e.g. a3f2b1c4d5e6f7..."
                 value={verifyHash}
                 onChange={(e) => { setVerifyHash(e.target.value); setVerifyStatus(null); }}
                 style={{ fontFamily: "monospace", fontSize: 13, resize: "vertical" }}

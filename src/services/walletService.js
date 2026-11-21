@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { isDemoMode, getDemoWallet, updateDemoWalletBalance } from "../data/demoData";
 
 /**
  * Wallet Service — Supabase wallet operations.
@@ -37,6 +38,10 @@ export async function createWallet(userId) {
  * Get the wallet for a user.
  */
 export async function getWallet(userId) {
+  if (isDemoMode()) {
+    return getDemoWallet();
+  }
+
   const { data, error } = await supabase
     .from("wallets")
     .select("*")
@@ -51,6 +56,13 @@ export async function getWallet(userId) {
  * Update wallet balance.
  */
 export async function updateWalletBalance(userId, newBalance) {
+  if (isDemoMode()) {
+    const current = getDemoWallet().balance;
+    const delta = newBalance - current;
+    updateDemoWalletBalance(delta);
+    return getDemoWallet();
+  }
+
   const { data, error } = await supabase
     .from("wallets")
     .update({ balance: newBalance, updated_at: new Date().toISOString() })

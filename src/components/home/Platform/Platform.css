@@ -1,7 +1,7 @@
 /* ── Why CresoX + CTA ───────────────────────────────────────── */
 
 .why-cresox {
-  background: #ffffff;
+  background: #080C14;
 }
 
 .why-cresox__container {
@@ -20,7 +20,7 @@
   font-size: clamp(28px, 3.5vw, 36px);
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: var(--text-primary);
+  color: #FFFFFF !important;
   margin-bottom: var(--sp-4);
 }
 
@@ -28,7 +28,7 @@
   font-size: 17px;
   font-weight: 400;
   line-height: 1.7;
-  color: var(--text-muted);
+  color: #94A3B8 !important;
 }
 
 .why-cresox__grid {
@@ -38,17 +38,17 @@
 }
 
 .why-cresox__card {
-  background: #ffffff;
-  border: 1px solid var(--border);
+  background: rgba(14, 21, 38, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: var(--r-md);
   padding: var(--sp-8);
-  box-shadow: 0 1px 3px rgba(17, 24, 39, 0.04);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   transition: border-color var(--t), transform var(--t);
 }
 
 .why-cresox__card:hover {
-  border-color: #d1d5db;
-  transform: scale(1.02);
+  border-color: rgba(56, 189, 248, 0.3);
+  transform: translateY(-2px);
 }
 
 .why-cresox__icon {
@@ -58,15 +58,15 @@
   width: 40px;
   height: 40px;
   border-radius: var(--r-sm);
-  background: var(--blue-light);
-  color: var(--blue);
+  background: rgba(56, 189, 248, 0.15);
+  color: #38BDF8;
   margin-bottom: var(--sp-5);
 }
 
 .why-cresox__card-title {
   font-size: 17px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #FFFFFF !important;
   margin-bottom: var(--sp-2);
 }
 
@@ -74,14 +74,15 @@
   font-size: 15px;
   font-weight: 400;
   line-height: 1.65;
-  color: var(--text-muted);
+  color: #CBD5E1 !important;
 }
 
 /* CTA band */
 
 .why-cresox__cta {
-  background: #075ad8;
+  background: linear-gradient(135deg, #0A192F 0%, #06101E 100%);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .why-cresox__cta-inner {
@@ -138,15 +139,17 @@
 }
 
 .btn-white {
-  background: #ffffff;
-  color: var(--blue);
-  border-color: #ffffff;
+  background: linear-gradient(135deg, #FF5722 0%, #FF7043 100%);
+  color: #ffffff !important;
+  border-color: #FF5722;
   font-weight: 600;
+  box-shadow: 0 4px 16px rgba(255, 87, 34, 0.35);
 }
 
 .btn-white:hover {
-  background: rgba(255, 255, 255, 0.92);
-  border-color: rgba(255, 255, 255, 0.92);
+  background: linear-gradient(135deg, #E64A19 0%, #FF5722 100%);
+  border-color: #E64A19;
+  box-shadow: 0 6px 22px rgba(255, 87, 34, 0.5);
 }
 
 @media (max-width: 960px) {
@@ -158,23 +161,5 @@
 @media (max-width: 600px) {
   .why-cresox__container {
     padding: 72px var(--sp-4) 56px;
-  }
-
-  .why-cresox__grid {
-    grid-template-columns: 1fr;
-  }
-
-  .why-cresox__cta-inner {
-    padding: 48px var(--sp-4);
-  }
-
-  .why-cresox__cta-actions {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .why-cresox__cta-actions .btn {
-    width: 100%;
-    justify-content: center;
   }
 }
