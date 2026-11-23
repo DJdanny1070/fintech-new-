@@ -218,3 +218,27 @@
     margin-bottom: var(--sp-12);
   }
 }
+
+/* ── Light Theme Overrides ─────────────────────────────────────── */
+[data-theme="light"] .leadership__card {
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+[data-theme="light"] .leadership__card:hover {
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12), 0 0 20px rgba(2, 132, 199, 0.12);
+  border-color: rgba(2, 132, 199, 0.3);
+}
+
+[data-theme="light"] .leadership__photo-wrapper {
+  background: #EEF2F6;
+}
+
+[data-theme="light"] .leadership__name {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .leadership__bio {
+  color: #475569 !important;
+}

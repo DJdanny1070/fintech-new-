@@ -72,6 +72,7 @@ function Hero() {
 
     const render = () => {
       ctx.clearRect(0, 0, width, height);
+      const isLight = document.documentElement.getAttribute("data-theme") === "light";
 
       // Draw connecting lines
       for (let i = 0; i < particles.length; i++) {
@@ -85,9 +86,15 @@ function Hero() {
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = particles[i].accent || particles[j].accent
-              ? `rgba(255, 87, 34, ${opacity * 1.5})`
-              : `rgba(79, 163, 255, ${opacity})`;
+            if (isLight) {
+              ctx.strokeStyle = particles[i].accent || particles[j].accent
+                ? `rgba(255, 87, 34, ${opacity * 2.2})`
+                : `rgba(2, 96, 198, ${opacity * 1.8})`;
+            } else {
+              ctx.strokeStyle = particles[i].accent || particles[j].accent
+                ? `rgba(255, 87, 34, ${opacity * 1.5})`
+                : `rgba(79, 163, 255, ${opacity})`;
+            }
             ctx.lineWidth = 0.85;
             ctx.stroke();
           }
@@ -106,7 +113,11 @@ function Hero() {
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = p.accent ? "rgba(255, 87, 34, 0.75)" : "rgba(147, 197, 253, 0.55)";
+        if (isLight) {
+          ctx.fillStyle = p.accent ? "rgba(255, 87, 34, 0.85)" : "rgba(2, 96, 198, 0.65)";
+        } else {
+          ctx.fillStyle = p.accent ? "rgba(255, 87, 34, 0.75)" : "rgba(147, 197, 253, 0.55)";
+        }
         ctx.fill();
       });
 

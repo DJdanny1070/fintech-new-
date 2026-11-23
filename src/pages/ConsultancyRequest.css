@@ -442,3 +442,35 @@
   .cr-row--2 { grid-template-columns: 1fr; }
   .cr-success__card { padding: 40px 24px; }
 }
+
+/* ── Light Theme Overrides ─────────────────────────────────────── */
+[data-theme="light"] .cr-hero {
+  background: radial-gradient(ellipse 65% 65% at 80% 20%, rgba(2, 96, 198, 0.08) 0%, transparent 60%),
+              radial-gradient(ellipse 50% 60% at 15% 80%, rgba(255, 87, 34, 0.06) 0%, transparent 60%),
+              #F8FAFC;
+  color: #0F172A;
+}
+
+[data-theme="light"] .cr-hero__title {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .cr-hero__desc {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .cr-input,
+[data-theme="light"] .cr-select,
+[data-theme="light"] .cr-textarea {
+  background: #FFFFFF;
+  border: 1.5px solid #CBD5E1;
+  color: #0F172A;
+}
+
+[data-theme="light"] .cr-input:focus,
+[data-theme="light"] .cr-select:focus,
+[data-theme="light"] .cr-textarea:focus {
+  border-color: #0284C7;
+  background: #FFFFFF;
+  box-shadow: 0 0 12px rgba(2, 132, 199, 0.15);
+}

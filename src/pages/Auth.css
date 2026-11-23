@@ -406,3 +406,119 @@
   .auth-form-row { grid-template-columns: 1fr; }
   .auth-roles__grid { grid-template-columns: repeat(3, 1fr); }
 }
+
+/* ── Light Theme Overrides ─────────────────────────────────────── */
+[data-theme="light"] .auth-page {
+  background: #F8FAFC;
+  background-image: 
+    radial-gradient(ellipse 700px 500px at 15% 10%, rgba(2, 96, 198, 0.06) 0%, transparent 65%),
+    radial-gradient(ellipse 600px 450px at 85% 85%, rgba(255, 87, 34, 0.05) 0%, transparent 60%),
+    radial-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  color: #0F172A;
+}
+
+[data-theme="light"] .auth-page__panel {
+  background: linear-gradient(180deg, #F1F5F9 0%, #E2E8F0 100%);
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .auth-panel__logo-creso {
+  color: #0F172A;
+}
+
+[data-theme="light"] .auth-panel__logo-sub {
+  color: #64748B;
+}
+
+[data-theme="light"] .auth-panel__tagline {
+  color: #0F172A;
+}
+
+[data-theme="light"] .auth-panel__sub {
+  color: #475569;
+}
+
+[data-theme="light"] .auth-panel__features {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .auth-panel__feature {
+  color: #334155;
+}
+
+[data-theme="light"] .auth-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 16px 45px rgba(15, 23, 42, 0.08);
+}
+
+[data-theme="light"] .auth-card__title {
+  color: #0F172A;
+}
+
+[data-theme="light"] .auth-card__sub {
+  color: #64748B;
+}
+
+[data-theme="light"] .auth-social-btn {
+  background: #F8FAFC;
+  border: 1px solid #CBD5E1;
+  color: #0F172A;
+}
+
+[data-theme="light"] .auth-social-btn:hover {
+  background: #F1F5F9;
+  border-color: #94A3B8;
+}
+
+[data-theme="light"] .auth-input-wrap {
+  background: #FFFFFF;
+  border-color: #CBD5E1;
+}
+
+[data-theme="light"] .auth-input-wrap input {
+  color: #0F172A;
+}
+
+[data-theme="light"] .auth-input-wrap input::placeholder {
+  color: #94A3B8;
+}
+
+[data-theme="light"] .auth-input-wrap:focus-within {
+  border-color: #0284C7;
+  background: #FFFFFF;
+  box-shadow: 0 0 14px rgba(2, 132, 199, 0.2);
+}
+
+[data-theme="light"] .auth-form-label {
+  color: #334155;
+}
+
+[data-theme="light"] .auth-meta-text {
+  color: #64748B;
+}
+
+[data-theme="light"] .auth-role-btn {
+  background: #F8FAFC;
+  border-color: #CBD5E1;
+  color: #0F172A;
+}
+
+[data-theme="light"] .auth-role-btn__label {
+  color: #0F172A;
+}
+
+[data-theme="light"] .auth-role-btn__desc {
+  color: #64748B;
+}
+
+[data-theme="light"] .input-label,
+[data-theme="light"] label {
+  color: #1E293B !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="light"] .auth-role-btn--active {
+  border-color: #FF5722;
+  background: rgba(255, 87, 34, 0.08);
+}

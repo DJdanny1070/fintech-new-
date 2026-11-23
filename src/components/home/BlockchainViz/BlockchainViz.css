@@ -106,3 +106,35 @@
     padding: 0 20px;
   }
 }
+
+/* ── Light Theme Overrides ─────────────────────────────────────── */
+[data-theme="light"] .blockchain {
+  background: #F1F5F9;
+  background-image:
+    radial-gradient(ellipse 650px 450px at 15% 50%, rgba(2, 96, 198, 0.08) 0%, transparent 65%),
+    radial-gradient(ellipse 550px 400px at 85% 60%, rgba(255, 87, 34, 0.06) 0%, transparent 60%),
+    radial-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .blockchain__title {
+  color: #0F172A !important;
+  text-shadow: none;
+}
+
+[data-theme="light"] .blockchain__desc {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .blockchain__points li {
+  color: #1E293B !important;
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme="light"] .blockchain__points li:hover {
+  background: #F8FAFC;
+  border-color: rgba(2, 96, 198, 0.25);
+}

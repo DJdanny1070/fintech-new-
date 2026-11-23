@@ -15,7 +15,7 @@
   gap: var(--sp-4);
 }
 .analytics-kpi {
-  background: rgba(8,16,36,0.9);
+  background: var(--bg-white);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   padding: var(--sp-5);
@@ -118,4 +118,13 @@
   .analytics-kpis { grid-template-columns: 1fr; }
   .analytics-assets-thead,.analytics-asset-row { grid-template-columns: 1fr 80px; }
   .analytics-asset-type,.analytics-asset-value { display: none; }
+}
+
+/* ── Light Theme Overrides ─────────────────────────────────────── */
+[data-theme="light"] .analytics-asset-row:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .analytics-kpi {
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
 }

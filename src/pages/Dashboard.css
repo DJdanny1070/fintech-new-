@@ -484,7 +484,8 @@
 }
 
 /* ── Marketplace Token Cards ──────────────────────────────────── */
-.cp-token-card {
+[data-theme="dark"] .cp-token-card,
+:root:not([data-theme="light"]) .cp-token-card {
   background: rgba(14, 21, 38, 0.85) !important;
   backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.09) !important;
@@ -506,47 +507,120 @@
   opacity: 0.7;
 }
 
-.cp-token-card:hover {
+[data-theme="dark"] .cp-token-card:hover,
+:root:not([data-theme="light"]) .cp-token-card:hover {
   transform: translateY(-4px) !important;
   border-color: rgba(56, 189, 248, 0.4) !important;
   box-shadow: 0 16px 38px rgba(0, 0, 0, 0.55), 0 0 20px rgba(56, 189, 248, 0.15) !important;
 }
 
-.cp-stat {
+[data-theme="dark"] .cp-stat,
+:root:not([data-theme="light"]) .cp-stat {
   background: rgba(14, 21, 38, 0.85) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   border-radius: 14px !important;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
 }
 
-.cp-stat__label {
+[data-theme="dark"] .cp-stat__label,
+:root:not([data-theme="light"]) .cp-stat__label {
   color: #64748B !important;
 }
 
-.cp-stat__value {
+[data-theme="dark"] .cp-stat__value,
+:root:not([data-theme="light"]) .cp-stat__value {
   color: #FFFFFF !important;
 }
 
-.cp-tab {
+[data-theme="dark"] .cp-tab,
+:root:not([data-theme="light"]) .cp-tab {
   color: #94A3B8 !important;
 }
 
-.cp-tab:hover {
+[data-theme="dark"] .cp-tab:hover,
+:root:not([data-theme="light"]) .cp-tab:hover {
   color: #FFFFFF !important;
 }
 
-.cp-tab--active {
+[data-theme="dark"] .cp-tab--active,
+:root:not([data-theme="light"]) .cp-tab--active {
   color: #FF5722 !important;
   border-bottom-color: #FF5722 !important;
 }
 
-.mkt-info-banner {
+[data-theme="dark"] .mkt-info-banner,
+:root:not([data-theme="light"]) .mkt-info-banner {
   background: rgba(2, 96, 198, 0.12) !important;
   border-bottom: 1px solid rgba(56, 189, 248, 0.2) !important;
 }
 
-.mkt-info-banner__item {
+[data-theme="dark"] .mkt-info-banner__item,
+:root:not([data-theme="light"]) .mkt-info-banner__item {
   color: #CBD5E1 !important;
+}
+
+/* Light Mode for Marketplace Cards & Stats */
+[data-theme="light"] .cp-token-card {
+  background: #FFFFFF !important;
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 16px !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="light"] .cp-token-card:hover {
+  transform: translateY(-4px) !important;
+  border-color: rgba(2, 96, 198, 0.35) !important;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.1), 0 0 20px rgba(2, 96, 198, 0.08) !important;
+}
+
+[data-theme="light"] .cp-token-card__name {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .cp-token-card__category {
+  color: #64748B !important;
+}
+
+[data-theme="light"] .cp-stat {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03) !important;
+}
+
+[data-theme="light"] .cp-stat__label {
+  color: #64748B !important;
+}
+
+[data-theme="light"] .cp-stat__value {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .cp-tab {
+  color: #64748B !important;
+}
+
+[data-theme="light"] .cp-tab:hover {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .cp-tab--active {
+  color: #FF5722 !important;
+  border-bottom-color: #FF5722 !important;
+}
+
+[data-theme="light"] .mkt-info-banner {
+  background: rgba(2, 96, 198, 0.08) !important;
+  border-bottom: 1px solid rgba(2, 96, 198, 0.18) !important;
+}
+
+[data-theme="light"] .mkt-info-banner__item {
+  color: #0369A1 !important;
+  font-weight: 600 !important;
 }
 
 /* ── Blockchain Ledger Styling ────────────────────────────────── */
@@ -611,5 +685,75 @@
   border-radius: 18px !important;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8) !important;
   color: #FFFFFF !important;
+}
+
+/* ── Light Theme Overrides ─────────────────────────────────────── */
+[data-theme="light"] .cx-dash-hero {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F1F5F9 100%);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.05);
+}
+
+[data-theme="light"] .cx-dash-hero__title {
+  color: #0F172A;
+}
+
+[data-theme="light"] .cx-dash-hero__subtitle {
+  color: #64748B;
+}
+
+[data-theme="light"] .cx-dash-hero__tag {
+  color: #64748B;
+}
+
+[data-theme="light"] .cx-dash-hero__badge {
+  background: #FFFFFF;
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #334155;
+}
+
+[data-theme="light"] .db-layout .modal-card,
+[data-theme="light"] .db-layout .modal-content {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.15) !important;
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .db-layout .btn-ghost {
+  color: #475569 !important;
+  background: rgba(0, 0, 0, 0.04) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] .db-layout .btn-ghost:hover {
+  background: rgba(0, 0, 0, 0.08) !important;
+  border-color: rgba(0, 0, 0, 0.18) !important;
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .cx-dash-btn-ghost {
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: #0F172A;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme="light"] .cx-dash-btn-ghost:hover {
+  background: #F1F5F9;
+  border-color: rgba(0, 0, 0, 0.22);
+  color: #0F172A;
+}
+
+[data-theme="light"] .bc-hash-cell {
+  color: #0284C7 !important;
+  background: rgba(2, 132, 199, 0.08) !important;
+  border: 1px solid rgba(2, 132, 199, 0.2) !important;
+}
+
+[data-theme="light"] .bc-verify-pass {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  color: #059669 !important;
 }
 

@@ -205,3 +205,46 @@
     position: static;
   }
 }
+
+/* ── Light Theme Overrides ─────────────────────────────────────── */
+[data-theme="light"] .cx-objectives {
+  background: #F8FAFC;
+  color: #0F172A;
+}
+
+[data-theme="light"] .cx-objectives__tag {
+  color: #64748B;
+}
+
+[data-theme="light"] .cx-objectives__title {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .cx-objectives__visual-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.06);
+}
+
+[data-theme="light"] .cx-objectives__visual-badge {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #0F172A;
+}
+
+[data-theme="light"] .cx-objectives__visual-footer {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  color: #64748B;
+}
+
+[data-theme="light"] .cx-objectives__meta-status {
+  color: #0284C7;
+}
+
+[data-theme="light"] .cx-objective-step__title {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .cx-objective-step__desc {
+  color: #475569 !important;
+}

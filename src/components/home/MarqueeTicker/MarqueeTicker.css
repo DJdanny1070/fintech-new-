@@ -69,3 +69,22 @@
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+
+/* ── Light Theme Overrides ─────────────────────────────────────── */
+[data-theme="light"] .cx-ticker {
+  background: #F1F5F9;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .cx-ticker__text {
+  color: #475569;
+}
+
+[data-theme="light"] .cx-ticker__fade--left {
+  background: linear-gradient(to right, #F1F5F9, transparent);
+}
+
+[data-theme="light"] .cx-ticker__fade--right {
+  background: linear-gradient(to left, #F1F5F9, transparent);
+}

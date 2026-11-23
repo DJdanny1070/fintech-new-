@@ -11,48 +11,6 @@
   --font-sans:    'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-display: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
-  /* ── Brand colors ──────────────────────────────────────────── */
-  --blue:          #38BDF8;
-  --blue-dark:     #0260C6;
-  --blue-light:    rgba(56, 189, 248, 0.12);
-  --blue-lighter:  rgba(56, 189, 248, 0.06);
-  --blue-mid:      rgba(56, 189, 248, 0.25);
-  --red:           #FF5722;
-  --red-light:     rgba(255, 87, 34, 0.14);
-  --slate:         #0E1424;
-  --slate-light:   #151E32;
-
-  /* ── Semantic colors ───────────────────────────────────────── */
-  --green:         #10B981;
-  --green-light:   rgba(16, 185, 129, 0.14);
-  --amber:         #F59E0B;
-  --amber-light:   rgba(245, 158, 11, 0.14);
-
-  /* ── Backgrounds ───────────────────────────────────────────── */
-  --bg:           #080C14;
-  --bg-white:     #0E1424;
-  --bg-section:   #0B101D;
-  --bg-dark:      #060910;
-
-  /* ── Dark-surface helpers ──────────────────────────────────── */
-  --text-dark-secondary: #94A3B8;
-  --text-dark-muted:     #64748B;
-  --border-dark:         rgba(255, 255, 255, 0.08);
-
-  /* ── Text (High-contrast, crystal clear on dark backgrounds) ─ */
-  --text-primary:   #FFFFFF;
-  --text-secondary: #CBD5E1;
-  --text-muted:     #94A3B8;
-  --text-subtle:    #64748B;
-  --text-white:     #FFFFFF;
-  --text-white-70:  rgba(255, 255, 255, 0.70);
-
-  /* ── Borders ───────────────────────────────────────────────── */
-  --border:        rgba(255, 255, 255, 0.09);
-  --border-soft:   rgba(255, 255, 255, 0.06);
-  --border-hover:  rgba(255, 255, 255, 0.18);
-  --border-focus:  #FF5722;
-
   /* ── Radius ────────────────────────────────────────────────── */
   --r-sm:   6px;
   --r-md:   8px;
@@ -60,7 +18,7 @@
   --r-xl:  16px;
   --r-full: 100px;
 
-  /* Radius aliases (used by Wallet, Analytics, AISection, JourneyCards) */
+  /* Radius aliases */
   --radius-sm:   var(--r-sm);
   --radius-md:   var(--r-md);
   --radius-lg:   var(--r-lg);
@@ -92,10 +50,128 @@
   --ease:        cubic-bezier(0.4, 0, 0.2, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  /* ── Gradients ──────────────────────────────────────────────── */
-  --grad-blue: linear-gradient(135deg, #075AD8 0%, #4F74F0 100%);
+  /* ── Default / Dark Theme Tokens ───────────────────────────── */
+  --bg:           #080C14;
+  --bg-white:     #0E1424;
+  --bg-section:   #0B101D;
+  --bg-dark:      #060910;
 
-  /* ── Shadows ────────────────────────────────────────────────── */
-  --shadow-card: 0 4px 16px rgba(17, 24, 39, 0.08);
+  --text-dark-secondary: #94A3B8;
+  --text-dark-muted:     #64748B;
+  --border-dark:         rgba(255, 255, 255, 0.08);
+
+  --text-primary:   #FFFFFF;
+  --text-secondary: #CBD5E1;
+  --text-muted:     #94A3B8;
+  --text-subtle:    #64748B;
+  --text-white:     #FFFFFF;
+  --text-white-70:  rgba(255, 255, 255, 0.70);
+
+  --blue:          #38BDF8;
+  --blue-dark:     #0260C6;
+  --blue-light:    rgba(56, 189, 248, 0.12);
+  --blue-lighter:  rgba(56, 189, 248, 0.06);
+  --blue-mid:      rgba(56, 189, 248, 0.25);
+  --red:           #FF5722;
+  --red-light:     rgba(255, 87, 34, 0.14);
+  --slate:         #0E1424;
+  --slate-light:   #151E32;
+
+  --green:         #10B981;
+  --green-light:   rgba(16, 185, 129, 0.14);
+  --amber:         #F59E0B;
+  --amber-light:   rgba(245, 158, 11, 0.14);
+
+  --border:        rgba(255, 255, 255, 0.09);
+  --border-soft:   rgba(255, 255, 255, 0.06);
+  --border-hover:  rgba(255, 255, 255, 0.18);
+  --border-focus:  #FF5722;
+
+  --grad-blue: linear-gradient(135deg, #075AD8 0%, #4F74F0 100%);
+  --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.5);
   --shadow-blue: 0 6px 24px rgba(7, 90, 216, 0.30);
+}
+
+[data-theme="dark"] {
+  --bg:           #080C14;
+  --bg-white:     #0E1424;
+  --bg-section:   #0B101D;
+  --bg-dark:      #060910;
+
+  --text-dark-secondary: #94A3B8;
+  --text-dark-muted:     #64748B;
+  --border-dark:         rgba(255, 255, 255, 0.08);
+
+  --text-primary:   #FFFFFF;
+  --text-secondary: #CBD5E1;
+  --text-muted:     #94A3B8;
+  --text-subtle:    #64748B;
+  --text-white:     #FFFFFF;
+  --text-white-70:  rgba(255, 255, 255, 0.70);
+
+  --blue:          #38BDF8;
+  --blue-dark:     #0260C6;
+  --blue-light:    rgba(56, 189, 248, 0.12);
+  --blue-lighter:  rgba(56, 189, 248, 0.06);
+  --blue-mid:      rgba(56, 189, 248, 0.25);
+  --red:           #FF5722;
+  --red-light:     rgba(255, 87, 34, 0.14);
+  --slate:         #0E1424;
+  --slate-light:   #151E32;
+
+  --green:         #10B981;
+  --green-light:   rgba(16, 185, 129, 0.14);
+  --amber:         #F59E0B;
+  --amber-light:   rgba(245, 158, 11, 0.14);
+
+  --border:        rgba(255, 255, 255, 0.09);
+  --border-soft:   rgba(255, 255, 255, 0.06);
+  --border-hover:  rgba(255, 255, 255, 0.18);
+  --border-focus:  #FF5722;
+
+  --grad-blue: linear-gradient(135deg, #075AD8 0%, #4F74F0 100%);
+  --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.5);
+  --shadow-blue: 0 6px 24px rgba(7, 90, 216, 0.30);
+}
+
+[data-theme="light"] {
+  --bg:           #F8FAFC;
+  --bg-white:     #FFFFFF;
+  --bg-section:   #F1F5F9;
+  --bg-dark:      #E2E8F0;
+
+  --text-dark-secondary: #475569;
+  --text-dark-muted:     #64748B;
+  --border-dark:         rgba(0, 0, 0, 0.10);
+
+  --text-primary:   #0F172A;
+  --text-secondary: #334155;
+  --text-muted:     #64748B;
+  --text-subtle:    #94A3B8;
+  --text-white:     #0F172A;
+  --text-white-70:  rgba(15, 23, 42, 0.70);
+
+  --blue:          #0284C7;
+  --blue-dark:     #0369A1;
+  --blue-light:    rgba(2, 132, 199, 0.08);
+  --blue-lighter:  rgba(2, 132, 199, 0.04);
+  --blue-mid:      rgba(2, 132, 199, 0.18);
+  --red:           #FF5722;
+  --red-light:     rgba(255, 87, 34, 0.08);
+  --slate:         #F1F5F9;
+  --slate-light:   #E2E8F0;
+
+  --green:         #059669;
+  --green-light:   rgba(5, 150, 105, 0.08);
+  --amber:         #D97706;
+  --amber-light:   rgba(217, 119, 6, 0.08);
+
+  --border:        rgba(0, 0, 0, 0.08);
+  --border-soft:   rgba(0, 0, 0, 0.04);
+  --border-hover:  rgba(0, 0, 0, 0.16);
+  --border-focus:  #FF5722;
+
+  --grad-blue: linear-gradient(135deg, #0284C7 0%, #2563EB 100%);
+  --shadow-card: 0 4px 20px rgba(15, 23, 42, 0.06);
+  --shadow-blue: 0 6px 24px rgba(2, 132, 199, 0.16);
 }

@@ -1,6 +1,6 @@
 .role-page {
   min-height: 100vh;
-  background: #080C14;
+  background: var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -196,4 +196,17 @@
 }
 @media (max-width: 480px) {
   .role-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Light Theme Overrides ─────────────────────────────────────── */
+[data-theme="light"] .role-page {
+  background: #F8FAFC;
+}
+
+[data-theme="light"] .role-card {
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme="light"] .role-card:hover {
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }

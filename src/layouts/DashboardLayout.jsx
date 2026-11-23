@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Sun, Moon } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
+import { useTheme } from "../hooks/useTheme";
 import { useToast } from "../components/common/ToastProvider";
 import { getProducts } from "../services/productService";
 import { searchSellers } from "../services/profileService";
@@ -58,6 +60,7 @@ function DashboardLayout() {
 
   const navigate = useNavigate();
   const { profile, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const toast = useToast();
 
   const displayName  = profile?.full_name || "User";
@@ -336,6 +339,17 @@ function DashboardLayout() {
               <span className="db-topbar__status-pulse" aria-hidden="true" />
               <span>All systems operational</span>
             </span>
+
+            {/* ── Theme Toggle Button ────────────────────────── */}
+            <button
+              type="button"
+              className="db-topbar__icon-btn"
+              onClick={toggleTheme}
+              title={`Switch to ${isDark ? "light" : "dark"} mode`}
+              aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
+            >
+              {isDark ? <Sun size={17} strokeWidth={2} /> : <Moon size={17} strokeWidth={2} />}
+            </button>
 
             {/* ── Notification Bell ──────────────────────────── */}
             <div className="db-topbar__notification-wrap" ref={notificationRef}>

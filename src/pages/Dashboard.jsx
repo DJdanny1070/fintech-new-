@@ -396,19 +396,19 @@ function Dashboard() {
               Consider WebSocket subscription for real-time updates. */}
           <div style={{display:"grid",gap:"var(--sp-4)"}}>
             <div>
-              <div style={{fontWeight:700,marginBottom:4,color:"#FFFFFF",fontSize:14}}>Orders over time</div>
+              <div style={{fontWeight:700,marginBottom:4,color:"var(--text-primary)",fontSize:14}}>Orders over time</div>
               {loadingData
                 ? <LoadingSkeleton rows={2} height={24} />
                 : <SummaryBarChart values={ordersTrend.map((item) => item.count)} labels={ordersTrend.map((item) => item.label)} color="#38BDF8" />}
             </div>
             <div>
-              <div style={{fontWeight:700,marginBottom:4,color:"#FFFFFF",fontSize:14}}>Transactions over time</div>
+              <div style={{fontWeight:700,marginBottom:4,color:"var(--text-primary)",fontSize:14}}>Transactions over time</div>
               {loadingData
                 ? <LoadingSkeleton rows={2} height={24} />
                 : <SummaryBarChart values={transactionsTrend.map((item) => item.count)} labels={transactionsTrend.map((item) => item.label)} color="#FF5722" />}
             </div>
             <div>
-              <div style={{fontWeight:700,marginBottom:4,color:"#FFFFFF",fontSize:14}}>Products by category</div>
+              <div style={{fontWeight:700,marginBottom:4,color:"var(--text-primary)",fontSize:14}}>Products by category</div>
               {loadingData
                 ? <LoadingSkeleton rows={3} height={20} gap={6} />
                 : <CategoryBarChart items={categoryBreakdown} />}
@@ -431,9 +431,9 @@ function Dashboard() {
             { label:"Marketplace Value", value: loadingData ? "Loading..." : formatBalance(marketplaceValue) },
             { label:"Recent Login", value: loadingData ? "Loading..." : formatLoginDate(user?.last_sign_in_at || profile?.updated_at || profile?.created_at) },
           ].map(s => (
-            <div key={s.label} style={{display:"flex",justifyContent:"space-between",padding:"11px 0",borderBottom:"1px solid rgba(255, 255, 255, 0.06)",alignItems:"center"}}>
-              <span style={{fontSize:13,color:"#94A3B8",fontWeight:500}}>{s.label}</span>
-              <span style={{fontSize:14,fontWeight:700,color:"#FFFFFF",letterSpacing:"-0.01em",fontFamily:s.label.includes("Balance") || s.label.includes("Value") ? "monospace" : "inherit"}}>{s.value}</span>
+            <div key={s.label} style={{display:"flex",justifyContent:"space-between",padding:"11px 0",borderBottom:"1px solid var(--border)",alignItems:"center"}}>
+              <span style={{fontSize:13,color:"var(--text-muted)",fontWeight:500}}>{s.label}</span>
+              <span style={{fontSize:14,fontWeight:700,color:"var(--text-primary)",letterSpacing:"-0.01em",fontFamily:s.label.includes("Balance") || s.label.includes("Value") ? "monospace" : "inherit"}}>{s.value}</span>
             </div>
           ))}
           <div style={{marginTop:14,display:"grid",gap:10}}>

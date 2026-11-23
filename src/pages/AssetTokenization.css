@@ -940,3 +940,60 @@
     font-size: 16px;
   }
 }
+
+/* ── Light Theme Overrides ─────────────────────────────────────── */
+[data-theme="light"] .at-hero {
+  background: radial-gradient(ellipse 65% 65% at 80% 20%, rgba(2, 96, 198, 0.08) 0%, transparent 60%),
+              radial-gradient(ellipse 50% 60% at 15% 80%, rgba(255, 87, 34, 0.06) 0%, transparent 60%),
+              #F8FAFC;
+  color: #0F172A;
+}
+
+[data-theme="light"] .at-hero__title {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .at-hero__desc {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .at-hero__stat-card,
+[data-theme="light"] .at-card,
+[data-theme="light"] .at-industry-card,
+[data-theme="light"] .at-benefit-card,
+[data-theme="light"] .at-docs__card,
+[data-theme="light"] .at-terms__box {
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+  color: #0F172A;
+}
+
+[data-theme="light"] .at-section-title {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .at-section-desc {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .at-workflow__step-title {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .at-workflow__step-desc {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .at-cta-banner {
+  background: #F1F5F9;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .at-cta-banner__title {
+  color: #0F172A;
+}
+
+[data-theme="light"] .at-cta-banner__desc {
+  color: #475569;
+}

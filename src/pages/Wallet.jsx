@@ -263,13 +263,10 @@ function Wallet() {
       <div className="two-col" style={{marginBottom:"var(--sp-5)"}}>
         {/* Balance card */}
         <div
-          className="content-card"
+          className="content-card wallet-balance-banner"
           style={{
             position: "relative",
             overflow: "hidden",
-            border: "1px solid rgba(56, 189, 248, 0.25)",
-            background: "linear-gradient(135deg, rgba(14, 21, 38, 0.9) 0%, rgba(9, 14, 25, 0.95) 100%)",
-            boxShadow: "0 12px 36px rgba(0, 0, 0, 0.45)",
           }}
         >
           <div
@@ -289,10 +286,10 @@ function Wallet() {
             </div>
             <span className="badge badge-green"><span className="dot-live" aria-hidden="true"></span> Active</span>
           </div>
-          <div style={{fontSize:40,fontWeight:800,letterSpacing:"-0.03em",color:"#FFFFFF",fontFamily:"monospace",marginBottom:"var(--sp-1)",textShadow:"0 0 16px rgba(56, 189, 248, 0.3)"}}>
+          <div className="wallet-balance-amount">
             {formattedBalance}
           </div>
-          <div style={{fontSize:13,color:"#94A3B8",marginBottom:"var(--sp-6)"}}>
+          <div style={{fontSize:13,color:"var(--text-secondary)",marginBottom:"var(--sp-6)"}}>
             Verified on-chain balance · CresoX Ledger
           </div>
           <MiniLineChart/>
@@ -300,20 +297,7 @@ function Wallet() {
             {ACTIONS.map(a => (
               <button
                 key={a.label}
-                className="btn btn-ghost"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "8px 16px",
-                  borderRadius: 999,
-                  background: "rgba(255, 255, 255, 0.05)",
-                  border: "1px solid rgba(255, 255, 255, 0.12)",
-                  color: "#FFFFFF",
-                  fontWeight: 600,
-                  fontSize: 13,
-                  cursor: "pointer",
-                }}
+                className="btn btn-ghost wallet-banner-action-btn"
                 onClick={() => handleModalOpen(a.label)}
                 aria-label={`${a.label} funds`}
               >

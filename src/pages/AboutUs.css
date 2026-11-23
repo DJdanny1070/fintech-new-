@@ -154,3 +154,45 @@
     gap: 40px;
   }
 }
+
+/* ── Light Theme Overrides ─────────────────────────────────────── */
+[data-theme="light"] .cx-about {
+  background: #F8FAFC;
+  color: #0F172A;
+}
+
+[data-theme="light"] .cx-about-hero__title {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .cx-about-hero__lead {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .cx-about-hero__tag {
+  color: #64748B;
+}
+
+[data-theme="light"] .cx-about-hero__card {
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.06);
+}
+
+[data-theme="light"] .cx-about-hero__card-top {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .cx-about-hero__card-tag {
+  color: #64748B;
+}
+
+[data-theme="light"] .cx-about-hero__card-badge {
+  background: rgba(2, 96, 198, 0.08);
+  color: #0260C6;
+  border-color: rgba(2, 96, 198, 0.2);
+}
+
+[data-theme="light"] .cx-about-hero__card-canvas-wrap {
+  background: radial-gradient(circle at 60% 40%, rgba(2, 96, 198, 0.12) 0%, rgba(241, 245, 249, 0.95) 70%);
+}

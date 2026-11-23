@@ -544,3 +544,45 @@
   .atr-row--2 { grid-template-columns: 1fr; }
   .atr-success__card { padding: 40px 24px; }
 }
+
+/* ── Light Theme Overrides ─────────────────────────────────────── */
+[data-theme="light"] .atr-hero {
+  background: radial-gradient(ellipse 65% 65% at 80% 20%, rgba(2, 96, 198, 0.08) 0%, transparent 60%),
+              radial-gradient(ellipse 50% 60% at 15% 80%, rgba(255, 87, 34, 0.06) 0%, transparent 60%),
+              #F8FAFC;
+  color: #0F172A;
+}
+
+[data-theme="light"] .atr-hero__title {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .atr-hero__desc {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .atr-input,
+[data-theme="light"] .atr-select,
+[data-theme="light"] .atr-textarea {
+  background: #FFFFFF;
+  border: 1.5px solid #CBD5E1;
+  color: #0F172A;
+}
+
+[data-theme="light"] .atr-input:focus,
+[data-theme="light"] .atr-select:focus,
+[data-theme="light"] .atr-textarea:focus {
+  border-color: #0284C7;
+  background: #FFFFFF;
+  box-shadow: 0 0 12px rgba(2, 132, 199, 0.15);
+}
+
+[data-theme="light"] .atr-file-drop {
+  background: #F8FAFC;
+  border-color: #CBD5E1;
+}
+
+[data-theme="light"] .atr-file-item {
+  background: #F8FAFC;
+  border-color: #CBD5E1;
+}

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Moon, Sun, ArrowRight } from "lucide-react";
 import { useAuth } from "../../../hooks/useAuth";
+import { useTheme } from "../../../hooks/useTheme";
 import "./Navbar.css";
 
 const NAV_LINKS = [
@@ -16,7 +17,7 @@ const NAV_LINKS = [
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isDark, setIsDark] = useState(true);
+  const { isDark, toggleTheme } = useTheme();
   const location = useLocation();
   const { isAuthenticated } = useAuth();
 
@@ -34,20 +35,6 @@ function Navbar() {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
-
-  // Ensure the entire website consistently adheres to the high-tech theme
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", "dark");
-    localStorage.setItem("cresox_theme", "dark");
-    setIsDark(true);
-  }, []);
-
-  const toggleTheme = () => {
-    // Keep consistent with the deep-tech midnight theme across all pages
-    document.documentElement.setAttribute("data-theme", "dark");
-    localStorage.setItem("cresox_theme", "dark");
-    setIsDark(true);
-  };
 
   return (
     <header className={`cx-nav ${scrolled ? "cx-nav--scrolled" : ""}`}>
@@ -130,6 +117,16 @@ function Navbar() {
               </Link>
             ))}
             <div className="cx-nav__drawer-actions">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ width: "100%", justifyContent: "center", display: "flex", alignItems: "center", gap: 8 }}
+                onClick={toggleTheme}
+                aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
+              >
+                {isDark ? <Moon size={16} strokeWidth={2} /> : <Sun size={16} strokeWidth={2} />}
+                <span>{isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}</span>
+              </button>
               <Link to="/login" className="btn btn-secondary" style={{ width: "100%", justifyContent: "center" }}>
                 Sign In to Platform
               </Link>

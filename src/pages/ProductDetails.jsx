@@ -226,11 +226,11 @@ function ProductDetails() {
             </div>
           )}
           <div style={{marginTop:12, display:"flex", flexDirection:"column", gap:10}}>
-            <div style={{padding:"14px 16px", border:"1px solid rgba(255, 255, 255, 0.09)", borderRadius:12, background:"rgba(255, 255, 255, 0.03)"}}>
-              <div style={{fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.08em", color:"#64748B", marginBottom:4}}>Current Price</div>
+            <div style={{padding:"14px 16px", border:"1px solid var(--border)", borderRadius:12, background:"var(--bg-white)"}}>
+              <div style={{fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.08em", color:"var(--text-muted)", marginBottom:4}}>Current Price</div>
               {hasPricingData ? (
                 <>
-                  <div style={{fontSize:26, fontWeight:800, color:"#FFFFFF", fontFamily:"monospace", textShadow:"0 0 12px rgba(56, 189, 248, 0.35)"}}>{formatCurrency(currentPrice)}</div>
+                  <div style={{fontSize:26, fontWeight:800, color:"var(--text-primary)", fontFamily:"monospace"}}>{formatCurrency(currentPrice)}</div>
                   <div style={{marginTop:10, display:"grid", gap:8}}>
                     <MarketMetric label="Previous Price" value={formatCurrency(previousPrice)} />
                     <div style={{display:"grid", gridTemplateColumns:"repeat(2, minmax(0, 1fr))", gap:8}}>

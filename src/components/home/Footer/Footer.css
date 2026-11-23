@@ -183,3 +183,55 @@
     align-items: flex-start;
   }
 }
+
+/* ── Light Theme Overrides ─────────────────────────────────────── */
+[data-theme="light"] .footer {
+  background: #F1F5F9;
+  color: #475569;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .footer__top {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .footer__logo .cx-nav__logo-creso {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .footer__logo .cx-nav__logo-sub {
+  color: #64748B !important;
+}
+
+[data-theme="light"] .footer__desc {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .footer__social-link {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: #475569;
+  background: #FFFFFF;
+}
+
+[data-theme="light"] .footer__social-link:hover {
+  background: #E2E8F0;
+  border-color: rgba(0, 0, 0, 0.25);
+  color: #0F172A;
+}
+
+[data-theme="light"] .footer__col-title {
+  color: #0F172A;
+}
+
+[data-theme="light"] .footer__col-link {
+  color: #475569;
+}
+
+[data-theme="light"] .footer__col-link:hover {
+  color: #0F172A;
+}
+
+[data-theme="light"] .footer__copy,
+[data-theme="light"] .footer__meta {
+  color: #64748B;
+}

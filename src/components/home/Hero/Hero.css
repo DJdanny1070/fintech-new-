@@ -377,3 +377,116 @@
     display: none;
   }
 }
+
+/* ── Light Theme Overrides ─────────────────────────────────────── */
+[data-theme="light"] .cx-hero {
+  background: #F8FAFC;
+  color: #0F172A;
+}
+
+[data-theme="light"] .cx-hero__glow-orange {
+  background: radial-gradient(circle, rgba(255, 87, 34, 0.12) 0%, rgba(255, 87, 34, 0) 70%);
+}
+
+[data-theme="light"] .cx-hero__glow-blue {
+  background: radial-gradient(circle, rgba(2, 96, 198, 0.10) 0%, rgba(2, 96, 198, 0) 70%);
+}
+
+[data-theme="light"] .cx-hero__tag {
+  color: #64748B;
+}
+
+[data-theme="light"] .cx-hero__title {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .cx-hero__desc {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .cx-hero__btn-secondary {
+  background: #FFFFFF;
+  color: #0F172A;
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme="light"] .cx-hero__btn-secondary:hover {
+  background: #F1F5F9;
+  border-color: rgba(0, 0, 0, 0.22);
+}
+
+[data-theme="light"] .cx-hero__dash {
+  background: #CBD5E1;
+}
+
+[data-theme="light"] .cx-hero__dash--active {
+  background: #FF5722;
+}
+
+[data-theme="light"] .cx-hero__asset-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+[data-theme="light"] .cx-hero__card-top {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .cx-hero__asset-tag {
+  color: #64748B;
+}
+
+[data-theme="light"] .cx-hero__tile {
+  background: #F1F5F9;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .cx-hero__tile:hover {
+  background: #E2E8F0;
+  border-color: rgba(2, 132, 199, 0.4);
+}
+
+[data-theme="light"] .cx-hero__tile--active {
+  background: #0260C6;
+  border-color: #0284C7;
+  box-shadow: 0 0 18px rgba(2, 96, 198, 0.35);
+}
+
+[data-theme="light"] .cx-hero__card-bot {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .cx-hero__unit-code {
+  color: #64748B;
+}
+
+[data-theme="light"] .cx-hero__unit-label {
+  color: #475569;
+}
+
+[data-theme="light"] .cx-hero__counter {
+  color: #64748B;
+}
+
+[data-theme="light"] .cx-hero__counter strong {
+  color: #0F172A;
+}
+
+[data-theme="light"] .cx-hero__arrow-btn {
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: #0F172A;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme="light"] .cx-hero__arrow-btn:hover {
+  background: #FF5722;
+  border-color: #FF5722;
+  color: #FFFFFF;
+}
+
+[data-theme="light"] .cx-hero__scroll-indicator {
+  color: #94A3B8;
+}

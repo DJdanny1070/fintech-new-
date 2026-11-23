@@ -167,3 +167,54 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Light Theme Overrides ─────────────────────────────────────── */
+[data-theme="light"] .cx-practices {
+  background: #FFFFFF;
+  color: #0F172A;
+}
+
+[data-theme="light"] .cx-practices__tag {
+  color: #64748B;
+}
+
+[data-theme="light"] .cx-practices__title {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .cx-practices__subtitle {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .cx-practice-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+}
+
+[data-theme="light"] .cx-practice-card:hover {
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.1);
+  border-color: rgba(2, 96, 198, 0.25);
+}
+
+[data-theme="light"] .cx-practice-card--featured {
+  border-top: 3px solid #FF5722;
+  box-shadow: 0 12px 34px rgba(255, 87, 34, 0.12), 0 4px 20px rgba(15, 23, 42, 0.05);
+}
+
+[data-theme="light"] .cx-practice-card__num {
+  color: #64748B;
+}
+
+[data-theme="light"] .cx-practice-card__icon {
+  background: rgba(2, 96, 198, 0.08);
+  color: #0260C6;
+}
+
+[data-theme="light"] .cx-practice-card__title {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .cx-practice-card__desc {
+  color: #475569 !important;
+}

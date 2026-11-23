@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "../contexts/ThemeContext";
 import { AuthProvider } from "../contexts/AuthContext";
 import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../layouts/MainLayout";
@@ -38,9 +39,10 @@ import ServicesPage from "../pages/ServicesPage";
 function AppRoutes() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <ToastProvider>
-        <Routes>
+      <ThemeProvider>
+        <AuthProvider>
+          <ToastProvider>
+          <Routes>
           {/* Public Routes */}
           <Route path="/" element={<MainLayout />}>
             <Route index element={<Home />} />
@@ -93,6 +95,7 @@ function AppRoutes() {
         </Routes>
         </ToastProvider>
       </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

@@ -1,5 +1,76 @@
 .wallet-page { display: flex; flex-direction: column; gap: var(--sp-5); }
 
+.wallet-balance-banner {
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  background: linear-gradient(135deg, rgba(14, 21, 38, 0.9) 0%, rgba(9, 14, 25, 0.95) 100%);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+}
+
+[data-theme="light"] .wallet-balance-banner {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.05) !important;
+}
+
+.wallet-balance-amount {
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-family: monospace;
+  margin-bottom: var(--sp-1);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .wallet-balance-amount,
+:root:not([data-theme="light"]) .wallet-balance-amount {
+  color: #FFFFFF;
+  text-shadow: 0 0 16px rgba(56, 189, 248, 0.3);
+}
+
+[data-theme="light"] .wallet-balance-amount {
+  color: #0F172A;
+  text-shadow: none;
+}
+
+.wallet-banner-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+[data-theme="dark"] .wallet-banner-action-btn,
+:root:not([data-theme="light"]) .wallet-banner-action-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .wallet-banner-action-btn:hover,
+:root:not([data-theme="light"]) .wallet-banner-action-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+}
+
+[data-theme="light"] .wallet-banner-action-btn {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  color: #0F172A !important;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04) !important;
+}
+
+[data-theme="light"] .wallet-banner-action-btn:hover {
+  background: #F1F5F9 !important;
+  border-color: rgba(0, 0, 0, 0.22) !important;
+  color: #0F172A !important;
+}
+
 /* Balance Card */
 .wallet-balance-card {
   position: relative;
@@ -186,4 +257,39 @@
 @media (max-width: 600px)  {
   .wallet-cards-row { grid-template-columns: 1fr; }
   .wallet-balance-card__value { font-size: 32px; }
+}
+
+/* ── Light Theme Overrides ─────────────────────────────────────── */
+[data-theme="light"] .wallet-mini-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme="light"] .wallet-history {
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-xl);
+}
+
+[data-theme="light"] .wallet-history__row:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .wallet-modal {
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 32px 80px rgba(15, 23, 42, 0.16);
+  color: #0F172A;
+}
+
+[data-theme="light"] .wallet-modal__close {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #475569;
+}
+
+[data-theme="light"] .wallet-modal__close:hover {
+  background: rgba(239, 68, 68, 0.08);
+  color: var(--red);
 }
